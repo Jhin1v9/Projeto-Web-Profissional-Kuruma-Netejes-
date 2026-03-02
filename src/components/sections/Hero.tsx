@@ -4,16 +4,25 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { BUSINESS, HERO_BANNER_SETTINGS, HERO_BANNER_SLIDES } from "@/lib/constants";
-import { TRANSLATIONS } from "@/lib/i18n";
-import { eur, generateWhatsAppLink, scrollToSection } from "@/lib/utils";
+import { generateWhatsAppLink, scrollToSection } from "@/lib/utils";
 import { useCursor } from "@/components/providers/CursorProvider";
-import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
+
+const HERO_LOREM_TEXT = {
+  badge: "Lorem ipsum dolor",
+  title: "Lorem ipsum dolor sit amet",
+  highlight: "consectetur adipiscing",
+  description:
+    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  buttonText: "Lorem ipsum",
+  whatsappMessage: "Lorem ipsum dolor sit amet",
+  seeServices: "Lorem ipsum services",
+  address: "Lorem ipsum street, 123",
+};
 
 export function Hero() {
   const { setHover } = useCursor();
   const cfg = useSiteConfig();
-  const { language, t } = useLanguage();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const bannerSettings = cfg.heroBanner?.settings ?? HERO_BANNER_SETTINGS;
@@ -21,18 +30,7 @@ export function Hero() {
   const colors = cfg.appearance.textColors;
   const slidesCount = slides.length;
   const activeSlide = slides[activeSlideIndex];
-  const translatedSlide = cfg.i18n?.[language]?.heroSlides?.[activeSlideIndex] ?? TRANSLATIONS[language].hero.slides[activeSlideIndex];
-  const slideText =
-    language === "ca" || !translatedSlide
-      ? {
-          badge: activeSlide.badge,
-          title: activeSlide.title,
-          highlight: activeSlide.highlight,
-          description: activeSlide.description,
-          buttonText: activeSlide.buttonText,
-          whatsappMessage: activeSlide.whatsappMessage,
-        }
-      : translatedSlide;
+  const slideText = HERO_LOREM_TEXT;
 
   useEffect(() => {
     if (!slidesCount) return;
@@ -119,7 +117,6 @@ export function Hero() {
           style={{ textShadow: "0 0 35px rgba(0,240,255,0.18)", color: colors.heroTitle }}
         >
           {slideText.title} <span style={{ color: colors.heroHighlight }}>{slideText.highlight}</span>
-          {activeSlide.price !== undefined ? ` ${eur(activeSlide.price)}` : ""}
         </motion.h1>
 
         <motion.p
@@ -161,7 +158,7 @@ export function Hero() {
             onMouseEnter={() => setHover(true, "hover")}
             onMouseLeave={() => setHover(false)}
           >
-            {t.hero.seeServices}
+            {slideText.seeServices}
           </motion.button>
         </motion.div>
 
@@ -174,12 +171,12 @@ export function Hero() {
               className={`h-2.5 rounded-full transition-all ${
                 index === activeSlideIndex ? "w-8 bg-brand-cyan" : "w-2.5 bg-white/50 hover:bg-white/80"
               }`}
-              aria-label={`Ir para slide ${index + 1}`}
+              aria-label={`Lorem ipsum slide ${index + 1}`}
             />
           ))}
         </div>
 
-        <div className="mt-10 text-sm text-brand-silver/70">{BUSINESS.address.street}</div>
+        <div className="mt-10 text-sm text-brand-silver/70">{slideText.address}</div>
       </div>
     </section>
   );
