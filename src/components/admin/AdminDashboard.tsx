@@ -5,7 +5,7 @@ import { Save, Rocket, RefreshCw } from "lucide-react";
 import type { SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import type { PriceValue } from "@/lib/constants";
-import { LANGUAGES, TRANSLATIONS, type Language } from "@/lib/i18n";
+import { LANGUAGES, TRANSLATIONS, type CtaText, type Language, type ServiceText, type SlideText } from "@/lib/i18n";
 import { LivePreview } from "./LivePreview";
 
 export type AdminSection = "dashboard" | "hero" | "services" | "appearance";
@@ -146,7 +146,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     setCfg({ ...cfg, heroBanner: { ...cfg.heroBanner, slides } });
   }
 
-  function updateLocalizedHeroSlide(lang: Language, index: number, patch: Partial<NonNullable<SiteConfig["i18n"]>[Language]["heroSlides"][number]>) {
+  function updateLocalizedHeroSlide(lang: Language, index: number, patch: Partial<SlideText>) {
     if (!cfg || lang === "ca") return;
     const currentSlides = cfg.i18n?.[lang]?.heroSlides ?? TRANSLATIONS[lang].hero.slides;
     const heroSlides = currentSlides.map((slide, i) => (i === index ? { ...slide, ...patch } : slide));
@@ -172,7 +172,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     setCfg({ ...cfg, services });
   }
 
-  function updateLocalizedService(lang: Language, serviceId: string, patch: Partial<NonNullable<SiteConfig["i18n"]>[Language]["services"][string]>) {
+  function updateLocalizedService(lang: Language, serviceId: string, patch: Partial<ServiceText>) {
     if (!cfg || lang === "ca") return;
     const fallbackService = TRANSLATIONS[lang].services.items[serviceId];
     if (!fallbackService) return;
@@ -197,7 +197,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     });
   }
 
-  function updateLocalizedCta(lang: Language, patch: Partial<NonNullable<SiteConfig["i18n"]>[Language]["cta"]>) {
+  function updateLocalizedCta(lang: Language, patch: Partial<CtaText>) {
     if (!cfg || lang === "ca") return;
     const currentCta = cfg.i18n?.[lang]?.cta ?? TRANSLATIONS[lang].cta;
     setCfg({
