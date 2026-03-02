@@ -123,16 +123,18 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(cfg),
     });
+    const payload = await res.json().catch(() => null);
     setSaving(false);
-    setMsg(res.ok ? "Rascunho guardado. So muda no site apos Publicar." : "Erro ao guardar.");
+    setMsg(res.ok ? "Rascunho guardado. So muda no site apos Publicar." : payload?.error ?? "Erro ao guardar.");
   }
 
   async function publish() {
     setPublishing(true);
     setMsg(null);
     const res = await fetch("/api/site-config", { method: "POST" });
+    const payload = await res.json().catch(() => null);
     setPublishing(false);
-    setMsg(res.ok ? "Publicado com sucesso no site." : "Erro ao publicar.");
+    setMsg(res.ok ? "Publicado com sucesso no site." : payload?.error ?? "Erro ao publicar.");
   }
 
   function reset() {

@@ -15,6 +15,7 @@ type StoredRecord = {
 };
 
 type ViewMode = "draft" | "published";
+const IS_VERCEL = !!process.env.VERCEL;
 
 function getViewMode(req: Request): ViewMode {
   const view = new URL(req.url).searchParams.get("view");
@@ -85,6 +86,12 @@ export async function PATCH(req: Request) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anon) {
+    if (IS_VERCEL) {
+      return NextResponse.json(
+        { error: "Supabase not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel." },
+        { status: 500 }
+      );
+    }
     const existing = await readLocalRecord();
     await writeLocalRecord({
       ...existing,
@@ -105,6 +112,12 @@ export async function POST() {
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anon) {
+    if (IS_VERCEL) {
+      return NextResponse.json(
+        { error: "Supabase not configured. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in Vercel." },
+        { status: 500 }
+      );
+    }
     const existing = await readLocalRecord();
     const source = existing?.data ?? existing?.published_data;
     if (!source) return NextResponse.json({ error: "No draft to publish" }, { status: 400 });
