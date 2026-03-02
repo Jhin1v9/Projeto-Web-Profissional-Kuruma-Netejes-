@@ -1,0 +1,152 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, Phone } from "lucide-react";
+import { LANGUAGES } from "@/lib/i18n";
+import { BUSINESS } from "@/lib/constants";
+import { generateWhatsAppLink, scrollToSection } from "@/lib/utils";
+import { useCursor } from "@/components/providers/CursorProvider";
+import { useLanguage } from "@/components/providers/LanguageProvider";
+
+export function Navbar() {
+  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { setHover } = useCursor();
+  const { language, setLanguage, t } = useLanguage();
+
+  const nav = [
+    { label: t.navbar.home, id: "hero" },
+    { label: t.navbar.services, id: "services" },
+    { label: t.navbar.process, id: "process" },
+    { label: t.navbar.contact, id: "location" },
+  ];
+
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", on);
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+
+  const go = (id: string) => {
+    scrollToSection(id);
+    setOpen(false);
+  };
+
+  return (
+    <>
+      <motion.header
+        className={[
+          "fixed top-0 left-0 right-0 z-50 transition-all",
+          scrolled ? "bg-brand-dark/65 backdrop-blur-xl border-b border-white/10" : "bg-transparent",
+        ].join(" ")}
+        initial={{ y: -60 }}
+        animate={{ y: 0 }}
+      >
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <button
+            onClick={() => go("hero")}
+            className="flex items-center gap-3"
+            onMouseEnter={() => setHover(true, "cta")}
+            onMouseLeave={() => setHover(false)}
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue text-brand-dark font-black flex items-center justify-center shadow-glow">
+              K
+            </div>
+            <div className="text-left leading-none hidden sm:block">
+              <div className="font-black">Kuruma Netejes</div>
+              <div className="text-xs text-brand-silver/70">Sabadell</div>
+            </div>
+          </button>
+
+          <nav className="hidden md:flex items-center gap-8">
+            {nav.map((n) => (
+              <button
+                key={n.id}
+                onClick={() => go(n.id)}
+                className="text-sm font-semibold text-brand-silver/85 hover:text-white"
+                onMouseEnter={() => setHover(true, "hover")}
+                onMouseLeave={() => setHover(false)}
+              >
+                {n.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="hidden md:flex items-center gap-3">
+            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-2 py-1">
+              {LANGUAGES.map((lang) => (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => setLanguage(lang.code)}
+                  className={`rounded-md px-2 py-1 text-sm ${language === lang.code ? "bg-white/15" : "hover:bg-white/10"}`}
+                  title={lang.label}
+                >
+                  <img src={lang.flagSrc} alt={lang.label} className="w-5 h-4 rounded-sm object-cover" />
+                </button>
+              ))}
+            </div>
+            <a
+              href={generateWhatsAppLink(BUSINESS.whatsapp, t.navbar.whatsappMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-brand-cyan text-brand-dark font-extrabold shadow-glow"
+              onMouseEnter={() => setHover(true, "cta")}
+              onMouseLeave={() => setHover(false)}
+            >
+              <Phone className="w-4 h-4" />
+              WhatsApp
+            </a>
+          </div>
+
+          <button
+            className="md:hidden p-2"
+            onClick={() => setOpen(!open)}
+            onMouseEnter={() => setHover(true, "hover")}
+            onMouseLeave={() => setHover(false)}
+          >
+            {open ? <X /> : <Menu />}
+          </button>
+        </div>
+      </motion.header>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div className="fixed inset-0 z-40 md:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div className="absolute inset-0 bg-brand-dark/92 backdrop-blur-xl" onClick={() => setOpen(false)} />
+            <motion.div className="absolute top-20 left-0 right-0 p-6 space-y-3" initial={{ y: -10 }} animate={{ y: 0 }}>
+              <div className="flex items-center gap-2 pb-2">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => setLanguage(lang.code)}
+                    className={`rounded-md px-3 py-1.5 text-sm ${language === lang.code ? "bg-white/15" : "bg-white/5"}`}
+                    title={lang.label}
+                  >
+                    <img src={lang.flagSrc} alt={lang.label} className="w-5 h-4 rounded-sm object-cover" />
+                  </button>
+                ))}
+              </div>
+              {nav.map((n) => (
+                <button key={n.id} onClick={() => go(n.id)} className="w-full text-left text-xl font-black py-3 border-b border-white/10">
+                  {n.label}
+                </button>
+              ))}
+              <a
+                href={generateWhatsAppLink(BUSINESS.whatsapp, t.navbar.whatsappMessage)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 bg-brand-cyan text-brand-dark font-extrabold"
+              >
+                <Phone className="w-5 h-5" />
+                {t.navbar.mobileContact}
+              </a>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}

@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html { scroll-behavior: smooth; }
+
+:root{
+  --overlay: 0.52;
+  --brightness: 0.85;
+  --texture: url("/images/texture.webp");
+}
+
+body { background: #0A0A0F; }
+
+.admin-cursor-default,
+.admin-cursor-default * {
+  cursor: auto !important;
+}
+
+.k-bg{ position: fixed; inset: 0; z-index: -1; pointer-events: none; }
+.k-bg::before{
+  content:""; position:absolute; inset:0;
+  background-image: var(--texture);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.30;
+  filter: saturate(1.05) brightness(var(--brightness));
+}
+.k-bg::after{
+  content:""; position:absolute; inset:0;
+  background: linear-gradient(to bottom, rgba(10,10,15,var(--overlay)), rgba(10,10,15,var(--overlay)) 45%, rgba(10,10,15,0.92));
+}
+
+::selection { background: rgba(0,240,255,0.25); color: #fff; }

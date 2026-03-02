@@ -1,0 +1,565 @@
+{
+  "data": {
+    "appearance": {
+      "brightness": 0.85,
+      "overlay": 0.52,
+      "showTexture": true,
+      "textureUrl": "/images/texture.webp",
+      "cursorMode": "realistic",
+      "textColors": {
+        "heroBadge": "#00F0FF",
+        "heroTitle": "#FFFFFF",
+        "heroHighlight": "#00F0FF",
+        "heroDescription": "#D6D9E0",
+        "heroButtonText": "#0A0A0F",
+        "servicesTitle": "#FFFFFF",
+        "servicesHighlight": "#00F0FF",
+        "servicesCardTitle": "#FFFFFF",
+        "servicesCardPrice": "#00F0FF",
+        "servicesCardDescription": "#D6D9E0",
+        "servicesCardBullet": "#D6D9E0",
+        "ctaTitle": "#FFFFFF",
+        "ctaHighlight": "#00F0FF",
+        "ctaDescription": "#D6D9E0",
+        "ctaButtonText": "#0A0A0F"
+      }
+    },
+    "hero": {
+      "title": "Neteja interior professional des de 120 EUR",
+      "subtitle": "Resultats visibles des del primer minut. Cuidem el teu vehicle com si fos nostre.",
+      "badge": "Resultats reals, sense maquillatge",
+      "imageUrl": "/images/hero.webp"
+    },
+    "heroBanner": {
+      "settings": {
+        "autoSlideIntervalMs": 5000,
+        "imageOpacity": 0.45,
+        "overlayDarkness": {
+          "top": 0.25,
+          "middle": 0.55,
+          "bottom": 1
+        },
+        "bottomFadeStartPercent": 72
+      },
+      "slides": [
+        {
+          "image": "/images/hero.webp",
+          "badge": "Resultats reals, sense maquillatge",
+          "title": "Interior net de veritat",
+          "highlight": "Des de",
+          "price": 120,
+          "description": "Neteja profunda de tapisseria, cuir i plastics amb acabat professional.",
+          "buttonText": "Demanar pressupost",
+          "whatsappMessage": "Hola! Vull un pressupost per neteja interior.",
+          "imageSize": "cover",
+          "imagePosition": "center"
+        },
+        {
+          "image": "/images/service-polishing.webp",
+          "badge": "Brillantor premium",
+          "title": "Poliment exterior",
+          "highlight": "Acabat mirall",
+          "price": 150,
+          "description": "Correccio de micro-ratllades i brillantor real per tornar vida a la pintura.",
+          "buttonText": "Reservar poliment",
+          "whatsappMessage": "Hola! M'interessa reservar un poliment exterior.",
+          "imageSize": "cover",
+          "imagePosition": "center"
+        },
+        {
+          "image": "/images/service-foam.webp",
+          "badge": "Manteniment complet",
+          "title": "Rentat exterior premium",
+          "highlight": "Des de",
+          "price": 60,
+          "description": "Escuma activa, detall de llandes i assecat acurat sense marques.",
+          "buttonText": "Vull aquest servei",
+          "whatsappMessage": "Hola! Vull informacio del rentat exterior premium.",
+          "imageSize": "cover",
+          "imagePosition": "center"
+        }
+      ]
+    },
+    "i18n": {
+      "es": {
+        "heroSlides": [
+          {
+            "badge": "Resultados reales, sin maquillaje",
+            "title": "Interior limpio de verdad",
+            "highlight": "Desde",
+            "description": "Limpieza profunda de tapiceria, cuero y plasticos con acabado profesional.",
+            "buttonText": "Pedir presupuesto",
+            "whatsappMessage": "Hola! Quiero presupuesto para limpieza interior."
+          },
+          {
+            "badge": "Brillo premium",
+            "title": "Pulido exterior",
+            "highlight": "Acabado espejo",
+            "description": "Correccion de micro-rayas y brillo real para recuperar la pintura.",
+            "buttonText": "Reservar pulido",
+            "whatsappMessage": "Hola! Me interesa reservar un pulido exterior."
+          },
+          {
+            "badge": "Mantenimiento completo",
+            "title": "Lavado exterior premium",
+            "highlight": "Desde",
+            "description": "Espuma activa, detalle de llantas y secado cuidadoso sin marcas.",
+            "buttonText": "Quiero este servicio",
+            "whatsappMessage": "Hola! Quiero informacion del lavado exterior premium."
+          }
+        ],
+        "services": {
+          "interior": {
+            "name": "Limpieza interior",
+            "description": "Tapiceria, cuero y plasticos. Eliminamos manchas y olores con extraccion profesional.",
+            "highlights": [
+              "Extraccion profunda",
+              "Manchas y olores",
+              "Acabado real sin maquillaje"
+            ]
+          },
+          "polishing": {
+            "name": "Pulido exterior",
+            "description": "Correccion de micro-rayas y acabado espejo con brillo real.",
+            "highlights": [
+              "Brillo espejo",
+              "Correccion swirl",
+              "Acabado premium"
+            ]
+          },
+          "wash": {
+            "name": "Lavado exterior premium",
+            "description": "Espuma activa, detalle de llantas y secado sin marcas.",
+            "highlights": [
+              "Espuma activa",
+              "Llantas",
+              "Secado microfibra"
+            ]
+          },
+          "ozone": {
+            "name": "Limpieza por ozono",
+            "description": "Tratamiento orientado a eliminar olor a tabaco/cigarro y olores persistentes.",
+            "highlights": [
+              "Reduce olor a tabaco",
+              "Combate olores persistentes",
+              "Extra ideal para interior"
+            ]
+          }
+        },
+        "cta": {
+          "title": "Deja tu coche",
+          "highlight": "como nuevo",
+          "description": "Dinos si es tapiceria o cuero y te recomendamos la mejor opcion.",
+          "button": "Escribir ahora",
+          "whatsappMessage": "Hola! Quiero limpieza interior. Tapiceria o cuero?"
+        }
+      },
+      "en": {
+        "heroSlides": [
+          {
+            "badge": "Real results, no cover-ups",
+            "title": "Truly clean interior",
+            "highlight": "From",
+            "description": "Deep cleaning for upholstery, leather and plastics with a professional finish.",
+            "buttonText": "Request quote",
+            "whatsappMessage": "Hi! I want a quote for interior cleaning."
+          },
+          {
+            "badge": "Premium shine",
+            "title": "Exterior polishing",
+            "highlight": "Mirror finish",
+            "description": "Micro-scratch correction and real shine to restore your paint.",
+            "buttonText": "Book polishing",
+            "whatsappMessage": "Hi! I want to book exterior polishing."
+          },
+          {
+            "badge": "Full maintenance",
+            "title": "Premium exterior wash",
+            "highlight": "From",
+            "description": "Active foam, wheel detailing and careful streak-free drying.",
+            "buttonText": "I want this service",
+            "whatsappMessage": "Hi! I want info about premium exterior wash."
+          }
+        ],
+        "services": {
+          "interior": {
+            "name": "Interior cleaning",
+            "description": "Upholstery, leather and plastics. We remove stains and odors with professional extraction.",
+            "highlights": [
+              "Deep extraction",
+              "Stains and odors",
+              "Real finish, no cover-ups"
+            ]
+          },
+          "polishing": {
+            "name": "Exterior polishing",
+            "description": "Micro-scratch correction and mirror finish with real gloss.",
+            "highlights": [
+              "Mirror gloss",
+              "Swirl correction",
+              "Premium finish"
+            ]
+          },
+          "wash": {
+            "name": "Premium exterior wash",
+            "description": "Active foam, wheel detailing and streak-free drying.",
+            "highlights": [
+              "Active foam",
+              "Wheels",
+              "Microfiber dry"
+            ]
+          },
+          "ozone": {
+            "name": "Ozone cleaning",
+            "description": "Treatment focused on removing cigarette/tobacco smell and persistent odors.",
+            "highlights": [
+              "Reduces smoke smell",
+              "Targets persistent odors",
+              "Great interior add-on"
+            ]
+          }
+        },
+        "cta": {
+          "title": "Leave your car",
+          "highlight": "like new",
+          "description": "Tell us if it's upholstery or leather and we'll recommend the best option.",
+          "button": "Message now",
+          "whatsappMessage": "Hi! I want interior cleaning. Upholstery or leather?"
+        }
+      }
+    },
+    "services": [
+      {
+        "id": "polishing",
+        "name": "Poliment exterior",
+        "description": "Correccio de micro-ratllades i acabat mirall amb brillantor real.",
+        "priceFrom": 150,
+        "imageUrl": "/images/service-polishing.webp",
+        "highlights": [
+          "Gloss mirall",
+          "Correccio swirl",
+          "Acabat premium"
+        ]
+      },
+      {
+        "id": "interior",
+        "name": "Neteja interior",
+        "description": "Tapisseria, cuir i plastics. Eliminem taques i olors amb extraccio professional.",
+        "priceFrom": 120,
+        "imageUrl": "/images/antes-dps.png",
+        "popular": true,
+        "highlights": [
+          "Extraccio profunda",
+          "Taques i olors",
+          "Acabat real, sense maquillatge"
+        ]
+      },
+      {
+        "id": "ozone",
+        "name": "Neteja per ozono",
+        "description": "Tractament amb ozono orientat a eliminar olor de tabac/cigarro, olor fort d'humitat i altres olors persistents de l'habitacle.",
+        "priceFrom": 45,
+        "imageUrl": "/images/ozonio.png",
+        "highlights": [
+          "Reduccio d'olor a tabac/cigarro",
+          "Combat olors persistents",
+          "Ideal com a extra de neteja interior"
+        ]
+      },
+      {
+        "id": "wash",
+        "name": "Rentat exterior premium",
+        "description": "Escuma activa, detall de llandes i assecat sense marques.",
+        "priceFrom": 60,
+        "imageUrl": "/images/service-foam.webp",
+        "highlights": [
+          "Escuma activa",
+          "Llandes",
+          "Assecat microfibra"
+        ]
+      }
+    ]
+  },
+  "published_data": {
+    "appearance": {
+      "brightness": 0.85,
+      "overlay": 0.52,
+      "showTexture": true,
+      "textureUrl": "/images/texture.webp",
+      "cursorMode": "realistic",
+      "textColors": {
+        "heroBadge": "#00F0FF",
+        "heroTitle": "#FFFFFF",
+        "heroHighlight": "#00F0FF",
+        "heroDescription": "#D6D9E0",
+        "heroButtonText": "#0A0A0F",
+        "servicesTitle": "#FFFFFF",
+        "servicesHighlight": "#00F0FF",
+        "servicesCardTitle": "#FFFFFF",
+        "servicesCardPrice": "#00F0FF",
+        "servicesCardDescription": "#D6D9E0",
+        "servicesCardBullet": "#D6D9E0",
+        "ctaTitle": "#FFFFFF",
+        "ctaHighlight": "#00F0FF",
+        "ctaDescription": "#D6D9E0",
+        "ctaButtonText": "#0A0A0F"
+      }
+    },
+    "hero": {
+      "title": "Neteja interior professional des de 120 EUR",
+      "subtitle": "Resultats visibles des del primer minut. Cuidem el teu vehicle com si fos nostre.",
+      "badge": "Resultats reals, sense maquillatge",
+      "imageUrl": "/images/hero.webp"
+    },
+    "heroBanner": {
+      "settings": {
+        "autoSlideIntervalMs": 5000,
+        "imageOpacity": 0.45,
+        "overlayDarkness": {
+          "top": 0.25,
+          "middle": 0.55,
+          "bottom": 1
+        },
+        "bottomFadeStartPercent": 72
+      },
+      "slides": [
+        {
+          "image": "/images/hero.webp",
+          "badge": "Resultats reals, sense maquillatge",
+          "title": "Interior net de veritat",
+          "highlight": "Des de",
+          "price": 120,
+          "description": "Neteja profunda de tapisseria, cuir i plastics amb acabat professional.",
+          "buttonText": "Demanar pressupost",
+          "whatsappMessage": "Hola! Vull un pressupost per neteja interior.",
+          "imageSize": "cover",
+          "imagePosition": "center"
+        },
+        {
+          "image": "/images/service-polishing.webp",
+          "badge": "Brillantor premium",
+          "title": "Poliment exterior",
+          "highlight": "Acabat mirall",
+          "price": 150,
+          "description": "Correccio de micro-ratllades i brillantor real per tornar vida a la pintura.",
+          "buttonText": "Reservar poliment",
+          "whatsappMessage": "Hola! M'interessa reservar un poliment exterior.",
+          "imageSize": "cover",
+          "imagePosition": "center"
+        },
+        {
+          "image": "/images/service-foam.webp",
+          "badge": "Manteniment complet",
+          "title": "Rentat exterior premium",
+          "highlight": "Des de",
+          "price": 60,
+          "description": "Escuma activa, detall de llandes i assecat acurat sense marques.",
+          "buttonText": "Vull aquest servei",
+          "whatsappMessage": "Hola! Vull informacio del rentat exterior premium.",
+          "imageSize": "cover",
+          "imagePosition": "center"
+        }
+      ]
+    },
+    "i18n": {
+      "es": {
+        "heroSlides": [
+          {
+            "badge": "Resultados reales, sin maquillaje",
+            "title": "Interior limpio de verdad",
+            "highlight": "Desde",
+            "description": "Limpieza profunda de tapiceria, cuero y plasticos con acabado profesional.",
+            "buttonText": "Pedir presupuesto",
+            "whatsappMessage": "Hola! Quiero presupuesto para limpieza interior."
+          },
+          {
+            "badge": "Brillo premium",
+            "title": "Pulido exterior",
+            "highlight": "Acabado espejo",
+            "description": "Correccion de micro-rayas y brillo real para recuperar la pintura.",
+            "buttonText": "Reservar pulido",
+            "whatsappMessage": "Hola! Me interesa reservar un pulido exterior."
+          },
+          {
+            "badge": "Mantenimiento completo",
+            "title": "Lavado exterior premium",
+            "highlight": "Desde",
+            "description": "Espuma activa, detalle de llantas y secado cuidadoso sin marcas.",
+            "buttonText": "Quiero este servicio",
+            "whatsappMessage": "Hola! Quiero informacion del lavado exterior premium."
+          }
+        ],
+        "services": {
+          "interior": {
+            "name": "Limpieza interior",
+            "description": "Tapiceria, cuero y plasticos. Eliminamos manchas y olores con extraccion profesional.",
+            "highlights": [
+              "Extraccion profunda",
+              "Manchas y olores",
+              "Acabado real sin maquillaje"
+            ]
+          },
+          "polishing": {
+            "name": "Pulido exterior",
+            "description": "Correccion de micro-rayas y acabado espejo con brillo real.",
+            "highlights": [
+              "Brillo espejo",
+              "Correccion swirl",
+              "Acabado premium"
+            ]
+          },
+          "wash": {
+            "name": "Lavado exterior premium",
+            "description": "Espuma activa, detalle de llantas y secado sin marcas.",
+            "highlights": [
+              "Espuma activa",
+              "Llantas",
+              "Secado microfibra"
+            ]
+          },
+          "ozone": {
+            "name": "Limpieza por ozono",
+            "description": "Tratamiento orientado a eliminar olor a tabaco/cigarro y olores persistentes.",
+            "highlights": [
+              "Reduce olor a tabaco",
+              "Combate olores persistentes",
+              "Extra ideal para interior"
+            ]
+          }
+        },
+        "cta": {
+          "title": "Deja tu coche",
+          "highlight": "como nuevo",
+          "description": "Dinos si es tapiceria o cuero y te recomendamos la mejor opcion.",
+          "button": "Escribir ahora",
+          "whatsappMessage": "Hola! Quiero limpieza interior. Tapiceria o cuero?"
+        }
+      },
+      "en": {
+        "heroSlides": [
+          {
+            "badge": "Real results, no cover-ups",
+            "title": "Truly clean interior",
+            "highlight": "From",
+            "description": "Deep cleaning for upholstery, leather and plastics with a professional finish.",
+            "buttonText": "Request quote",
+            "whatsappMessage": "Hi! I want a quote for interior cleaning."
+          },
+          {
+            "badge": "Premium shine",
+            "title": "Exterior polishing",
+            "highlight": "Mirror finish",
+            "description": "Micro-scratch correction and real shine to restore your paint.",
+            "buttonText": "Book polishing",
+            "whatsappMessage": "Hi! I want to book exterior polishing."
+          },
+          {
+            "badge": "Full maintenance",
+            "title": "Premium exterior wash",
+            "highlight": "From",
+            "description": "Active foam, wheel detailing and careful streak-free drying.",
+            "buttonText": "I want this service",
+            "whatsappMessage": "Hi! I want info about premium exterior wash."
+          }
+        ],
+        "services": {
+          "interior": {
+            "name": "Interior cleaning",
+            "description": "Upholstery, leather and plastics. We remove stains and odors with professional extraction.",
+            "highlights": [
+              "Deep extraction",
+              "Stains and odors",
+              "Real finish, no cover-ups"
+            ]
+          },
+          "polishing": {
+            "name": "Exterior polishing",
+            "description": "Micro-scratch correction and mirror finish with real gloss.",
+            "highlights": [
+              "Mirror gloss",
+              "Swirl correction",
+              "Premium finish"
+            ]
+          },
+          "wash": {
+            "name": "Premium exterior wash",
+            "description": "Active foam, wheel detailing and streak-free drying.",
+            "highlights": [
+              "Active foam",
+              "Wheels",
+              "Microfiber dry"
+            ]
+          },
+          "ozone": {
+            "name": "Ozone cleaning",
+            "description": "Treatment focused on removing cigarette/tobacco smell and persistent odors.",
+            "highlights": [
+              "Reduces smoke smell",
+              "Targets persistent odors",
+              "Great interior add-on"
+            ]
+          }
+        },
+        "cta": {
+          "title": "Leave your car",
+          "highlight": "like new",
+          "description": "Tell us if it's upholstery or leather and we'll recommend the best option.",
+          "button": "Message now",
+          "whatsappMessage": "Hi! I want interior cleaning. Upholstery or leather?"
+        }
+      }
+    },
+    "services": [
+      {
+        "id": "polishing",
+        "name": "Poliment exterior",
+        "description": "Correccio de micro-ratllades i acabat mirall amb brillantor real.",
+        "priceFrom": 150,
+        "imageUrl": "/images/service-polishing.webp",
+        "highlights": [
+          "Gloss mirall",
+          "Correccio swirl",
+          "Acabat premium"
+        ]
+      },
+      {
+        "id": "interior",
+        "name": "Neteja interior",
+        "description": "Tapisseria, cuir i plastics. Eliminem taques i olors amb extraccio professional.",
+        "priceFrom": 120,
+        "imageUrl": "/images/antes-dps.png",
+        "popular": true,
+        "highlights": [
+          "Extraccio profunda",
+          "Taques i olors",
+          "Acabat real, sense maquillatge"
+        ]
+      },
+      {
+        "id": "ozone",
+        "name": "Neteja per ozono",
+        "description": "Tractament amb ozono orientat a eliminar olor de tabac/cigarro, olor fort d'humitat i altres olors persistents de l'habitacle.",
+        "priceFrom": 45,
+        "imageUrl": "/images/ozonio.png",
+        "highlights": [
+          "Reduccio d'olor a tabac/cigarro",
+          "Combat olors persistents",
+          "Ideal com a extra de neteja interior"
+        ]
+      },
+      {
+        "id": "wash",
+        "name": "Rentat exterior premium",
+        "description": "Escuma activa, detall de llandes i assecat sense marques.",
+        "priceFrom": 60,
+        "imageUrl": "/images/service-foam.webp",
+        "highlights": [
+          "Escuma activa",
+          "Llandes",
+          "Assecat microfibra"
+        ]
+      }
+    ]
+  },
+  "published_at": "2026-03-02T21:53:08.140Z"
+}
