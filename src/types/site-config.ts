@@ -12,6 +12,7 @@ import type {
 } from "@/lib/i18n";
 
 export type CursorMode = "realistic" | "neon" | "off";
+export type BusinessStatus = "open" | "closing" | "closed";
 export type SectionType = "hero" | "services" | "estimate" | "process" | "location" | "cta" | "footer";
 
 export type HeroBannerSettings = {
@@ -74,6 +75,7 @@ export type SiteConfig = {
   };
   navbar: NavbarText;
   process: ProcessText;
+  businessStatus: BusinessStatus;
   location: LocationText;
   cta: CtaText;
   footer: FooterText;

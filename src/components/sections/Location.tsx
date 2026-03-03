@@ -13,6 +13,17 @@ export function Location({ sectionId = "location" }: { sectionId?: string }) {
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
   const text = language === "ca" ? cfg.location : cfg.i18n?.[language]?.location ?? t.location;
+  const statusLabelByLanguage = {
+    ca: { open: "Obert ara", closing: "Tancant", closed: "Tancat" },
+    es: { open: "Abierto ahora", closing: "Cerrando", closed: "Cerrado" },
+    en: { open: "Open now", closing: "Closing", closed: "Closed" },
+  } as const;
+  const statusStyles = {
+    open: "bg-emerald-500 shadow-[0_0_14px_rgba(16,185,129,0.8)]",
+    closing: "bg-orange-400 shadow-[0_0_14px_rgba(251,146,60,0.85)]",
+    closed: "bg-red-500 shadow-[0_0_14px_rgba(239,68,68,0.8)]",
+  } as const;
+  const status = cfg.businessStatus ?? "open";
   const maps = "https://www.google.com/maps?q=Carrer%20d%27Alfons%20Sala%2C%2057%2C%2008202%20Sabadell&output=embed";
 
   return (
@@ -27,6 +38,10 @@ export function Location({ sectionId = "location" }: { sectionId?: string }) {
           >
             <h2 className="text-3xl font-black sm:text-4xl">{text.title}</h2>
             <p className="mt-3 text-sm text-brand-silver/85 sm:text-base">{text.intro}</p>
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-xs font-semibold text-brand-silver/95">
+              <span className={`h-2.5 w-2.5 rounded-full ${statusStyles[status]}`} />
+              {statusLabelByLanguage[language][status]}
+            </div>
 
             <div className="mt-8 space-y-4">
               <div className="flex items-start gap-3">

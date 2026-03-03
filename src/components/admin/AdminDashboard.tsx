@@ -656,6 +656,23 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                     <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
                       <div className="mb-3 text-sm font-bold text-white">Localizacao e rodape</div>
                       <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block sm:col-span-2">
+                          <div className="mb-1 text-xs text-brand-silver/70">Status (manual)</div>
+                          <select
+                            value={cfg.businessStatus}
+                            onChange={(e) =>
+                              setCfg({
+                                ...cfg,
+                                businessStatus: e.target.value as SiteConfig["businessStatus"],
+                              })
+                            }
+                            className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60"
+                          >
+                            <option value="open">Aberto (bolinha verde)</option>
+                            <option value="closing">Fechando (bolinha laranja)</option>
+                            <option value="closed">Fechado (bolinha vermelha)</option>
+                          </select>
+                        </label>
                         <label className="block">
                           <div className="mb-1 text-xs text-brand-silver/70">Titulo localizacao</div>
                           <input value={locationSource.title} onChange={(e) => editorTextLang === "ca" ? updateLocation({ title: e.target.value }) : updateLocalizedLocation(editorTextLang, { title: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
