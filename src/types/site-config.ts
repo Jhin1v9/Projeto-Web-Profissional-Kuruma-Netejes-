@@ -1,5 +1,5 @@
 import type { HeroBannerSlide, PriceValue } from "@/lib/constants";
-import type { Language, SlideText, ServiceText, CtaText } from "@/lib/i18n";
+import type { Language, SlideText, ServiceText, CtaText, EstimateText } from "@/lib/i18n";
 
 export type CursorMode = "realistic" | "neon" | "off";
 
@@ -49,6 +49,7 @@ export type SiteConfig = {
     settings: HeroBannerSettings;
     slides: HeroBannerSlide[];
   };
+  estimate: EstimateText;
   i18n?: Partial<
     Record<
       Language,
@@ -56,6 +57,7 @@ export type SiteConfig = {
         heroSlides: SlideText[];
         services: Record<string, ServiceText>;
         cta: CtaText;
+        estimate: EstimateText;
       }
     >
   >;

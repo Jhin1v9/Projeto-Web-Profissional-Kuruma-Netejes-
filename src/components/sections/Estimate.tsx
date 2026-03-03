@@ -7,58 +7,6 @@ import { eur, generateWhatsAppLink } from "@/lib/utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
 
-type Copy = {
-  title: string;
-  highlight: string;
-  subtitle: string;
-  helper: string;
-  onRequest: string;
-  total: string;
-  note: string;
-  cta: string;
-  none: string;
-  unknown: string;
-};
-
-const COPY_BY_LANG: Record<"ca" | "es" | "en", Copy> = {
-  ca: {
-    title: "Calcula un",
-    highlight: "pressupost orientatiu",
-    subtitle: "Selecciona serveis i veu una suma aproximada a l'instant.",
-    helper: "Preu estimat",
-    onRequest: "Sota consulta",
-    total: "Total aproximat",
-    note: "Per un preu exacte, escriu-nos per WhatsApp i t'ho confirmem segons l'estat del vehicle.",
-    cta: "Demanar preu exacte",
-    none: "Selecciona almenys un servei",
-    unknown: "Inclou serveis amb preu sota consulta",
-  },
-  es: {
-    title: "Calcula un",
-    highlight: "presupuesto orientativo",
-    subtitle: "Selecciona servicios y mira una suma aproximada al momento.",
-    helper: "Precio estimado",
-    onRequest: "A consultar",
-    total: "Total aproximado",
-    note: "Si quieres un precio exacto, escríbenos por WhatsApp y lo ajustamos según el estado del coche.",
-    cta: "Pedir precio exacto",
-    none: "Selecciona al menos un servicio",
-    unknown: "Incluye servicios con precio a consultar",
-  },
-  en: {
-    title: "Build a quick",
-    highlight: "estimate",
-    subtitle: "Pick your services and get an instant rough total.",
-    helper: "Estimated price",
-    onRequest: "On request",
-    total: "Approximate total",
-    note: "For an exact quote, message us on WhatsApp and we will adjust it to your car condition.",
-    cta: "Request exact quote",
-    none: "Select at least one service",
-    unknown: "Includes services with price on request",
-  },
-};
-
 function toNumberPrice(value: string | number): number | null {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   const normalized = String(value).replace(",", ".").trim();
@@ -71,7 +19,7 @@ function toNumberPrice(value: string | number): number | null {
 export function Estimate() {
   const cfg = useSiteConfig();
   const { language, t } = useLanguage();
-  const copy = COPY_BY_LANG[language];
+  const copy = language === "ca" ? cfg.estimate : cfg.i18n?.[language]?.estimate ?? t.estimate;
   const [selected, setSelected] = useState<Record<string, boolean>>({});
 
   const options = useMemo(

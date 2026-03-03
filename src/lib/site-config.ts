@@ -73,10 +73,24 @@ const LocalizedCtaSchema = z.object({
   whatsappMessage: z.string().min(1),
 });
 
+const LocalizedEstimateSchema = z.object({
+  title: z.string().min(1),
+  highlight: z.string().min(1),
+  subtitle: z.string().min(1),
+  helper: z.string().min(1),
+  onRequest: z.string().min(1),
+  total: z.string().min(1),
+  note: z.string().min(1),
+  cta: z.string().min(1),
+  none: z.string().min(1),
+  unknown: z.string().min(1),
+});
+
 const LocalizedLanguageSchema = z.object({
   heroSlides: z.array(LocalizedHeroSlideSchema).length(3),
   services: z.record(LocalizedServiceSchema),
   cta: LocalizedCtaSchema,
+  estimate: LocalizedEstimateSchema,
 });
 
 export const SiteConfigSchema = z.object({
@@ -100,6 +114,7 @@ export const SiteConfigSchema = z.object({
       slides: z.array(HeroBannerSlideSchema).length(3),
     })
     .optional(),
+  estimate: LocalizedEstimateSchema.optional(),
   i18n: z
     .object({
       ca: LocalizedLanguageSchema.optional(),
@@ -193,6 +208,7 @@ function getDefaultI18nLanguage(lang: Language): NonNullable<SiteConfig["i18n"]>
     heroSlides: t.hero.slides.map((slide) => ({ ...slide })),
     services: Object.fromEntries(Object.entries(t.services.items).map(([id, value]) => [id, { ...value, highlights: [...value.highlights] }])),
     cta: { ...t.cta },
+    estimate: { ...t.estimate },
   };
 }
 
@@ -205,6 +221,7 @@ function getDefaultI18n(): NonNullable<SiteConfig["i18n"]> {
 
 export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
   const heroBanner = input.heroBanner ?? getDefaultHeroBanner();
+  const estimate = input.estimate ?? { ...TRANSLATIONS.ca.estimate };
   const textColors = {
     ...getDefaultTextColors(),
     ...(input.appearance.textColors ?? {}),
@@ -217,11 +234,13 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       heroSlides: input.i18n?.es?.heroSlides ?? defaults.es!.heroSlides,
       services: { ...defaults.es!.services, ...(input.i18n?.es?.services ?? {}) },
       cta: { ...defaults.es!.cta, ...(input.i18n?.es?.cta ?? {}) },
+      estimate: { ...defaults.es!.estimate, ...(input.i18n?.es?.estimate ?? {}) },
     },
     en: {
       heroSlides: input.i18n?.en?.heroSlides ?? defaults.en!.heroSlides,
       services: { ...defaults.en!.services, ...(input.i18n?.en?.services ?? {}) },
       cta: { ...defaults.en!.cta, ...(input.i18n?.en?.cta ?? {}) },
+      estimate: { ...defaults.en!.estimate, ...(input.i18n?.en?.estimate ?? {}) },
     },
   };
 
@@ -232,6 +251,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       textColors,
     },
     heroBanner,
+    estimate,
     i18n,
     services,
   };
@@ -254,6 +274,7 @@ export function getDefaultConfig(): SiteConfig {
       imageUrl: DEFAULT_IMAGE_PATHS.hero,
     },
     heroBanner: getDefaultHeroBanner(),
+    estimate: { ...TRANSLATIONS.ca.estimate },
     i18n: getDefaultI18n(),
     services: getDefaultServices(),
   };

@@ -29,6 +29,19 @@ export type CtaText = {
   whatsappMessage: string;
 };
 
+export type EstimateText = {
+  title: string;
+  highlight: string;
+  subtitle: string;
+  helper: string;
+  onRequest: string;
+  total: string;
+  note: string;
+  cta: string;
+  none: string;
+  unknown: string;
+};
+
 export type TranslationPack = {
   navbar: {
     home: string;
@@ -72,6 +85,7 @@ export type TranslationPack = {
     button: string;
     whatsappMessage: string;
   };
+  estimate: EstimateText;
   footer: {
     reserveMessage: string;
   };
@@ -172,6 +186,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
       button: "Escriure ara",
       whatsappMessage: "Hola! Vull neteja interior. Tapisseria o cuir?",
     },
+    estimate: {
+      title: "Calcula un",
+      highlight: "pressupost orientatiu",
+      subtitle: "Selecciona serveis i veu una suma aproximada a l'instant.",
+      helper: "Preu estimat",
+      onRequest: "Sota consulta",
+      total: "Total aproximat",
+      note: "Per un preu exacte, escriu-nos per WhatsApp i t'ho confirmem segons l'estat del vehicle.",
+      cta: "Demanar preu exacte",
+      none: "Selecciona almenys un servei",
+      unknown: "Inclou serveis amb preu sota consulta",
+    },
     footer: {
       reserveMessage: "Hola! Vull reservar una neteja interior.",
     },
@@ -270,6 +296,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
       button: "Escribir ahora",
       whatsappMessage: "Hola! Quiero limpieza interior. Tapiceria o cuero?",
     },
+    estimate: {
+      title: "Calcula un",
+      highlight: "presupuesto orientativo",
+      subtitle: "Selecciona servicios y mira una suma aproximada al momento.",
+      helper: "Precio estimado",
+      onRequest: "A consultar",
+      total: "Total aproximado",
+      note: "Si quieres un precio exacto, escribenos por WhatsApp y lo ajustamos segun el estado del coche.",
+      cta: "Pedir precio exacto",
+      none: "Selecciona al menos un servicio",
+      unknown: "Incluye servicios con precio a consultar",
+    },
     footer: {
       reserveMessage: "Hola! Quiero reservar una limpieza interior.",
     },
@@ -367,6 +405,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
       description: "Tell us if it's upholstery or leather and we'll recommend the best option.",
       button: "Message now",
       whatsappMessage: "Hi! I want interior cleaning. Upholstery or leather?",
+    },
+    estimate: {
+      title: "Build a quick",
+      highlight: "estimate",
+      subtitle: "Pick your services and get an instant rough total.",
+      helper: "Estimated price",
+      onRequest: "On request",
+      total: "Approximate total",
+      note: "For an exact quote, message us on WhatsApp and we will adjust it to your car condition.",
+      cta: "Request exact quote",
+      none: "Select at least one service",
+      unknown: "Includes services with price on request",
     },
     footer: {
       reserveMessage: "Hi! I want to book an interior cleaning.",

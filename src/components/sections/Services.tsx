@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Check, Star } from "lucide-react";
 import { useCursor } from "@/components/providers/CursorProvider";
@@ -13,6 +14,25 @@ export function Services() {
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
   const colors = cfg.appearance.textColors;
+  const totalServices = cfg.services.length;
+
+  const desktopCols = useMemo(() => {
+    if (totalServices <= 1) return 1;
+    if (totalServices === 2) return 2;
+    if (totalServices === 3) return 3;
+    if (totalServices % 4 !== 1) return 4;
+    if (totalServices % 3 !== 1) return 3;
+    return 2;
+  }, [totalServices]);
+
+  const desktopColsClass =
+    desktopCols === 1
+      ? "xl:grid-cols-1"
+      : desktopCols === 2
+      ? "xl:grid-cols-2"
+      : desktopCols === 3
+      ? "xl:grid-cols-3"
+      : "xl:grid-cols-4";
 
   return (
     <section id="services" className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
@@ -28,17 +48,24 @@ export function Services() {
           <p className="mt-3 text-base text-brand-silver/90 sm:mt-4 sm:text-lg">{t.services.subtitle}</p>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2 xl:grid-cols-4 xl:gap-7">
-          {cfg.services.map((service) => {
+        <div className={`mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2 ${desktopColsClass} xl:gap-7`}>
+          {cfg.services.map((service, index) => {
             const translated = cfg.i18n?.[language]?.services?.[service.id] ?? t.services.items[service.id];
             const name = language === "ca" ? service.name : translated?.name ?? service.name;
             const description = language === "ca" ? service.description : translated?.description ?? service.description;
             const highlights = language === "ca" ? service.highlights : translated?.highlights ?? service.highlights;
+            const isLast = index === totalServices - 1;
+            const isOddOnMobileGrid = totalServices % 2 === 1;
+            const shouldCenterLastOnMobile = isLast && isOddOnMobileGrid && totalServices > 1;
 
             return (
               <motion.div
                 key={service.id}
-                className="group relative h-full"
+                className={`group relative h-full ${
+                  shouldCenterLastOnMobile
+                    ? "sm:col-span-2 sm:mx-auto sm:w-full sm:max-w-[420px] xl:col-span-1 xl:mx-0 xl:max-w-none"
+                    : ""
+                }`}
                 whileHover={{ y: -6 }}
                 onMouseEnter={() => setHover(true, service.popular ? "cta" : "hover")}
                 onMouseLeave={() => setHover(false)}

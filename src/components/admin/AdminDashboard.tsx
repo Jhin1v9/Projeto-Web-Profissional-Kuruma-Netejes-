@@ -5,7 +5,7 @@ import { Save, Rocket, RefreshCw, ImagePlus, Loader2 } from "lucide-react";
 import type { SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import type { PriceValue } from "@/lib/constants";
-import { LANGUAGES, TRANSLATIONS, type CtaText, type Language, type ServiceText, type SlideText } from "@/lib/i18n";
+import { LANGUAGES, TRANSLATIONS, type CtaText, type EstimateText, type Language, type ServiceText, type SlideText } from "@/lib/i18n";
 import { LivePreview } from "./LivePreview";
 
 export type AdminSection = "dashboard" | "hero" | "services" | "appearance";
@@ -153,6 +153,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
   const [heroTextLang, setHeroTextLang] = useState<Language>("ca");
   const [serviceTextLang, setServiceTextLang] = useState<Language>("ca");
   const [ctaTextLang, setCtaTextLang] = useState<Language>("ca");
+  const [estimateTextLang, setEstimateTextLang] = useState<Language>("ca");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -226,6 +227,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             heroSlides: TRANSLATIONS[lang].hero.slides,
             services: TRANSLATIONS[lang].services.items,
             cta: TRANSLATIONS[lang].cta,
+            estimate: TRANSLATIONS[lang].estimate,
           }),
           heroSlides,
         },
@@ -254,6 +256,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             heroSlides: TRANSLATIONS[lang].hero.slides,
             services: TRANSLATIONS[lang].services.items,
             cta: TRANSLATIONS[lang].cta,
+            estimate: TRANSLATIONS[lang].estimate,
           }),
           services: {
             ...currentServices,
@@ -276,8 +279,34 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             heroSlides: TRANSLATIONS[lang].hero.slides,
             services: TRANSLATIONS[lang].services.items,
             cta: TRANSLATIONS[lang].cta,
+            estimate: TRANSLATIONS[lang].estimate,
           }),
           cta: { ...currentCta, ...patch },
+        },
+      },
+    });
+  }
+
+  function updateEstimate(patch: Partial<SiteConfig["estimate"]>) {
+    if (!cfg) return;
+    setCfg({ ...cfg, estimate: { ...cfg.estimate, ...patch } });
+  }
+
+  function updateLocalizedEstimate(lang: Language, patch: Partial<EstimateText>) {
+    if (!cfg || lang === "ca") return;
+    const currentEstimate = cfg.i18n?.[lang]?.estimate ?? TRANSLATIONS[lang].estimate;
+    setCfg({
+      ...cfg,
+      i18n: {
+        ...(cfg.i18n ?? {}),
+        [lang]: {
+          ...(cfg.i18n?.[lang] ?? {
+            heroSlides: TRANSLATIONS[lang].hero.slides,
+            services: TRANSLATIONS[lang].services.items,
+            cta: TRANSLATIONS[lang].cta,
+            estimate: TRANSLATIONS[lang].estimate,
+          }),
+          estimate: { ...currentEstimate, ...patch },
         },
       },
     });
@@ -630,6 +659,158 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div className="font-bold text-white">Simulador de orcamento (secao no site)</div>
+              <div className="mt-2 text-xs text-brand-silver/70">Edite todos os textos exibidos no bloco de orcamento.</div>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={`estimate-lang-${lang.code}`}
+                    type="button"
+                    onClick={() => setEstimateTextLang(lang.code)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                      estimateTextLang === lang.code
+                        ? "border border-brand-cyan/40 bg-brand-cyan/20 text-brand-cyan"
+                        : "border border-white/10 bg-black/20 text-brand-silver/80"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+              {(() => {
+                const source =
+                  estimateTextLang === "ca"
+                    ? cfg.estimate
+                    : cfg.i18n?.[estimateTextLang]?.estimate ?? TRANSLATIONS[estimateTextLang].estimate;
+                return (
+                  <div className="mt-4 grid sm:grid-cols-2 gap-4">
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Titulo</div>
+                      <input
+                        value={source.title}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ title: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { title: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Highlight</div>
+                      <input
+                        value={source.highlight}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ highlight: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { highlight: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block sm:col-span-2">
+                      <div className="text-xs text-brand-silver/70 mb-1">Subtitulo</div>
+                      <input
+                        value={source.subtitle}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ subtitle: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { subtitle: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Rotulo preco</div>
+                      <input
+                        value={source.helper}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ helper: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { helper: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Texto "a consultar"</div>
+                      <input
+                        value={source.onRequest}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ onRequest: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { onRequest: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Titulo total</div>
+                      <input
+                        value={source.total}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ total: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { total: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Texto botao</div>
+                      <input
+                        value={source.cta}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ cta: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { cta: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Mensagem sem selecao</div>
+                      <input
+                        value={source.none}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ none: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { none: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block">
+                      <div className="text-xs text-brand-silver/70 mb-1">Mensagem com servico sem preco</div>
+                      <input
+                        value={source.unknown}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ unknown: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { unknown: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                    <label className="block sm:col-span-2">
+                      <div className="text-xs text-brand-silver/70 mb-1">Aviso abaixo do total</div>
+                      <textarea
+                        rows={3}
+                        value={source.note}
+                        onChange={(e) =>
+                          estimateTextLang === "ca"
+                            ? updateEstimate({ note: e.target.value })
+                            : updateLocalizedEstimate(estimateTextLang, { note: e.target.value })
+                        }
+                        className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                      />
+                    </label>
+                  </div>
+                );
+              })()}
             </div>
           </div>
           {cfg.services.map((service, index) => (
