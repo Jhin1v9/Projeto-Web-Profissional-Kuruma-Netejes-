@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { cookies } from "next/headers";
 import { SiteConfigSchema, getDefaultConfig, normalizeSiteConfig } from "@/lib/site-config";
 import { createClient } from "@/lib/supabase/server";
 import type { SiteConfig } from "@/types/site-config";
+import { getAdminCookieName, isAdminTokenValid } from "@/lib/admin-auth";
 
 const KEY = "default";
 const LOCAL_CONFIG_FILE = path.join(process.cwd(), "data", "site-config.local.json");
@@ -27,6 +29,15 @@ function getViewMode(req: Request): ViewMode {
 function parseConfigPayload(payload: unknown): SiteConfig | null {
   const parsed = SiteConfigSchema.safeParse(payload);
   return parsed.success ? normalizeSiteConfig(parsed.data) : null;
+}
+
+async function assertAdminSession(): Promise<NextResponse | null> {
+  const store = await cookies();
+  const token = store.get(getAdminCookieName())?.value;
+  if (!isAdminTokenValid(token)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return null;
 }
 
 function pickPayload(record: StoredRecord | null, view: ViewMode): SiteConfig {
@@ -85,6 +96,11 @@ async function writeStorageRecord(record: StoredRecord): Promise<void> {
 
 export async function GET(req: Request) {
   const view = getViewMode(req);
+  if (view === "draft") {
+    const unauthorized = await assertAdminSession();
+    if (unauthorized) return unauthorized;
+  }
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -131,6 +147,9 @@ export async function GET(req: Request) {
 }
 
 export async function PATCH(req: Request) {
+  const unauthorized = await assertAdminSession();
+  if (unauthorized) return unauthorized;
+
   const body = await req.json().catch(() => null);
   const parsed = parseConfigPayload(body);
   if (!parsed) return NextResponse.json({ error: "Invalid config" }, { status: 400 });
@@ -166,6 +185,9 @@ export async function PATCH(req: Request) {
 }
 
 export async function POST() {
+  const unauthorized = await assertAdminSession();
+  if (unauthorized) return unauthorized;
+
   const now = new Date().toISOString();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;

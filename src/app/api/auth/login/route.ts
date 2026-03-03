@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getAdminCookieName, getExpectedAdminSessionToken } from "@/lib/admin-auth";
+
 export async function POST(req: Request) {
   const { email, password } = await req.json().catch(() => ({ email: "", password: "" }));
 
@@ -12,6 +14,12 @@ export async function POST(req: Request) {
   }
 
   const res = NextResponse.json({ ok: true });
-  res.cookies.set("kn_admin", "1", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60*60*8 });
+  res.cookies.set(getAdminCookieName(), getExpectedAdminSessionToken(), {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 8,
+    secure: process.env.NODE_ENV === "production",
+  });
   return res;
 }

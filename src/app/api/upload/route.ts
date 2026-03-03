@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { getAdminCookieName, isAdminTokenValid } from "@/lib/admin-auth";
 
 const BUCKET = "site-assets";
 const MAX_MB = 8;
@@ -32,10 +33,9 @@ async function ensureBucket() {
 }
 
 export async function POST(req: Request) {
-  if (process.env.DEMO_AUTH === "1") {
-    const token = cookies().get("kn_admin")?.value;
-    if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const store = await cookies();
+  const token = store.get(getAdminCookieName())?.value;
+  if (!isAdminTokenValid(token)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
     return NextResponse.json({ error: "Supabase upload not configured." }, { status: 500 });

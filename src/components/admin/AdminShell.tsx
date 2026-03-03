@@ -22,7 +22,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto w-[98vw] max-w-[1800px] px-2 py-4 sm:px-3 sm:py-6 lg:px-6">
+      <div
+        className="mx-auto w-full max-w-[1800px] px-4 py-4 sm:px-5 sm:py-6 lg:px-6"
+        style={{
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
+      >
         <div className="grid gap-4 xl:grid-cols-[290px_1fr] xl:gap-8">
           <aside className="h-fit rounded-3xl border border-white/10 bg-brand-dark2/70 p-4 backdrop-blur-xl sm:p-5 xl:sticky xl:top-6">
             <div className="mb-5 flex items-center gap-3 sm:mb-6">
