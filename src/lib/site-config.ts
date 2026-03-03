@@ -151,6 +151,7 @@ export const SiteConfigSchema = z.object({
   navbar: LocalizedNavbarSchema.optional(),
   process: LocalizedProcessSchema.optional(),
   location: LocalizedLocationSchema.optional(),
+  cta: LocalizedCtaSchema.optional(),
   footer: LocalizedFooterSchema.optional(),
   estimate: LocalizedEstimateSchema.optional(),
   i18n: z
@@ -278,6 +279,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     steps: TRANSLATIONS.ca.process.steps.map((step) => ({ ...step })),
   };
   const location = input.location ?? { ...TRANSLATIONS.ca.location };
+  const cta = input.cta ?? { ...TRANSLATIONS.ca.cta };
   const footer = input.footer ?? { ...TRANSLATIONS.ca.footer };
   const estimate = input.estimate ?? { ...TRANSLATIONS.ca.estimate };
   const textColors = {
@@ -331,6 +333,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     navbar,
     process,
     location,
+    cta,
     footer,
     estimate,
     i18n,
@@ -361,6 +364,7 @@ export function getDefaultConfig(): SiteConfig {
       steps: TRANSLATIONS.ca.process.steps.map((step) => ({ ...step })),
     },
     location: { ...TRANSLATIONS.ca.location },
+    cta: { ...TRANSLATIONS.ca.cta },
     footer: { ...TRANSLATIONS.ca.footer },
     estimate: { ...TRANSLATIONS.ca.estimate },
     i18n: getDefaultI18n(),

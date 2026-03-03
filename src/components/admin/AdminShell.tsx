@@ -15,10 +15,15 @@ const links = [
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const isVisualEditor = pathname === "/admin/editor";
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
+  }
+
+  if (isVisualEditor) {
+    return <div className="min-h-screen">{children}</div>;
   }
 
   return (

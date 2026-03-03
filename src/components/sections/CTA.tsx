@@ -13,8 +13,7 @@ export function CTA() {
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
   const colors = cfg.appearance.textColors;
-  const ctaText = cfg.i18n?.[language]?.cta;
-  const displayCta = ctaText ?? t.cta;
+  const displayCta = language === "ca" ? cfg.cta : cfg.i18n?.[language]?.cta ?? t.cta;
 
   return (
     <section className="relative py-16 sm:py-20 lg:py-24">

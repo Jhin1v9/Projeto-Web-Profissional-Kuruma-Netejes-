@@ -62,6 +62,7 @@ export type SiteConfig = {
   navbar: NavbarText;
   process: ProcessText;
   location: LocationText;
+  cta: CtaText;
   footer: FooterText;
   estimate: EstimateText;
   i18n?: Partial<
