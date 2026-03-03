@@ -7,7 +7,7 @@ import { getDefaultConfig } from "@/lib/site-config";
 import { CursorProvider } from "@/components/providers/CursorProvider";
 import { CustomCursor } from "@/components/layout/CustomCursor";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
-import { LocalThemeToggle } from "@/components/dev/LocalThemeToggle";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -48,13 +48,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.className} antialiased text-white`}>
         <div className="k-bg" />
-        <LanguageProvider>
-          <CursorProvider>
-            {cfg.appearance.cursorMode !== "off" && <CustomCursor mode={cfg.appearance.cursorMode} />}
-            <LocalThemeToggle />
-            {children}
-          </CursorProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <CursorProvider>
+              {cfg.appearance.cursorMode !== "off" && <CustomCursor mode={cfg.appearance.cursorMode} />}
+              {children}
+            </CursorProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

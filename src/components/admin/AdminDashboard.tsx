@@ -5,7 +5,19 @@ import { Save, Rocket, RefreshCw, ImagePlus, Loader2 } from "lucide-react";
 import type { SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import type { PriceValue } from "@/lib/constants";
-import { LANGUAGES, TRANSLATIONS, type CtaText, type EstimateText, type Language, type ServiceText, type SlideText } from "@/lib/i18n";
+import {
+  LANGUAGES,
+  TRANSLATIONS,
+  type CtaText,
+  type EstimateText,
+  type FooterText,
+  type Language,
+  type LocationText,
+  type NavbarText,
+  type ProcessText,
+  type ServiceText,
+  type SlideText,
+} from "@/lib/i18n";
 import { LivePreview } from "./LivePreview";
 
 export type AdminSection = "dashboard" | "hero" | "services" | "appearance" | "editor";
@@ -156,6 +168,23 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
   const [serviceTextLang, setServiceTextLang] = useState<Language>("ca");
   const [ctaTextLang, setCtaTextLang] = useState<Language>("ca");
   const [estimateTextLang, setEstimateTextLang] = useState<Language>("ca");
+  const [editorTextLang, setEditorTextLang] = useState<Language>("ca");
+
+  function getLangDefaults(lang: Language): NonNullable<SiteConfig["i18n"]>[Language] {
+    return {
+      navbar: { ...TRANSLATIONS[lang].navbar },
+      heroSlides: TRANSLATIONS[lang].hero.slides.map((slide) => ({ ...slide })),
+      services: Object.fromEntries(Object.entries(TRANSLATIONS[lang].services.items).map(([id, value]) => [id, { ...value, highlights: [...value.highlights] }])),
+      process: {
+        ...TRANSLATIONS[lang].process,
+        steps: TRANSLATIONS[lang].process.steps.map((step) => ({ ...step })),
+      },
+      location: { ...TRANSLATIONS[lang].location },
+      cta: { ...TRANSLATIONS[lang].cta },
+      footer: { ...TRANSLATIONS[lang].footer },
+      estimate: { ...TRANSLATIONS[lang].estimate },
+    };
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -225,12 +254,8 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       i18n: {
         ...(cfg.i18n ?? {}),
         [lang]: {
-          ...(cfg.i18n?.[lang] ?? {
-            heroSlides: TRANSLATIONS[lang].hero.slides,
-            services: TRANSLATIONS[lang].services.items,
-            cta: TRANSLATIONS[lang].cta,
-            estimate: TRANSLATIONS[lang].estimate,
-          }),
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
           heroSlides,
         },
       },
@@ -254,12 +279,8 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       i18n: {
         ...(cfg.i18n ?? {}),
         [lang]: {
-          ...(cfg.i18n?.[lang] ?? {
-            heroSlides: TRANSLATIONS[lang].hero.slides,
-            services: TRANSLATIONS[lang].services.items,
-            cta: TRANSLATIONS[lang].cta,
-            estimate: TRANSLATIONS[lang].estimate,
-          }),
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
           services: {
             ...currentServices,
             [serviceId]: nextService,
@@ -277,12 +298,8 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       i18n: {
         ...(cfg.i18n ?? {}),
         [lang]: {
-          ...(cfg.i18n?.[lang] ?? {
-            heroSlides: TRANSLATIONS[lang].hero.slides,
-            services: TRANSLATIONS[lang].services.items,
-            cta: TRANSLATIONS[lang].cta,
-            estimate: TRANSLATIONS[lang].estimate,
-          }),
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
           cta: { ...currentCta, ...patch },
         },
       },
@@ -302,13 +319,106 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       i18n: {
         ...(cfg.i18n ?? {}),
         [lang]: {
-          ...(cfg.i18n?.[lang] ?? {
-            heroSlides: TRANSLATIONS[lang].hero.slides,
-            services: TRANSLATIONS[lang].services.items,
-            cta: TRANSLATIONS[lang].cta,
-            estimate: TRANSLATIONS[lang].estimate,
-          }),
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
           estimate: { ...currentEstimate, ...patch },
+        },
+      },
+    });
+  }
+
+  function updateNavbar(patch: Partial<SiteConfig["navbar"]>) {
+    if (!cfg) return;
+    setCfg({ ...cfg, navbar: { ...cfg.navbar, ...patch } });
+  }
+
+  function updateLocalizedNavbar(lang: Language, patch: Partial<NavbarText>) {
+    if (!cfg || lang === "ca") return;
+    const current = cfg.i18n?.[lang]?.navbar ?? TRANSLATIONS[lang].navbar;
+    setCfg({
+      ...cfg,
+      i18n: {
+        ...(cfg.i18n ?? {}),
+        [lang]: {
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
+          navbar: { ...current, ...patch },
+        },
+      },
+    });
+  }
+
+  function updateProcess(patch: Partial<SiteConfig["process"]>) {
+    if (!cfg) return;
+    setCfg({ ...cfg, process: { ...cfg.process, ...patch } });
+  }
+
+  function updateLocalizedProcess(lang: Language, patch: Partial<ProcessText>) {
+    if (!cfg || lang === "ca") return;
+    const current = cfg.i18n?.[lang]?.process ?? TRANSLATIONS[lang].process;
+    setCfg({
+      ...cfg,
+      i18n: {
+        ...(cfg.i18n ?? {}),
+        [lang]: {
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
+          process: { ...current, ...patch },
+        },
+      },
+    });
+  }
+
+  function updateProcessStep(stepIndex: number, patch: { t?: string; d?: string }) {
+    if (!cfg) return;
+    const steps = cfg.process.steps.map((step, index) => (index === stepIndex ? { ...step, ...patch } : step));
+    setCfg({ ...cfg, process: { ...cfg.process, steps } });
+  }
+
+  function updateLocalizedProcessStep(lang: Language, stepIndex: number, patch: { t?: string; d?: string }) {
+    if (!cfg || lang === "ca") return;
+    const current = cfg.i18n?.[lang]?.process ?? TRANSLATIONS[lang].process;
+    const steps = current.steps.map((step, index) => (index === stepIndex ? { ...step, ...patch } : step));
+    updateLocalizedProcess(lang, { steps });
+  }
+
+  function updateLocation(patch: Partial<SiteConfig["location"]>) {
+    if (!cfg) return;
+    setCfg({ ...cfg, location: { ...cfg.location, ...patch } });
+  }
+
+  function updateLocalizedLocation(lang: Language, patch: Partial<LocationText>) {
+    if (!cfg || lang === "ca") return;
+    const current = cfg.i18n?.[lang]?.location ?? TRANSLATIONS[lang].location;
+    setCfg({
+      ...cfg,
+      i18n: {
+        ...(cfg.i18n ?? {}),
+        [lang]: {
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
+          location: { ...current, ...patch },
+        },
+      },
+    });
+  }
+
+  function updateFooter(patch: Partial<SiteConfig["footer"]>) {
+    if (!cfg) return;
+    setCfg({ ...cfg, footer: { ...cfg.footer, ...patch } });
+  }
+
+  function updateLocalizedFooter(lang: Language, patch: Partial<FooterText>) {
+    if (!cfg || lang === "ca") return;
+    const current = cfg.i18n?.[lang]?.footer ?? TRANSLATIONS[lang].footer;
+    setCfg({
+      ...cfg,
+      i18n: {
+        ...(cfg.i18n ?? {}),
+        [lang]: {
+          ...getLangDefaults(lang),
+          ...(cfg.i18n?.[lang] ?? {}),
+          footer: { ...current, ...patch },
         },
       },
     });
@@ -448,6 +558,129 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                 <a href="/admin/services" className="rounded-xl border border-white/10 px-3 py-2 text-sm text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan">Servicos e cards</a>
                 <a href="/admin/appearance" className="rounded-xl border border-white/10 px-3 py-2 text-sm text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan">Cores e visual</a>
               </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-black/20 p-6">
+              <div className="font-extrabold text-white">Textos globais do site</div>
+              <p className="mt-1 text-xs text-brand-silver/70">
+                Navbar, processo, localizacao e rodape. Edite por idioma.
+              </p>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={`editor-lang-${lang.code}`}
+                    type="button"
+                    onClick={() => setEditorTextLang(lang.code)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                      editorTextLang === lang.code
+                        ? "border border-brand-cyan/40 bg-brand-cyan/20 text-brand-cyan"
+                        : "border border-white/10 bg-black/20 text-brand-silver/80"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+
+              {(() => {
+                const navbarSource = editorTextLang === "ca" ? cfg.navbar : cfg.i18n?.[editorTextLang]?.navbar ?? TRANSLATIONS[editorTextLang].navbar;
+                const processSource = editorTextLang === "ca" ? cfg.process : cfg.i18n?.[editorTextLang]?.process ?? TRANSLATIONS[editorTextLang].process;
+                const locationSource = editorTextLang === "ca" ? cfg.location : cfg.i18n?.[editorTextLang]?.location ?? TRANSLATIONS[editorTextLang].location;
+                const footerSource = editorTextLang === "ca" ? cfg.footer : cfg.i18n?.[editorTextLang]?.footer ?? TRANSLATIONS[editorTextLang].footer;
+
+                return (
+                  <div className="mt-4 space-y-5">
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="mb-3 text-sm font-bold text-white">Navbar</div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Inicio</div>
+                          <input value={navbarSource.home} onChange={(e) => editorTextLang === "ca" ? updateNavbar({ home: e.target.value }) : updateLocalizedNavbar(editorTextLang, { home: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Servicos</div>
+                          <input value={navbarSource.services} onChange={(e) => editorTextLang === "ca" ? updateNavbar({ services: e.target.value }) : updateLocalizedNavbar(editorTextLang, { services: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Processo</div>
+                          <input value={navbarSource.process} onChange={(e) => editorTextLang === "ca" ? updateNavbar({ process: e.target.value }) : updateLocalizedNavbar(editorTextLang, { process: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Contato</div>
+                          <input value={navbarSource.contact} onChange={(e) => editorTextLang === "ca" ? updateNavbar({ contact: e.target.value }) : updateLocalizedNavbar(editorTextLang, { contact: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block sm:col-span-2">
+                          <div className="mb-1 text-xs text-brand-silver/70">Mensagem WhatsApp</div>
+                          <input value={navbarSource.whatsappMessage} onChange={(e) => editorTextLang === "ca" ? updateNavbar({ whatsappMessage: e.target.value }) : updateLocalizedNavbar(editorTextLang, { whatsappMessage: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="mb-3 text-sm font-bold text-white">Processo</div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Titulo</div>
+                          <input value={processSource.title} onChange={(e) => editorTextLang === "ca" ? updateProcess({ title: e.target.value }) : updateLocalizedProcess(editorTextLang, { title: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Highlight</div>
+                          <input value={processSource.highlight} onChange={(e) => editorTextLang === "ca" ? updateProcess({ highlight: e.target.value }) : updateLocalizedProcess(editorTextLang, { highlight: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block sm:col-span-2">
+                          <div className="mb-1 text-xs text-brand-silver/70">Subtitulo</div>
+                          <input value={processSource.subtitle} onChange={(e) => editorTextLang === "ca" ? updateProcess({ subtitle: e.target.value }) : updateLocalizedProcess(editorTextLang, { subtitle: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                      </div>
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        {processSource.steps.map((step, stepIndex) => (
+                          <div key={`step-edit-${stepIndex}`} className="rounded-xl border border-white/10 bg-black/20 p-3">
+                            <div className="mb-1 text-xs text-brand-silver/70">Passo {stepIndex + 1} titulo</div>
+                            <input
+                              value={step.t}
+                              onChange={(e) => editorTextLang === "ca" ? updateProcessStep(stepIndex, { t: e.target.value }) : updateLocalizedProcessStep(editorTextLang, stepIndex, { t: e.target.value })}
+                              className="w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none focus:border-brand-cyan/60"
+                            />
+                            <div className="mb-1 mt-2 text-xs text-brand-silver/70">Descricao</div>
+                            <textarea
+                              rows={2}
+                              value={step.d}
+                              onChange={(e) => editorTextLang === "ca" ? updateProcessStep(stepIndex, { d: e.target.value }) : updateLocalizedProcessStep(editorTextLang, stepIndex, { d: e.target.value })}
+                              className="w-full rounded-lg bg-black/30 border border-white/10 px-3 py-2 outline-none focus:border-brand-cyan/60"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                      <div className="mb-3 text-sm font-bold text-white">Localizacao e rodape</div>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Titulo localizacao</div>
+                          <input value={locationSource.title} onChange={(e) => editorTextLang === "ca" ? updateLocation({ title: e.target.value }) : updateLocalizedLocation(editorTextLang, { title: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block">
+                          <div className="mb-1 text-xs text-brand-silver/70">Botao WhatsApp</div>
+                          <input value={locationSource.whatsappButton} onChange={(e) => editorTextLang === "ca" ? updateLocation({ whatsappButton: e.target.value }) : updateLocalizedLocation(editorTextLang, { whatsappButton: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block sm:col-span-2">
+                          <div className="mb-1 text-xs text-brand-silver/70">Intro localizacao</div>
+                          <textarea rows={2} value={locationSource.intro} onChange={(e) => editorTextLang === "ca" ? updateLocation({ intro: e.target.value }) : updateLocalizedLocation(editorTextLang, { intro: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block sm:col-span-2">
+                          <div className="mb-1 text-xs text-brand-silver/70">Mensagem WhatsApp localizacao</div>
+                          <input value={locationSource.whatsappMessage} onChange={(e) => editorTextLang === "ca" ? updateLocation({ whatsappMessage: e.target.value }) : updateLocalizedLocation(editorTextLang, { whatsappMessage: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                        <label className="block sm:col-span-2">
+                          <div className="mb-1 text-xs text-brand-silver/70">Mensagem WhatsApp do rodape</div>
+                          <input value={footerSource.reserveMessage} onChange={(e) => editorTextLang === "ca" ? updateFooter({ reserveMessage: e.target.value }) : updateLocalizedFooter(editorTextLang, { reserveMessage: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60" />
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-black/20 p-6">

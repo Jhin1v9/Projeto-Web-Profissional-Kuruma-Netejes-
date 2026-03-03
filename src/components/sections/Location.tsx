@@ -6,10 +6,13 @@ import { BUSINESS } from "@/lib/constants";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { generateWhatsAppLink } from "@/lib/utils";
+import { useSiteConfig } from "./useSiteConfig";
 
 export function Location() {
   const { setHover } = useCursor();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const cfg = useSiteConfig();
+  const text = language === "ca" ? cfg.location : cfg.i18n?.[language]?.location ?? t.location;
   const maps = "https://www.google.com/maps?q=Carrer%20d%27Alfons%20Sala%2C%2057%2C%2008202%20Sabadell&output=embed";
 
   return (
@@ -22,35 +25,35 @@ export function Location() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl font-black sm:text-4xl">{t.location.title}</h2>
-            <p className="mt-3 text-sm text-brand-silver/85 sm:text-base">{t.location.intro}</p>
+            <h2 className="text-3xl font-black sm:text-4xl">{text.title}</h2>
+            <p className="mt-3 text-sm text-brand-silver/85 sm:text-base">{text.intro}</p>
 
             <div className="mt-8 space-y-4">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-brand-cyan mt-1" />
                 <div>
-                  <div className="font-bold">{t.location.address}</div>
+                  <div className="font-bold">{text.address}</div>
                   <div className="text-brand-silver/85">{BUSINESS.address.street}</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Phone className="w-5 h-5 text-brand-cyan mt-1" />
                 <div>
-                  <div className="font-bold">{t.location.phone}</div>
+                  <div className="font-bold">{text.phone}</div>
                   <div className="text-brand-silver/85">{BUSINESS.phone}</div>
                 </div>
               </div>
             </div>
 
             <a
-              href={generateWhatsAppLink(BUSINESS.whatsapp, t.location.whatsappMessage)}
+              href={generateWhatsAppLink(BUSINESS.whatsapp, text.whatsappMessage)}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-brand-cyan px-6 py-3.5 text-sm font-black text-brand-dark shadow-glowStrong sm:mt-10 sm:py-4 sm:text-base"
               onMouseEnter={() => setHover(true, "cta")}
               onMouseLeave={() => setHover(false)}
             >
-              {t.location.whatsappButton}
+              {text.whatsappButton}
             </a>
           </motion.div>
 

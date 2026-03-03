@@ -86,10 +86,44 @@ const LocalizedEstimateSchema = z.object({
   unknown: z.string().min(1),
 });
 
+const LocalizedNavbarSchema = z.object({
+  home: z.string().min(1),
+  services: z.string().min(1),
+  process: z.string().min(1),
+  contact: z.string().min(1),
+  whatsappMessage: z.string().min(1),
+  mobileContact: z.string().min(1),
+});
+
+const LocalizedProcessSchema = z.object({
+  title: z.string().min(1),
+  highlight: z.string().min(1),
+  subtitle: z.string().min(1),
+  stepLabel: z.string().min(1),
+  steps: z.array(z.object({ t: z.string().min(1), d: z.string().min(1) })).min(1),
+});
+
+const LocalizedLocationSchema = z.object({
+  title: z.string().min(1),
+  intro: z.string().min(1),
+  address: z.string().min(1),
+  phone: z.string().min(1),
+  whatsappButton: z.string().min(1),
+  whatsappMessage: z.string().min(1),
+});
+
+const LocalizedFooterSchema = z.object({
+  reserveMessage: z.string().min(1),
+});
+
 const LocalizedLanguageSchema = z.object({
+  navbar: LocalizedNavbarSchema,
   heroSlides: z.array(LocalizedHeroSlideSchema).length(3),
   services: z.record(LocalizedServiceSchema),
+  process: LocalizedProcessSchema,
+  location: LocalizedLocationSchema,
   cta: LocalizedCtaSchema,
+  footer: LocalizedFooterSchema,
   estimate: LocalizedEstimateSchema,
 });
 
@@ -114,6 +148,10 @@ export const SiteConfigSchema = z.object({
       slides: z.array(HeroBannerSlideSchema).length(3),
     })
     .optional(),
+  navbar: LocalizedNavbarSchema.optional(),
+  process: LocalizedProcessSchema.optional(),
+  location: LocalizedLocationSchema.optional(),
+  footer: LocalizedFooterSchema.optional(),
   estimate: LocalizedEstimateSchema.optional(),
   i18n: z
     .object({
@@ -211,9 +249,16 @@ function getDefaultTextColors(): SiteConfig["appearance"]["textColors"] {
 function getDefaultI18nLanguage(lang: Language): NonNullable<SiteConfig["i18n"]>[Language] {
   const t = TRANSLATIONS[lang];
   return {
+    navbar: { ...t.navbar },
     heroSlides: t.hero.slides.map((slide) => ({ ...slide })),
     services: Object.fromEntries(Object.entries(t.services.items).map(([id, value]) => [id, { ...value, highlights: [...value.highlights] }])),
+    process: {
+      ...t.process,
+      steps: t.process.steps.map((step) => ({ ...step })),
+    },
+    location: { ...t.location },
     cta: { ...t.cta },
+    footer: { ...t.footer },
     estimate: { ...t.estimate },
   };
 }
@@ -227,6 +272,13 @@ function getDefaultI18n(): NonNullable<SiteConfig["i18n"]> {
 
 export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
   const heroBanner = input.heroBanner ?? getDefaultHeroBanner();
+  const navbar = input.navbar ?? { ...TRANSLATIONS.ca.navbar };
+  const process = input.process ?? {
+    ...TRANSLATIONS.ca.process,
+    steps: TRANSLATIONS.ca.process.steps.map((step) => ({ ...step })),
+  };
+  const location = input.location ?? { ...TRANSLATIONS.ca.location };
+  const footer = input.footer ?? { ...TRANSLATIONS.ca.footer };
   const estimate = input.estimate ?? { ...TRANSLATIONS.ca.estimate };
   const textColors = {
     ...getDefaultTextColors(),
@@ -240,15 +292,31 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
 
   const i18n: NonNullable<SiteConfig["i18n"]> = {
     es: {
+      navbar: { ...defaults.es!.navbar, ...(input.i18n?.es?.navbar ?? {}) },
       heroSlides: input.i18n?.es?.heroSlides ?? defaults.es!.heroSlides,
       services: { ...defaults.es!.services, ...(input.i18n?.es?.services ?? {}) },
+      process: {
+        ...defaults.es!.process,
+        ...(input.i18n?.es?.process ?? {}),
+        steps: input.i18n?.es?.process?.steps ?? defaults.es!.process.steps,
+      },
+      location: { ...defaults.es!.location, ...(input.i18n?.es?.location ?? {}) },
       cta: { ...defaults.es!.cta, ...(input.i18n?.es?.cta ?? {}) },
+      footer: { ...defaults.es!.footer, ...(input.i18n?.es?.footer ?? {}) },
       estimate: { ...defaults.es!.estimate, ...(input.i18n?.es?.estimate ?? {}) },
     },
     en: {
+      navbar: { ...defaults.en!.navbar, ...(input.i18n?.en?.navbar ?? {}) },
       heroSlides: input.i18n?.en?.heroSlides ?? defaults.en!.heroSlides,
       services: { ...defaults.en!.services, ...(input.i18n?.en?.services ?? {}) },
+      process: {
+        ...defaults.en!.process,
+        ...(input.i18n?.en?.process ?? {}),
+        steps: input.i18n?.en?.process?.steps ?? defaults.en!.process.steps,
+      },
+      location: { ...defaults.en!.location, ...(input.i18n?.en?.location ?? {}) },
       cta: { ...defaults.en!.cta, ...(input.i18n?.en?.cta ?? {}) },
+      footer: { ...defaults.en!.footer, ...(input.i18n?.en?.footer ?? {}) },
       estimate: { ...defaults.en!.estimate, ...(input.i18n?.en?.estimate ?? {}) },
     },
   };
@@ -260,6 +328,10 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       textColors,
     },
     heroBanner,
+    navbar,
+    process,
+    location,
+    footer,
     estimate,
     i18n,
     services,
@@ -283,6 +355,13 @@ export function getDefaultConfig(): SiteConfig {
       imageUrl: DEFAULT_IMAGE_PATHS.hero,
     },
     heroBanner: getDefaultHeroBanner(),
+    navbar: { ...TRANSLATIONS.ca.navbar },
+    process: {
+      ...TRANSLATIONS.ca.process,
+      steps: TRANSLATIONS.ca.process.steps.map((step) => ({ ...step })),
+    },
+    location: { ...TRANSLATIONS.ca.location },
+    footer: { ...TRANSLATIONS.ca.footer },
     estimate: { ...TRANSLATIONS.ca.estimate },
     i18n: getDefaultI18n(),
     services: getDefaultServices(),

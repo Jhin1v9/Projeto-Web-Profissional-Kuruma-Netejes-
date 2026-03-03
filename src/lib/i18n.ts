@@ -12,6 +12,15 @@ export type ServiceText = {
   highlights: string[];
 };
 
+export type NavbarText = {
+  home: string;
+  services: string;
+  process: string;
+  contact: string;
+  whatsappMessage: string;
+  mobileContact: string;
+};
+
 export type SlideText = {
   badge: string;
   title: string;
@@ -29,6 +38,27 @@ export type CtaText = {
   whatsappMessage: string;
 };
 
+export type ProcessText = {
+  title: string;
+  highlight: string;
+  subtitle: string;
+  stepLabel: string;
+  steps: Array<{ t: string; d: string }>;
+};
+
+export type LocationText = {
+  title: string;
+  intro: string;
+  address: string;
+  phone: string;
+  whatsappButton: string;
+  whatsappMessage: string;
+};
+
+export type FooterText = {
+  reserveMessage: string;
+};
+
 export type EstimateText = {
   title: string;
   highlight: string;
@@ -43,14 +73,7 @@ export type EstimateText = {
 };
 
 export type TranslationPack = {
-  navbar: {
-    home: string;
-    services: string;
-    process: string;
-    contact: string;
-    whatsappMessage: string;
-    mobileContact: string;
-  };
+  navbar: NavbarText;
   hero: {
     seeServices: string;
     slides: SlideText[];
@@ -63,21 +86,8 @@ export type TranslationPack = {
     fromLabel: string;
     items: Record<string, ServiceText>;
   };
-  process: {
-    title: string;
-    highlight: string;
-    subtitle: string;
-    stepLabel: string;
-    steps: Array<{ t: string; d: string }>;
-  };
-  location: {
-    title: string;
-    intro: string;
-    address: string;
-    phone: string;
-    whatsappButton: string;
-    whatsappMessage: string;
-  };
+  process: ProcessText;
+  location: LocationText;
   cta: {
     title: string;
     highlight: string;
@@ -86,9 +96,7 @@ export type TranslationPack = {
     whatsappMessage: string;
   };
   estimate: EstimateText;
-  footer: {
-    reserveMessage: string;
-  };
+  footer: FooterText;
 };
 
 export const TRANSLATIONS: Record<Language, TranslationPack> = {

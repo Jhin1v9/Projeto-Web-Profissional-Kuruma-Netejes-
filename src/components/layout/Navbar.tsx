@@ -8,18 +8,22 @@ import { BUSINESS } from "@/lib/constants";
 import { generateWhatsAppLink, scrollToSection } from "@/lib/utils";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useSiteConfig } from "@/components/sections/useSiteConfig";
+import { ThemeToggle } from "./ThemeToggle";
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { setHover } = useCursor();
   const { language, setLanguage, t } = useLanguage();
+  const cfg = useSiteConfig();
+  const navText = language === "ca" ? cfg.navbar : cfg.i18n?.[language]?.navbar ?? t.navbar;
 
   const nav = [
-    { label: t.navbar.home, id: "hero" },
-    { label: t.navbar.services, id: "services" },
-    { label: t.navbar.process, id: "process" },
-    { label: t.navbar.contact, id: "location" },
+    { label: navText.home, id: "hero" },
+    { label: navText.services, id: "services" },
+    { label: navText.process, id: "process" },
+    { label: navText.contact, id: "location" },
   ];
 
   useEffect(() => {
@@ -38,8 +42,9 @@ export function Navbar() {
       <motion.header
         className={[
           "fixed top-0 left-0 right-0 z-50 transition-all",
-          scrolled ? "bg-brand-dark/65 backdrop-blur-xl border-b border-white/10" : "bg-transparent",
+          scrolled ? "backdrop-blur-xl border-b border-white/10" : "bg-transparent",
         ].join(" ")}
+        style={scrolled ? { backgroundColor: "var(--app-header)" } : undefined}
         initial={{ y: -60 }}
         animate={{ y: 0 }}
       >
@@ -74,7 +79,8 @@ export function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
-            <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-black/25 px-2 py-1">
+            <ThemeToggle />
+            <div className="flex items-center gap-1 rounded-xl border border-white/10 px-2 py-1" style={{ backgroundColor: "var(--app-surface-soft)" }}>
               {LANGUAGES.map((lang) => (
                 <button
                   key={lang.code}
@@ -88,7 +94,7 @@ export function Navbar() {
               ))}
             </div>
             <a
-              href={generateWhatsAppLink(BUSINESS.whatsapp, t.navbar.whatsappMessage)}
+              href={generateWhatsAppLink(BUSINESS.whatsapp, navText.whatsappMessage)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 bg-brand-cyan text-brand-dark font-extrabold shadow-glow"
@@ -114,8 +120,9 @@ export function Navbar() {
       <AnimatePresence>
         {open && (
           <motion.div className="fixed inset-0 z-40 md:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="absolute inset-0 bg-brand-dark/92 backdrop-blur-xl" onClick={() => setOpen(false)} />
+            <div className="absolute inset-0 backdrop-blur-xl" style={{ backgroundColor: "var(--app-mobile-overlay)" }} onClick={() => setOpen(false)} />
             <motion.div className="absolute left-0 right-0 top-16 space-y-3 px-4 pb-6 pt-4 sm:top-20 sm:px-6" initial={{ y: -10 }} animate={{ y: 0 }}>
+              <ThemeToggle />
               <div className="flex items-center gap-2 pb-2">
                 {LANGUAGES.map((lang) => (
                   <button
@@ -135,13 +142,13 @@ export function Navbar() {
                 </button>
               ))}
               <a
-                href={generateWhatsAppLink(BUSINESS.whatsapp, t.navbar.whatsappMessage)}
+                href={generateWhatsAppLink(BUSINESS.whatsapp, navText.whatsappMessage)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-4 bg-brand-cyan text-brand-dark font-extrabold"
               >
                 <Phone className="w-5 h-5" />
-                {t.navbar.mobileContact}
+                {navText.mobileContact}
               </a>
             </motion.div>
           </motion.div>
