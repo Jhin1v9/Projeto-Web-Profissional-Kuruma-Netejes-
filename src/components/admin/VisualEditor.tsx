@@ -251,6 +251,27 @@ export function VisualEditor() {
     setCfg({ ...cfg, services });
   }
 
+  function duplicateService(index: number) {
+    if (!cfg) return;
+    const source = cfg.services[index];
+    if (!source) return;
+    const uniqueId = `service-${Date.now()}`;
+    const cloned: SiteConfig["services"][number] = {
+      ...source,
+      id: uniqueId,
+      name: "Novo servico",
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      priceFrom: 0,
+      popular: false,
+      estimateEnabled: true,
+      estimateLabel: "",
+      highlights: ["Lorem ipsum", "Dolor sit amet", "Consectetur adipiscing"],
+    };
+    const services = [...cfg.services];
+    services.splice(index + 1, 0, cloned);
+    setCfg({ ...cfg, services });
+  }
+
   function moveProcessStep(from: number, to: number) {
     if (!cfg || from === to) return;
     const source = language === "ca" ? cfg.process.steps : cfg.i18n?.[language]?.process?.steps ?? TRANSLATIONS[language].process.steps;
@@ -299,10 +320,6 @@ export function VisualEditor() {
     setHistoryIndex(historyIndex + 1);
     setCfg(history[historyIndex + 1]);
     setMsg("Redo aplicado.");
-  }
-
-  function visibleByType(type: SectionType): boolean {
-    return !!cfg && cfg.layout.sections.some((section) => section.type === type && section.enabled);
   }
 
   function sectionCount(type: SectionType): number {
@@ -427,12 +444,12 @@ export function VisualEditor() {
       </div>
 
       <main className="relative xl:pr-[360px]">
-        <section
-          className={`relative min-h-[92svh] overflow-hidden pt-24 ${!visibleByType("hero") ? "hidden" : ""} ${
-            selectedSectionType === "hero" ? "ring-2 ring-brand-cyan/60 ring-inset" : ""
-          }`}
-          onClick={() => syncSelectedType("hero")}
-        >
+        {Array.from({ length: sectionCount("hero") }).map((_, heroInstance) => (
+          <section
+            key={`hero-preview-${heroInstance}`}
+            className={`relative min-h-[92svh] overflow-hidden pt-24 ${selectedSectionType === "hero" ? "ring-2 ring-brand-cyan/60 ring-inset" : ""}`}
+            onClick={() => syncSelectedType("hero")}
+          >
           <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: `url(${cfg.heroBanner.slides[heroSlide].image})` }} />
           <div className="absolute right-6 top-24 z-10">
             <ImageTool
@@ -536,14 +553,15 @@ export function VisualEditor() {
               ))}
             </div>
           </div>
-        </section>
+          </section>
+        ))}
 
-        <section
-          className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 ${!visibleByType("services") ? "hidden" : ""} ${
-            selectedSectionType === "services" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
-          }`}
-          onClick={() => syncSelectedType("services")}
-        >
+        {Array.from({ length: sectionCount("services") }).map((_, servicesInstance) => (
+          <section
+            key={`services-preview-${servicesInstance}`}
+            className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 ${selectedSectionType === "services" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            onClick={() => syncSelectedType("services")}
+          >
           <EditableText
             value={`${isCa ? cfg.navbar.services : nav.services} ${t.services.highlight}`}
             onSave={() => {}}
@@ -571,6 +589,17 @@ export function VisualEditor() {
                     <span className="rounded-full border border-white/20 bg-brand-dark/70 p-1.5 text-brand-silver/80" title="Arraste para ordenar">
                       <GripVertical className="h-4 w-4" />
                     </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        duplicateService(index);
+                      }}
+                      className="rounded-full border border-white/20 bg-brand-dark/70 p-1.5 text-brand-silver/85 hover:border-brand-cyan/45 hover:text-brand-cyan"
+                      title="Duplicar card"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </button>
                     <ImageTool
                       label={`Imagem ${name}`}
                       value={service.imageUrl}
@@ -619,14 +648,15 @@ export function VisualEditor() {
               );
             })}
           </div>
-        </section>
+          </section>
+        ))}
 
-        <section
-          className={`mx-auto max-w-7xl px-4 py-12 sm:px-6 ${!visibleByType("estimate") ? "hidden" : ""} ${
-            selectedSectionType === "estimate" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
-          }`}
-          onClick={() => syncSelectedType("estimate")}
-        >
+        {Array.from({ length: sectionCount("estimate") }).map((_, estimateInstance) => (
+          <section
+            key={`estimate-preview-${estimateInstance}`}
+            className={`mx-auto max-w-7xl px-4 py-12 sm:px-6 ${selectedSectionType === "estimate" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            onClick={() => syncSelectedType("estimate")}
+          >
           <div className="rounded-3xl border border-white/10 bg-brand-dark2/60 p-6">
             <EditableText value={`${estimateText.title} ${estimateText.highlight}`} onSave={(next) => {
               const parts = next.split(" ");
@@ -665,14 +695,15 @@ export function VisualEditor() {
               {estimateText.total}: {eur(total)}
             </div>
           </div>
-        </section>
+          </section>
+        ))}
 
-        <section
-          className={`mx-auto max-w-7xl px-4 py-14 sm:px-6 ${!visibleByType("process") ? "hidden" : ""} ${
-            selectedSectionType === "process" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
-          }`}
-          onClick={() => syncSelectedType("process")}
-        >
+        {Array.from({ length: sectionCount("process") }).map((_, processInstance) => (
+          <section
+            key={`process-preview-${processInstance}`}
+            className={`mx-auto max-w-7xl px-4 py-14 sm:px-6 ${selectedSectionType === "process" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            onClick={() => syncSelectedType("process")}
+          >
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {processText.steps.map((step, index) => (
               <div
@@ -717,14 +748,15 @@ export function VisualEditor() {
               </div>
             ))}
           </div>
-        </section>
+          </section>
+        ))}
 
-        <section
-          className={`mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 ${!visibleByType("location") ? "hidden" : ""} ${
-            selectedSectionType === "location" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
-          }`}
-          onClick={() => syncSelectedType("location")}
-        >
+        {Array.from({ length: sectionCount("location") }).map((_, locationInstance) => (
+          <section
+            key={`location-preview-${locationInstance}`}
+            className={`mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 ${selectedSectionType === "location" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            onClick={() => syncSelectedType("location")}
+          >
           <div className="rounded-3xl border border-white/10 bg-brand-dark2/55 p-6 text-left">
             <EditableText
               value={locationText.title}
@@ -744,14 +776,15 @@ export function VisualEditor() {
               className="mt-3 text-brand-silver/85"
             />
           </div>
-        </section>
+          </section>
+        ))}
 
-        <section
-          className={`mx-auto max-w-4xl px-4 pb-20 text-center sm:px-6 ${!visibleByType("cta") ? "hidden" : ""} ${
-            selectedSectionType === "cta" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
-          }`}
-          onClick={() => syncSelectedType("cta")}
-        >
+        {Array.from({ length: sectionCount("cta") }).map((_, ctaInstance) => (
+          <section
+            key={`cta-preview-${ctaInstance}`}
+            className={`mx-auto max-w-4xl px-4 pb-20 text-center sm:px-6 ${selectedSectionType === "cta" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            onClick={() => syncSelectedType("cta")}
+          >
           <EditableText
             value={`${ctaText.title} ${ctaText.highlight}`}
             onSave={(next) => {
@@ -783,14 +816,15 @@ export function VisualEditor() {
           </div>
           <div className="mt-6 text-xs text-brand-silver/65">Modo construcao ativo: clique nos textos com lapis para editar.</div>
           <div className="mt-2 text-xs text-brand-silver/65">{locationText.title} - {locationText.phone}</div>
-        </section>
+          </section>
+        ))}
 
-        <section
-          className={`mx-auto max-w-7xl px-4 pb-16 ${!visibleByType("footer") ? "hidden" : ""} ${
-            selectedSectionType === "footer" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
-          }`}
-          onClick={() => syncSelectedType("footer")}
-        >
+        {Array.from({ length: sectionCount("footer") }).map((_, footerInstance) => (
+          <section
+            key={`footer-preview-${footerInstance}`}
+            className={`mx-auto max-w-7xl px-4 pb-16 ${selectedSectionType === "footer" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            onClick={() => syncSelectedType("footer")}
+          >
           <div className="rounded-2xl border border-white/10 bg-brand-dark/40 p-4 text-sm text-brand-silver/75">
             <EditableText
               value={footerText.reserveMessage}
@@ -801,7 +835,8 @@ export function VisualEditor() {
             />
             <div className="mt-2 text-xs">{BUSINESS.address.street}</div>
           </div>
-        </section>
+          </section>
+        ))}
       </main>
 
       <aside className="fixed right-4 top-24 z-30 hidden w-[330px] rounded-2xl border border-white/10 bg-brand-dark2/92 p-4 backdrop-blur xl:block">
