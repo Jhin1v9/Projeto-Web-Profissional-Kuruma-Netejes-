@@ -399,6 +399,31 @@ export function VisualEditor() {
           </div>
         </div>
         {msg && <div className="border-t border-white/10 px-4 py-2 text-xs text-brand-silver/80">{msg}</div>}
+        <div className="border-t border-white/10 px-4 py-2">
+          <div className="mx-auto flex max-w-[1700px] items-center gap-2 overflow-x-auto text-xs">
+            <span className="shrink-0 rounded-lg border border-white/10 px-2 py-1 font-bold text-brand-cyan">Fluxo publicado</span>
+            {cfg.layout.sections
+              .filter((section) => section.enabled)
+              .map((section, index) => (
+                <button
+                  key={`flow-${section.id}`}
+                  type="button"
+                  onClick={() => {
+                    setSelectedLayoutSectionId(section.id);
+                    setSelectedSectionType(section.type);
+                  }}
+                  className={`shrink-0 rounded-lg border px-2 py-1 font-semibold ${
+                    selectedLayoutSectionId === section.id
+                      ? "border-brand-cyan/45 bg-brand-cyan/12 text-brand-cyan"
+                      : "border-white/10 bg-black/20 text-brand-silver/80"
+                  }`}
+                  title={`${section.type} | mobile:${section.mobile ? "on" : "off"} desktop:${section.desktop ? "on" : "off"}`}
+                >
+                  {index + 1}. {section.type}
+                </button>
+              ))}
+          </div>
+        </div>
       </div>
 
       <main className="relative xl:pr-[360px]">
