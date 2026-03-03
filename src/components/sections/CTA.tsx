@@ -6,13 +6,21 @@ import { BUSINESS } from "@/lib/constants";
 import { generateWhatsAppLink } from "@/lib/utils";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { adaptiveThemeColor } from "@/lib/theme-colors";
 import { useSiteConfig } from "./useSiteConfig";
 
 export function CTA({ sectionId = "cta" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
   const cfg = useSiteConfig();
-  const colors = cfg.appearance.textColors;
+  const colors = {
+    ctaTitle: adaptiveThemeColor(cfg.appearance.textColors.ctaTitle, theme, "#0F172A"),
+    ctaHighlight: adaptiveThemeColor(cfg.appearance.textColors.ctaHighlight, theme, "#0EA5E9"),
+    ctaDescription: adaptiveThemeColor(cfg.appearance.textColors.ctaDescription, theme, "#334155"),
+    ctaButtonText: adaptiveThemeColor(cfg.appearance.textColors.ctaButtonText, theme, "#0B1220"),
+  };
   const displayCta = language === "ca" ? cfg.cta : cfg.i18n?.[language]?.cta ?? t.cta;
 
   return (

@@ -8,17 +8,26 @@ import { TRANSLATIONS } from "@/lib/i18n";
 import { eur, generateWhatsAppLink, scrollToSection } from "@/lib/utils";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { adaptiveThemeColor } from "@/lib/theme-colors";
 import { useSiteConfig } from "./useSiteConfig";
 
 export function Hero({ sectionId = "hero" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const cfg = useSiteConfig();
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const bannerSettings = cfg.heroBanner?.settings ?? HERO_BANNER_SETTINGS;
   const slides = cfg.heroBanner?.slides?.length ? cfg.heroBanner.slides : HERO_BANNER_SLIDES;
-  const colors = cfg.appearance.textColors;
+  const colors = {
+    heroBadge: adaptiveThemeColor(cfg.appearance.textColors.heroBadge, theme, "#0EA5E9"),
+    heroTitle: adaptiveThemeColor(cfg.appearance.textColors.heroTitle, theme, "#0F172A"),
+    heroHighlight: adaptiveThemeColor(cfg.appearance.textColors.heroHighlight, theme, "#0EA5E9"),
+    heroDescription: adaptiveThemeColor(cfg.appearance.textColors.heroDescription, theme, "#334155"),
+    heroButtonText: adaptiveThemeColor(cfg.appearance.textColors.heroButtonText, theme, "#0B1220"),
+  };
   const slidesCount = slides.length;
   const activeSlide = slides[activeSlideIndex];
   const translatedSlide = cfg.i18n?.[language]?.heroSlides?.[activeSlideIndex] ?? TRANSLATIONS[language].hero.slides[activeSlideIndex];

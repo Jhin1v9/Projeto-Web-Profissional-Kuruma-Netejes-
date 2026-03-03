@@ -7,13 +7,23 @@ import { useCursor } from "@/components/providers/CursorProvider";
 import { SERVICE_PRICING_BY_ID } from "@/lib/constants";
 import { eur } from "@/lib/utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
+import { useTheme } from "@/components/providers/ThemeProvider";
+import { adaptiveThemeColor } from "@/lib/theme-colors";
 import { useSiteConfig } from "./useSiteConfig";
 
 export function Services({ sectionId = "services" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
+  const { theme } = useTheme();
   const cfg = useSiteConfig();
-  const colors = cfg.appearance.textColors;
+  const colors = {
+    servicesTitle: adaptiveThemeColor(cfg.appearance.textColors.servicesTitle, theme, "#0F172A"),
+    servicesHighlight: adaptiveThemeColor(cfg.appearance.textColors.servicesHighlight, theme, "#0EA5E9"),
+    servicesCardTitle: adaptiveThemeColor(cfg.appearance.textColors.servicesCardTitle, theme, "#0F172A"),
+    servicesCardPrice: adaptiveThemeColor(cfg.appearance.textColors.servicesCardPrice, theme, "#0284C7"),
+    servicesCardDescription: adaptiveThemeColor(cfg.appearance.textColors.servicesCardDescription, theme, "#334155"),
+    servicesCardBullet: adaptiveThemeColor(cfg.appearance.textColors.servicesCardBullet, theme, "#334155"),
+  };
   const totalServices = cfg.services.length;
 
   const desktopCols = useMemo(() => {
