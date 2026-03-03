@@ -1334,6 +1334,44 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   />
                 </div>
                 <label className="block">
+                  <div className="text-xs text-brand-silver/70 mb-1">
+                    Texture Opacity Dark ({(cfg.appearance.textureOpacityDark ?? 0.36).toFixed(2)})
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={cfg.appearance.textureOpacityDark ?? 0.36}
+                    onChange={(e) =>
+                      setCfg({
+                        ...cfg,
+                        appearance: { ...cfg.appearance, textureOpacityDark: Number(e.target.value) },
+                      })
+                    }
+                    className="w-full"
+                  />
+                </label>
+                <label className="block">
+                  <div className="text-xs text-brand-silver/70 mb-1">
+                    Texture Opacity Light ({(cfg.appearance.textureOpacityLight ?? 0.22).toFixed(2)})
+                  </div>
+                  <input
+                    type="range"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={cfg.appearance.textureOpacityLight ?? 0.22}
+                    onChange={(e) =>
+                      setCfg({
+                        ...cfg,
+                        appearance: { ...cfg.appearance, textureOpacityLight: Number(e.target.value) },
+                      })
+                    }
+                    className="w-full"
+                  />
+                </label>
+                <label className="block">
                   <div className="text-xs text-brand-silver/70 mb-1">Cursor mode</div>
                   <select value={cfg.appearance.cursorMode} onChange={(e) => setCfg({ ...cfg, appearance: { ...cfg.appearance, cursorMode: e.target.value as SiteConfig["appearance"]["cursorMode"] } })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60">
                     <option value="realistic">realistic</option>

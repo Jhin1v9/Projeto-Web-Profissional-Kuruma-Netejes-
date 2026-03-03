@@ -14,7 +14,9 @@ export function AppearanceRuntime() {
     const darkTexture = cfg.appearance.textureUrl;
     const lightTexture = cfg.appearance.lightTextureUrl || darkTexture;
     const activeTexture = theme === "light" ? lightTexture : darkTexture;
-    const textureOpacity = cfg.appearance.showTexture ? (theme === "light" ? "0.22" : "0.36") : "0";
+    const textureOpacity = cfg.appearance.showTexture
+      ? String(theme === "light" ? cfg.appearance.textureOpacityLight ?? 0.22 : cfg.appearance.textureOpacityDark ?? 0.36)
+      : "0";
     const textureBrightness = theme === "light" ? "1.02" : String(cfg.appearance.brightness);
 
     root.style.setProperty("--overlay", String(cfg.appearance.overlay));

@@ -32,6 +32,8 @@ export type SiteConfig = {
     showTexture: boolean;
     textureUrl: string;
     lightTextureUrl?: string;
+    textureOpacityDark?: number;
+    textureOpacityLight?: number;
     cursorMode: CursorMode;
     textColors: {
       heroBadge: string;
