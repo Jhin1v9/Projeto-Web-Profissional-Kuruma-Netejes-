@@ -635,9 +635,6 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
           {cfg.services.map((service, index) => (
             <div
               key={service.id}
-              draggable
-              onDragStart={() => setDraggingServiceIndex(index)}
-              onDragEnd={() => setDraggingServiceIndex(null)}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 e.preventDefault();
@@ -651,7 +648,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <span className="cursor-move select-none text-brand-silver/60" title="Arraste para reordenar">⋮⋮</span>
+                  <button type="button" draggable onDragStart={() => setDraggingServiceIndex(index)} onDragEnd={() => setDraggingServiceIndex(null)} className="cursor-move select-none text-brand-silver/60 hover:text-brand-cyan" title="Arraste para reordenar">::</button>
                   <div className="font-extrabold text-white">{service.name}</div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -705,8 +702,20 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                         ? updateService(index, { description: e.target.value })
                         : updateLocalizedService(serviceTextLang, service.id, { description: e.target.value })
                     }
+                    onKeyDown={(e) => e.stopPropagation()}
                     className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
                   />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      serviceTextLang === "ca"
+                        ? updateService(index, { description: `${source.description}\n` })
+                        : updateLocalizedService(serviceTextLang, service.id, { description: `${source.description}\n` })
+                    }
+                    className="mt-2 rounded-lg border border-white/15 px-3 py-1 text-xs text-brand-silver/80 hover:border-brand-cyan/35 hover:text-brand-cyan"
+                  >
+                    + Adicionar linha
+                  </button>
                 </label>
                 <div className="sm:col-span-2">
                   <ImageUrlInput
@@ -737,8 +746,21 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                               .filter(Boolean),
                           })
                     }
+                    onKeyDown={(e) => e.stopPropagation()}
                     className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const lines = [...source.highlights, ""];
+                      serviceTextLang === "ca"
+                        ? updateService(index, { highlights: lines })
+                        : updateLocalizedService(serviceTextLang, service.id, { highlights: lines });
+                    }}
+                    className="mt-2 rounded-lg border border-white/15 px-3 py-1 text-xs text-brand-silver/80 hover:border-brand-cyan/35 hover:text-brand-cyan"
+                  >
+                    + Adicionar linha
+                  </button>
                 </label>
               </div>
                 );
@@ -833,3 +855,4 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     </div>
   );
 }
+

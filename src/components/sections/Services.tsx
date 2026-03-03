@@ -38,30 +38,32 @@ export function Services() {
             return (
               <motion.div
                 key={service.id}
-                className="relative group"
+                className="group relative h-full"
                 whileHover={{ y: -6 }}
                 onMouseEnter={() => setHover(true, service.popular ? "cta" : "hover")}
                 onMouseLeave={() => setHover(false)}
               >
                 <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-brand-cyan to-brand-blue opacity-0 group-hover:opacity-100 blur transition" />
-                <div className="relative rounded-3xl bg-brand-dark2/70 border border-white/10 overflow-hidden">
+                <div className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-brand-dark2/70">
                   <div className="h-40 bg-cover bg-center sm:h-44" style={{ backgroundImage: `url(${service.imageUrl})` }} />
-                  <div className="p-5 sm:p-7">
-                    {service.popular && (
+                  <div className="flex flex-1 flex-col p-5 sm:p-7">
+                    {service.popular ? (
                       <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-brand-cyan text-brand-dark text-xs font-black">
                         <Star className="w-3 h-3" fill="currentColor" /> {t.services.mostRequested}
                       </div>
+                    ) : (
+                      <div className="h-6" />
                     )}
-                    <h3 className="mt-3 text-xl font-extrabold sm:mt-4 sm:text-2xl" style={{ color: colors.servicesCardTitle }}>
+                    <h3 className="mt-3 min-h-[3.2rem] text-xl font-extrabold leading-tight sm:mt-4 sm:min-h-[3.8rem] sm:text-2xl" style={{ color: colors.servicesCardTitle }}>
                       {name}
                     </h3>
                     <div className="mt-2 text-base font-black sm:text-lg" style={{ color: colors.servicesCardPrice }}>
                       {t.services.fromLabel} {eur(SERVICE_PRICING_BY_ID[service.id] ?? service.priceFrom)}
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed sm:mt-4 sm:text-base" style={{ color: colors.servicesCardDescription }}>
+                    <p className="mt-3 min-h-[5.4rem] whitespace-pre-line text-sm leading-relaxed sm:mt-4 sm:min-h-[6.2rem] sm:text-base" style={{ color: colors.servicesCardDescription }}>
                       {description}
                     </p>
-                    <ul className="mt-4 space-y-2.5 sm:mt-6 sm:space-y-3">
+                    <ul className="mt-4 flex-1 space-y-2.5 sm:mt-6 sm:space-y-3">
                       {highlights.map((h, i) => (
                         <li key={i} className="flex items-start gap-3 text-sm" style={{ color: colors.servicesCardBullet }}>
                           <Check className="w-5 h-5 text-brand-cyan mt-0.5" />
