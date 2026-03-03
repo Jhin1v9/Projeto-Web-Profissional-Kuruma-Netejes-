@@ -43,14 +43,14 @@ export function Navbar() {
         initial={{ y: -60 }}
         animate={{ y: 0 }}
       >
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6">
           <button
             onClick={() => go("hero")}
             className="flex items-center gap-3"
             onMouseEnter={() => setHover(true, "cta")}
             onMouseLeave={() => setHover(false)}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue text-brand-dark font-black flex items-center justify-center shadow-glow">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue text-sm font-black text-brand-dark shadow-glow sm:h-10 sm:w-10">
               K
             </div>
             <div className="text-left leading-none hidden sm:block">
@@ -101,7 +101,7 @@ export function Navbar() {
           </div>
 
           <button
-            className="md:hidden p-2"
+            className="rounded-lg p-2 md:hidden"
             onClick={() => setOpen(!open)}
             onMouseEnter={() => setHover(true, "hover")}
             onMouseLeave={() => setHover(false)}
@@ -115,7 +115,7 @@ export function Navbar() {
         {open && (
           <motion.div className="fixed inset-0 z-40 md:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="absolute inset-0 bg-brand-dark/92 backdrop-blur-xl" onClick={() => setOpen(false)} />
-            <motion.div className="absolute top-20 left-0 right-0 p-6 space-y-3" initial={{ y: -10 }} animate={{ y: 0 }}>
+            <motion.div className="absolute left-0 right-0 top-16 space-y-3 px-4 pb-6 pt-4 sm:top-20 sm:px-6" initial={{ y: -10 }} animate={{ y: 0 }}>
               <div className="flex items-center gap-2 pb-2">
                 {LANGUAGES.map((lang) => (
                   <button
@@ -130,7 +130,7 @@ export function Navbar() {
                 ))}
               </div>
               {nav.map((n) => (
-                <button key={n.id} onClick={() => go(n.id)} className="w-full text-left text-xl font-black py-3 border-b border-white/10">
+                <button key={n.id} onClick={() => go(n.id)} className="w-full border-b border-white/10 py-3 text-left text-lg font-black sm:text-xl">
                   {n.label}
                 </button>
               ))}

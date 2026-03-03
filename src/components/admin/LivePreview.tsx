@@ -14,7 +14,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
         <div className="font-extrabold">Live preview</div>
         <div className="text-xs text-brand-silver/70">Hero + cards</div>
       </div>
-      <div className="relative p-6 bg-brand-dark">
+      <div className="relative bg-brand-dark p-3 sm:p-6">
         <div
           className="absolute inset-0"
           style={{
@@ -30,16 +30,16 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
         <div className="relative">
           <div className="rounded-3xl overflow-hidden border border-white/10">
             <div
-              className="h-56"
+              className="h-40 sm:h-56"
               style={{
                 backgroundImage: `url(${previewSlide.image})`,
                 backgroundSize: previewSlide.imageSize,
                 backgroundPosition: previewSlide.imagePosition,
               }}
             />
-            <div className="p-5 bg-black/30">
+            <div className="bg-black/30 p-4 sm:p-5">
               <div className="text-xs font-bold" style={{ color: colors.heroBadge }}>{previewSlide.badge}</div>
-              <div className="text-2xl font-black mt-2">
+              <div className="mt-2 text-lg font-black sm:text-2xl">
                 <span style={{ color: colors.heroTitle }}>{previewSlide.title}</span>{" "}
                 <span style={{ color: colors.heroHighlight }}>{previewSlide.highlight}</span>
               </div>
@@ -55,7 +55,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
             </div>
           </div>
 
-          <div className="grid sm:grid-cols-3 gap-4 mt-5">
+          <div className="mt-5 grid gap-3 sm:grid-cols-3 sm:gap-4">
             {cfg.services.map((s) => (
               <div key={s.id} className="rounded-2xl border border-white/10 bg-black/25 overflow-hidden">
                 <div className="h-24 bg-cover bg-center" style={{ backgroundImage: `url(${s.imageUrl})` }} />

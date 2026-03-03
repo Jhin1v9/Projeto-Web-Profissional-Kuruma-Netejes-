@@ -10,7 +10,11 @@ html { scroll-behavior: smooth; }
   --texture: url("/images/texture.webp");
 }
 
-body { background: #0A0A0F; }
+body {
+  background: #0A0A0F;
+  min-height: 100svh;
+  overflow-x: hidden;
+}
 
 .admin-cursor-default,
 .admin-cursor-default * {

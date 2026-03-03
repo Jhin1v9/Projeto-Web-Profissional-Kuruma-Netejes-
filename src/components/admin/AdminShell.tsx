@@ -8,7 +8,7 @@ const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/services", label: "Serveis", icon: ListChecks },
-  { href: "/admin/appearance", label: "Aparença", icon: ImageIcon },
+  { href: "/admin/appearance", label: "Aparenca", icon: ImageIcon },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -22,20 +22,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto w-[98vw] max-w-[1800px] px-3 py-6 lg:px-6">
-        <div className="grid lg:grid-cols-[300px_1fr] gap-6 lg:gap-8">
-          <aside className="rounded-3xl bg-brand-dark2/70 border border-white/10 backdrop-blur-xl p-5 h-fit sticky top-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue flex items-center justify-center text-brand-dark font-black">
+      <div className="mx-auto w-[98vw] max-w-[1800px] px-2 py-4 sm:px-3 sm:py-6 lg:px-6">
+        <div className="grid gap-4 xl:grid-cols-[290px_1fr] xl:gap-8">
+          <aside className="h-fit rounded-3xl border border-white/10 bg-brand-dark2/70 p-4 backdrop-blur-xl sm:p-5 xl:sticky xl:top-6">
+            <div className="mb-5 flex items-center gap-3 sm:mb-6">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue font-black text-brand-dark">
                 K
               </div>
               <div>
-                <div className="font-black text-white leading-none">Kuruma Admin</div>
+                <div className="leading-none font-black text-white">Kuruma Admin</div>
                 <div className="text-xs text-brand-silver/70">Editor del web</div>
               </div>
             </div>
 
-            <nav className="space-y-1">
+            <nav className="flex gap-2 overflow-x-auto pb-1 xl:block xl:space-y-1 xl:overflow-visible xl:pb-0">
               {links.map((l) => {
                 const active = l.href === "/admin" ? pathname === "/admin" : pathname === l.href || pathname.startsWith(`${l.href}/`);
                 const Icon = l.icon;
@@ -44,13 +44,13 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     key={l.href}
                     href={l.href}
                     className={[
-                      "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold transition",
+                      "flex min-w-max items-center gap-2 rounded-2xl border px-3 py-2.5 text-sm font-semibold transition xl:gap-3 xl:px-4 xl:py-3",
                       active
-                        ? "bg-brand-cyan/12 text-brand-cyan border border-brand-cyan/30 shadow-glow"
-                        : "text-brand-silver/85 hover:text-white hover:bg-white/5 border border-transparent",
+                        ? "border-brand-cyan/30 bg-brand-cyan/12 text-brand-cyan shadow-glow"
+                        : "border-transparent text-brand-silver/85 hover:bg-white/5 hover:text-white",
                     ].join(" ")}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                     {l.label}
                   </Link>
                 );
@@ -59,18 +59,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
             <button
               onClick={logout}
-              className="mt-8 w-full flex items-center justify-center gap-2 rounded-2xl px-4 py-3 border border-white/10 text-brand-silver/85 hover:text-white hover:border-brand-cyan/30 hover:bg-white/5"
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-brand-silver/85 hover:border-brand-cyan/30 hover:bg-white/5 hover:text-white sm:mt-8"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="h-4 w-4" />
               Sortir
             </button>
 
-            <div className="mt-6 text-xs text-brand-silver/60">
+            <div className="mt-4 text-xs text-brand-silver/60 sm:mt-6">
               Tip: clica <b>Publicar</b> quan estiguis llest.
             </div>
           </aside>
 
-          <section className="rounded-3xl bg-brand-dark2/55 border border-white/10 backdrop-blur-xl p-5 lg:p-8">
+          <section className="rounded-3xl border border-white/10 bg-brand-dark2/55 p-4 backdrop-blur-xl sm:p-5 lg:p-8">
             {children}
           </section>
         </div>

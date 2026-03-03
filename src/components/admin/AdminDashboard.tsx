@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Save, Rocket, RefreshCw } from "lucide-react";
+import { Save, Rocket, RefreshCw, ImagePlus, Loader2 } from "lucide-react";
 import type { SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import type { PriceValue } from "@/lib/constants";
@@ -48,6 +48,71 @@ function ColorInput({
         />
       </div>
     </div>
+  );
+}
+
+function ImageUrlInput({
+  label,
+  value,
+  folder,
+  onChange,
+  onError,
+}: {
+  label: string;
+  value: string;
+  folder: string;
+  onChange: (next: string) => void;
+  onError: (message: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  async function onFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const form = new FormData();
+    form.set("file", file);
+    form.set("folder", folder);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) {
+        onError(payload?.error ?? "Erro ao enviar imagem.");
+        return;
+      }
+      if (payload?.url) onChange(payload.url as string);
+    } catch {
+      onError("Falha de rede no upload.");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <label className="block">
+      <div className="mb-1 text-xs text-brand-silver/70">{label}</div>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+        />
+        <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-brand-cyan/35 bg-brand-cyan/10 px-3 py-2.5 text-sm font-semibold text-brand-cyan hover:bg-brand-cyan/15 sm:min-w-[160px]">
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+          {uploading ? "A enviar..." : "Subir imagem"}
+          <input type="file" accept="image/*" className="hidden" onChange={onFileSelect} disabled={uploading} />
+        </label>
+      </div>
+      {value && (
+        <div className="mt-2 overflow-hidden rounded-lg border border-white/10 bg-black/20 p-1">
+          {/* Preview helps validate mobile-first layouts quickly in admin */}
+          <img src={value} alt="Preview" className="h-24 w-full rounded-md object-cover" />
+        </div>
+      )}
+    </label>
   );
 }
 
@@ -409,10 +474,15 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                 <div key={`banner-${index}`} className="rounded-3xl border border-white/10 bg-black/20 p-6">
                   <div className="font-extrabold text-white mb-4">{`Banner ${index + 1}`}</div>
                   <div className="grid sm:grid-cols-2 gap-4">
-                    <label className="block sm:col-span-2">
-                      <div className="text-xs text-brand-silver/70 mb-1">Imagem (URL)</div>
-                      <input value={slide.image} onChange={(e) => updateSlide(index, { image: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
-                    </label>
+                    <div className="sm:col-span-2">
+                      <ImageUrlInput
+                        label="Imagem (URL)"
+                        value={slide.image}
+                        folder={`hero/slide-${index + 1}`}
+                        onChange={(next) => updateSlide(index, { image: next })}
+                        onError={setMsg}
+                      />
+                    </div>
                     <label className="block">
                       <div className="text-xs text-brand-silver/70 mb-1">Badge</div>
                       <input
@@ -593,10 +663,15 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   <div className="text-xs text-brand-silver/70 mb-1">Descricao</div>
                   <textarea rows={3} value={service.description} onChange={(e) => updateService(index, { description: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
                 </label>
-                <label className="block sm:col-span-2">
-                  <div className="text-xs text-brand-silver/70 mb-1">Imagem (URL)</div>
-                  <input value={service.imageUrl} onChange={(e) => updateService(index, { imageUrl: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
-                </label>
+                <div className="sm:col-span-2">
+                  <ImageUrlInput
+                    label="Imagem (URL)"
+                    value={service.imageUrl}
+                    folder={`services/${service.id}`}
+                    onChange={(next) => updateService(index, { imageUrl: next })}
+                    onError={setMsg}
+                  />
+                </div>
                 <label className="block sm:col-span-2">
                   <div className="text-xs text-brand-silver/70 mb-1">Highlights (uma linha por item)</div>
                   <textarea
@@ -633,10 +708,15 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   <div className="text-xs text-brand-silver/70 mb-1">Overlay ({cfg.appearance.overlay.toFixed(2)})</div>
                   <input type="range" min={0} max={1} step={0.01} value={cfg.appearance.overlay} onChange={(e) => setCfg({ ...cfg, appearance: { ...cfg.appearance, overlay: Number(e.target.value) } })} className="w-full" />
                 </label>
-                <label className="block sm:col-span-2">
-                  <div className="text-xs text-brand-silver/70 mb-1">Texture URL</div>
-                  <input value={cfg.appearance.textureUrl} onChange={(e) => setCfg({ ...cfg, appearance: { ...cfg.appearance, textureUrl: e.target.value } })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
-                </label>
+                <div className="sm:col-span-2">
+                  <ImageUrlInput
+                    label="Texture URL"
+                    value={cfg.appearance.textureUrl}
+                    folder="appearance/texture"
+                    onChange={(next) => setCfg({ ...cfg, appearance: { ...cfg.appearance, textureUrl: next } })}
+                    onError={setMsg}
+                  />
+                </div>
                 <label className="block">
                   <div className="text-xs text-brand-silver/70 mb-1">Cursor mode</div>
                   <select value={cfg.appearance.cursorMode} onChange={(e) => setCfg({ ...cfg, appearance: { ...cfg.appearance, cursorMode: e.target.value as SiteConfig["appearance"]["cursorMode"] } })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60">

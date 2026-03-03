@@ -11,16 +11,16 @@ export function Footer() {
   const { t } = useLanguage();
   return (
     <footer className="border-t border-white/10 bg-brand-dark/40 backdrop-blur">
-      <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center md:gap-6 md:py-10">
         <div>
-          <div className="font-black text-lg">Kuruma Netejes</div>
-          <div className="text-sm text-brand-silver/75 mt-1">{BUSINESS.address.street}</div>
+          <div className="text-lg font-black">Kuruma Netejes</div>
+          <div className="mt-1 text-sm text-brand-silver/75">{BUSINESS.address.street}</div>
         </div>
         <a
           href={generateWhatsAppLink(BUSINESS.whatsapp, t.footer.reserveMessage)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 bg-white/5 border border-white/10 hover:border-brand-cyan/30 hover:text-brand-cyan"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 hover:border-brand-cyan/30 hover:text-brand-cyan md:w-auto"
           onMouseEnter={() => setHover(true,"cta")} onMouseLeave={() => setHover(false)}
         >
           <Phone className="w-4 h-4" /> {BUSINESS.phone}

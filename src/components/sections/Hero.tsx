@@ -4,25 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { BUSINESS, HERO_BANNER_SETTINGS, HERO_BANNER_SLIDES } from "@/lib/constants";
-import { generateWhatsAppLink, scrollToSection } from "@/lib/utils";
+import { TRANSLATIONS } from "@/lib/i18n";
+import { eur, generateWhatsAppLink, scrollToSection } from "@/lib/utils";
 import { useCursor } from "@/components/providers/CursorProvider";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
-
-const HERO_LOREM_TEXT = {
-  badge: "Lorem ipsum dolor",
-  title: "Lorem ipsum dolor sit amet",
-  highlight: "consectetur adipiscing",
-  description:
-    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-  buttonText: "Lorem ipsum",
-  whatsappMessage: "Lorem ipsum dolor sit amet",
-  seeServices: "Lorem ipsum services",
-  address: "Lorem ipsum street, 123",
-};
 
 export function Hero() {
   const { setHover } = useCursor();
   const cfg = useSiteConfig();
+  const { language, t } = useLanguage();
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
 
   const bannerSettings = cfg.heroBanner?.settings ?? HERO_BANNER_SETTINGS;
@@ -30,7 +21,18 @@ export function Hero() {
   const colors = cfg.appearance.textColors;
   const slidesCount = slides.length;
   const activeSlide = slides[activeSlideIndex];
-  const slideText = HERO_LOREM_TEXT;
+  const translatedSlide = cfg.i18n?.[language]?.heroSlides?.[activeSlideIndex] ?? TRANSLATIONS[language].hero.slides[activeSlideIndex];
+  const slideText =
+    language === "ca" || !translatedSlide
+      ? {
+          badge: activeSlide.badge,
+          title: activeSlide.title,
+          highlight: activeSlide.highlight,
+          description: activeSlide.description,
+          buttonText: activeSlide.buttonText,
+          whatsappMessage: activeSlide.whatsappMessage,
+        }
+      : translatedSlide;
 
   useEffect(() => {
     if (!slidesCount) return;
@@ -53,7 +55,7 @@ export function Hero() {
   const bottomFadeStart = `${bannerSettings.bottomFadeStartPercent}%`;
 
   return (
-    <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-16 sm:pt-20">
       <div
         className="absolute inset-0"
         style={{
@@ -83,23 +85,23 @@ export function Hero() {
       <div className="absolute inset-0" style={{ background: overlayGradient }} />
 
       <motion.div
-        className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-brand-cyan/18 blur-[120px]"
+        className="absolute -left-16 -top-16 h-64 w-64 rounded-full bg-brand-cyan/18 blur-[110px] sm:h-80 sm:w-80"
         animate={{ scale: [1, 1.2, 1], opacity: [0.35, 0.55, 0.35] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
       />
       <motion.div
-        className="absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-brand-blue/18 blur-[140px]"
+        className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-brand-blue/18 blur-[130px] sm:h-96 sm:w-96"
         animate={{ scale: [1.15, 1, 1.15], opacity: [0.35, 0.55, 0.35] }}
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />
 
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-24">
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 text-center sm:px-6 sm:pb-14 md:pb-20">
         <motion.div
           key={`${activeSlideIndex}-badge`}
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-cyan/10 border border-brand-cyan/30 text-brand-cyan text-sm shadow-glow"
+          className="inline-flex max-w-full items-center gap-2 rounded-full border border-brand-cyan/30 bg-brand-cyan/10 px-3 py-1.5 text-xs text-brand-cyan shadow-glow sm:px-4 sm:py-2 sm:text-sm"
           style={{ color: colors.heroBadge }}
           onMouseEnter={() => setHover(true, "cta")}
           onMouseLeave={() => setHover(false)}
@@ -110,18 +112,19 @@ export function Hero() {
 
         <motion.h1
           key={`${activeSlideIndex}-title`}
-          className="mt-7 text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight"
+          className="mt-6 text-[clamp(2rem,9vw,4.6rem)] font-black leading-[0.98] tracking-tight"
           initial={{ opacity: 0, y: 26 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.75 }}
           style={{ textShadow: "0 0 35px rgba(0,240,255,0.18)", color: colors.heroTitle }}
         >
           {slideText.title} <span style={{ color: colors.heroHighlight }}>{slideText.highlight}</span>
+          {activeSlide.price !== undefined ? ` ${eur(activeSlide.price)}` : ""}
         </motion.h1>
 
         <motion.p
           key={`${activeSlideIndex}-desc`}
-          className="mt-6 text-lg sm:text-xl max-w-2xl mx-auto"
+          className="mx-auto mt-5 max-w-3xl text-base leading-relaxed sm:mt-6 sm:text-lg lg:text-xl"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -131,7 +134,7 @@ export function Hero() {
         </motion.p>
 
         <motion.div
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+          className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:items-center sm:gap-4"
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
@@ -140,7 +143,7 @@ export function Hero() {
             href={generateWhatsAppLink(BUSINESS.whatsapp, slideText.whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-brand-cyan text-brand-dark font-black text-lg shadow-glowStrong"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-cyan px-6 py-3.5 text-base font-black text-brand-dark shadow-glowStrong sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
             style={{ color: colors.heroButtonText }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
@@ -152,13 +155,13 @@ export function Hero() {
 
           <motion.button
             onClick={() => scrollToSection("services")}
-            className="px-8 py-4 rounded-2xl border border-white/20 text-white font-semibold hover:border-brand-cyan/60 hover:text-brand-cyan bg-black/10"
+            className="w-full rounded-2xl border border-white/20 bg-black/10 px-6 py-3.5 text-base font-semibold text-white hover:border-brand-cyan/60 hover:text-brand-cyan sm:w-auto sm:px-8 sm:py-4"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
             onMouseEnter={() => setHover(true, "hover")}
             onMouseLeave={() => setHover(false)}
           >
-            {slideText.seeServices}
+            {t.hero.seeServices}
           </motion.button>
         </motion.div>
 
@@ -171,12 +174,12 @@ export function Hero() {
               className={`h-2.5 rounded-full transition-all ${
                 index === activeSlideIndex ? "w-8 bg-brand-cyan" : "w-2.5 bg-white/50 hover:bg-white/80"
               }`}
-              aria-label={`Lorem ipsum slide ${index + 1}`}
+              aria-label={`Ir para slide ${index + 1}`}
             />
           ))}
         </div>
 
-        <div className="mt-10 text-sm text-brand-silver/70">{slideText.address}</div>
+        <div className="mt-7 text-xs text-brand-silver/75 sm:mt-10 sm:text-sm">{BUSINESS.address.street}</div>
       </div>
     </section>
   );

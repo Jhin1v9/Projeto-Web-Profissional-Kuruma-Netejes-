@@ -17,20 +17,20 @@ export function CTA() {
   const displayCta = ctaText ?? t.cta;
 
   return (
-    <section className="relative py-24">
-      <div className="max-w-4xl mx-auto px-6 text-center">
+    <section className="relative py-16 sm:py-20 lg:py-24">
+      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
         <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-          <h2 className="text-4xl sm:text-6xl font-black" style={{ color: colors.ctaTitle }}>
+          <h2 className="text-3xl font-black sm:text-5xl lg:text-6xl" style={{ color: colors.ctaTitle }}>
             {displayCta.title} <span style={{ color: colors.ctaHighlight }}>{displayCta.highlight}</span>
           </h2>
-          <p className="mt-5 text-lg" style={{ color: colors.ctaDescription }}>
+          <p className="mx-auto mt-4 max-w-2xl text-base sm:mt-5 sm:text-lg" style={{ color: colors.ctaDescription }}>
             {displayCta.description}
           </p>
           <a
             href={generateWhatsAppLink(BUSINESS.whatsapp, displayCta.whatsappMessage)}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-10 inline-flex items-center gap-2 rounded-2xl px-10 py-5 bg-brand-cyan text-brand-dark font-black text-xl shadow-glowStrong"
+            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-cyan px-7 py-3.5 text-base font-black text-brand-dark shadow-glowStrong sm:mt-10 sm:w-auto sm:px-10 sm:py-5 sm:text-xl"
             style={{ color: colors.ctaButtonText }}
             onMouseEnter={() => setHover(true, "cta")}
             onMouseLeave={() => setHover(false)}
