@@ -168,6 +168,7 @@ export const SiteConfigSchema = z.object({
     .optional(),
   navbar: LocalizedNavbarSchema.optional(),
   process: LocalizedProcessSchema.optional(),
+  businessStatusMode: z.enum(["auto", "manual"]).optional(),
   businessStatus: z.enum(["open", "closing", "closed"]).optional(),
   location: LocalizedLocationSchema.optional(),
   cta: LocalizedCtaSchema.optional(),
@@ -329,6 +330,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     ...TRANSLATIONS.ca.process,
     steps: TRANSLATIONS.ca.process.steps.map((step) => ({ ...step })),
   };
+  const businessStatusMode = input.businessStatusMode ?? "auto";
   const businessStatus = input.businessStatus ?? "open";
   const location = input.location ?? { ...TRANSLATIONS.ca.location };
   const cta = input.cta ?? { ...TRANSLATIONS.ca.cta };
@@ -388,6 +390,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     heroBanner,
     navbar,
     process,
+    businessStatusMode,
     businessStatus,
     location,
     cta,
@@ -424,6 +427,7 @@ export function getDefaultConfig(): SiteConfig {
       ...TRANSLATIONS.ca.process,
       steps: TRANSLATIONS.ca.process.steps.map((step) => ({ ...step })),
     },
+    businessStatusMode: "auto",
     businessStatus: "open",
     location: { ...TRANSLATIONS.ca.location },
     cta: { ...TRANSLATIONS.ca.cta },

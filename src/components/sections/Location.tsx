@@ -6,6 +6,7 @@ import { BUSINESS } from "@/lib/constants";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { generateWhatsAppLink } from "@/lib/utils";
+import { resolveBusinessStatus } from "@/lib/business-status";
 import { useSiteConfig } from "./useSiteConfig";
 
 export function Location({ sectionId = "location" }: { sectionId?: string }) {
@@ -23,7 +24,11 @@ export function Location({ sectionId = "location" }: { sectionId?: string }) {
     closing: "bg-orange-400 shadow-[0_0_14px_rgba(251,146,60,0.85)]",
     closed: "bg-red-500 shadow-[0_0_14px_rgba(239,68,68,0.8)]",
   } as const;
-  const status = cfg.businessStatus ?? "open";
+  const status = resolveBusinessStatus({
+    mode: cfg.businessStatusMode,
+    manualStatus: cfg.businessStatus,
+    timeZone: "Europe/Madrid",
+  });
   const maps = "https://www.google.com/maps?q=Carrer%20d%27Alfons%20Sala%2C%2057%2C%2008202%20Sabadell&output=embed";
 
   return (

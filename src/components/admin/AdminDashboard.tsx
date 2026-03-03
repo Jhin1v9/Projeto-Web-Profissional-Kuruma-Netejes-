@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Save, Rocket, RefreshCw, ImagePlus, Loader2 } from "lucide-react";
+import { Save, Rocket, RefreshCw, ImagePlus, Loader2, Clock3 } from "lucide-react";
 import type { SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import type { PriceValue } from "@/lib/constants";
+import { getAutoBusinessStatus, resolveBusinessStatus } from "@/lib/business-status";
 import {
   LANGUAGES,
   TRANSLATIONS,
@@ -157,6 +158,15 @@ function createPlaceholderService(index: number): SiteConfig["services"][number]
   };
 }
 
+function statusButtonClass(active: boolean, tone: "green" | "orange" | "red") {
+  const tones = {
+    green: active ? "bg-emerald-500/25 border-emerald-400/70 text-emerald-200" : "bg-emerald-500/10 border-emerald-500/25 text-emerald-300/80",
+    orange: active ? "bg-orange-500/25 border-orange-400/70 text-orange-200" : "bg-orange-500/10 border-orange-500/25 text-orange-300/80",
+    red: active ? "bg-red-500/25 border-red-400/70 text-red-200" : "bg-red-500/10 border-red-500/25 text-red-300/80",
+  } as const;
+  return `rounded-xl border px-3 py-2 text-xs font-bold transition ${tones[tone]}`;
+}
+
 export function AdminDashboard({ section = "dashboard" }: Props) {
   const [cfg, setCfg] = useState<SiteConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -210,6 +220,30 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
   }, []);
 
   const can = useMemo(() => !!cfg, [cfg]);
+  const autoStatus = getAutoBusinessStatus(new Date(), "Europe/Madrid");
+  const effectiveStatus = cfg
+    ? resolveBusinessStatus({
+        mode: cfg.businessStatusMode,
+        manualStatus: cfg.businessStatus,
+        timeZone: "Europe/Madrid",
+      })
+    : "closed";
+  const statusMeta = {
+    open: { label: "Aberto", dot: "bg-emerald-500" },
+    closing: { label: "Fechando", dot: "bg-orange-400" },
+    closed: { label: "Fechado", dot: "bg-red-500" },
+  } as const;
+
+  function setSectionTypeEnabled(type: SiteConfig["layout"]["sections"][number]["type"], enabled: boolean) {
+    if (!cfg) return;
+    setCfg({
+      ...cfg,
+      layout: {
+        ...cfg.layout,
+        sections: cfg.layout.sections.map((section) => (section.type === type ? { ...section, enabled } : section)),
+      },
+    });
+  }
 
   async function save() {
     if (!cfg) return;
@@ -527,7 +561,71 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
 
       {section === "dashboard" && (
         <div className="mt-8 space-y-6">
-          <div className="grid md:grid-cols-3 gap-4">
+          <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-xs text-brand-silver/70">Status da loja (topo rapido)</div>
+                <div className="mt-1 inline-flex items-center gap-2 text-sm font-semibold">
+                  <span className={`h-2.5 w-2.5 rounded-full ${statusMeta[effectiveStatus].dot}`} />
+                  {statusMeta[effectiveStatus].label}
+                  <span className="text-brand-silver/70">
+                    ({cfg.businessStatusMode === "manual" ? "manual" : "automatico"})
+                  </span>
+                </div>
+              </div>
+              <div className="inline-flex rounded-xl border border-white/10 bg-black/20 p-1">
+                <button
+                  type="button"
+                  onClick={() => setCfg({ ...cfg, businessStatusMode: "auto" })}
+                  className={`rounded-lg px-3 py-2 text-xs font-bold ${cfg.businessStatusMode !== "manual" ? "bg-brand-cyan/20 text-brand-cyan" : "text-brand-silver/75"}`}
+                >
+                  Auto
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCfg({ ...cfg, businessStatusMode: "manual" })}
+                  className={`rounded-lg px-3 py-2 text-xs font-bold ${cfg.businessStatusMode === "manual" ? "bg-brand-cyan/20 text-brand-cyan" : "text-brand-silver/75"}`}
+                >
+                  Manual
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setCfg({ ...cfg, businessStatusMode: "manual", businessStatus: "open" })}
+                className={statusButtonClass(cfg.businessStatusMode === "manual" && cfg.businessStatus === "open", "green")}
+              >
+                Verde - Aberto
+              </button>
+              <button
+                type="button"
+                onClick={() => setCfg({ ...cfg, businessStatusMode: "manual", businessStatus: "closing" })}
+                className={statusButtonClass(cfg.businessStatusMode === "manual" && cfg.businessStatus === "closing", "orange")}
+              >
+                Amarelo - Fechando
+              </button>
+              <button
+                type="button"
+                onClick={() => setCfg({ ...cfg, businessStatusMode: "manual", businessStatus: "closed" })}
+                className={statusButtonClass(cfg.businessStatusMode === "manual" && cfg.businessStatus === "closed", "red")}
+              >
+                Vermelho - Fechado
+              </button>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-black/20 p-3 text-xs text-brand-silver/80">
+              <div className="inline-flex items-center gap-2 font-semibold text-brand-silver/90">
+                <Clock3 className="h-3.5 w-3.5 text-brand-cyan" />
+                Regra automatica (Europe/Madrid)
+              </div>
+              <div className="mt-1">08:00 = verde, 17:30 = amarelo, 18:00 = vermelho.</div>
+              <div className="mt-1">Status automatico agora: <span className="font-bold text-white">{statusMeta[autoStatus].label}</span></div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-4">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
               <div className="text-xs text-brand-silver/70">Slides Hero</div>
               <div className="text-3xl font-black mt-1">{cfg.heroBanner.slides.length}</div>
@@ -537,10 +635,34 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
               <div className="text-3xl font-black mt-1">{cfg.services.length}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="text-xs text-brand-silver/70">Servicos no orcamento</div>
+              <div className="text-3xl font-black mt-1">{cfg.services.filter((service) => service.estimateEnabled !== false).length}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
               <div className="text-xs text-brand-silver/70">Intervalo do carrossel</div>
               <div className="text-3xl font-black mt-1">{cfg.heroBanner.settings.autoSlideIntervalMs}ms</div>
             </div>
           </div>
+
+          <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
+            <div className="text-sm font-bold text-white">Ligar/Desligar secoes (rapido)</div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from(new Set(cfg.layout.sections.map((section) => section.type))).map((type) => {
+                const enabled = cfg.layout.sections.some((section) => section.type === type && section.enabled);
+                return (
+                  <label key={`quick-toggle-${type}`} className="inline-flex items-center justify-between rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs">
+                    <span className="font-semibold capitalize">{type}</span>
+                    <input
+                      type="checkbox"
+                      checked={enabled}
+                      onChange={(e) => setSectionTypeEnabled(type, e.target.checked)}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
           <LivePreview cfg={cfg} />
         </div>
       )}
@@ -1383,7 +1505,23 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   </div>
                 </label>
                 <label className="block sm:col-span-2">
-                  <div className="text-xs text-brand-silver/70 mb-1">Status da loja (manual)</div>
+                  <div className="text-xs text-brand-silver/70 mb-1">Modo do status da loja</div>
+                  <select
+                    value={cfg.businessStatusMode ?? "auto"}
+                    onChange={(e) =>
+                      setCfg({
+                        ...cfg,
+                        businessStatusMode: e.target.value as NonNullable<SiteConfig["businessStatusMode"]>,
+                      })
+                    }
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  >
+                    <option value="auto">Automatico (08:00/17:30/18:00)</option>
+                    <option value="manual">Manual</option>
+                  </select>
+                </label>
+                <label className="block sm:col-span-2">
+                  <div className="text-xs text-brand-silver/70 mb-1">Status manual (quando modo = manual)</div>
                   <select
                     value={cfg.businessStatus}
                     onChange={(e) =>

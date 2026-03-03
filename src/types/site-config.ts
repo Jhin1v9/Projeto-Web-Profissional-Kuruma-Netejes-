@@ -13,6 +13,7 @@ import type {
 
 export type CursorMode = "realistic" | "neon" | "off";
 export type BusinessStatus = "open" | "closing" | "closed";
+export type BusinessStatusMode = "auto" | "manual";
 export type SectionType = "hero" | "services" | "estimate" | "process" | "location" | "cta" | "footer";
 
 export type HeroBannerSettings = {
@@ -75,6 +76,7 @@ export type SiteConfig = {
   };
   navbar: NavbarText;
   process: ProcessText;
+  businessStatusMode?: BusinessStatusMode;
   businessStatus: BusinessStatus;
   location: LocationText;
   cta: CtaText;
