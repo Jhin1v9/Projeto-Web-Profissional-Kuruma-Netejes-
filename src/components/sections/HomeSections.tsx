@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { Hero } from "@/components/sections/Hero";
 import { Services } from "@/components/sections/Services";
+import { ServiceSummaries } from "@/components/sections/ServiceSummaries";
 import { Estimate } from "@/components/sections/Estimate";
 import { Process } from "@/components/sections/Process";
 import { Location } from "@/components/sections/Location";
@@ -34,7 +35,12 @@ export function HomeSections() {
           case "hero":
             return <div key={section.id} className={cls}><Hero sectionId={sectionId} /></div>;
           case "services":
-            return <div key={section.id} className={cls}><Services sectionId={sectionId} /></div>;
+            return (
+              <div key={section.id} className={cls}>
+                <Services sectionId={sectionId} />
+                {count === 0 ? <ServiceSummaries /> : null}
+              </div>
+            );
           case "estimate":
             return <div key={section.id} className={cls}><Estimate sectionId={sectionId} /></div>;
           case "process":

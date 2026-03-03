@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { GripVertical, Pencil, Save, Rocket, RefreshCw, ImagePlus, Move, Check, Undo2, Redo2, Copy, Trash2 } from "lucide-react";
+import { GripVertical, Pencil, Save, Rocket, RefreshCw, ImagePlus, Move, Check, Undo2, Redo2, Copy, Trash2, PanelRightOpen, PanelRightClose } from "lucide-react";
 import type { SectionType, SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import { BUSINESS, SERVICE_PRICING_BY_ID, type PriceValue } from "@/lib/constants";
@@ -170,6 +170,7 @@ export function VisualEditor() {
   const [estimateSelection, setEstimateSelection] = useState<Record<string, boolean>>({});
   const [selectedSectionType, setSelectedSectionType] = useState<SectionType | null>(null);
   const [selectedLayoutSectionId, setSelectedLayoutSectionId] = useState<string | null>(null);
+  const [showBlocksPanel, setShowBlocksPanel] = useState(true);
   const [history, setHistory] = useState<SiteConfig[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const historyLock = useRef(false);
@@ -443,11 +444,11 @@ export function VisualEditor() {
         </div>
       </div>
 
-      <main className="relative xl:pr-[360px]">
+      <main className="relative">
         {Array.from({ length: sectionCount("hero") }).map((_, heroInstance) => (
           <section
             key={`hero-preview-${heroInstance}`}
-            className={`relative min-h-[92svh] overflow-hidden pt-24 ${selectedSectionType === "hero" ? "ring-2 ring-brand-cyan/60 ring-inset" : ""}`}
+            className={`relative min-h-[92svh] overflow-hidden pt-24 ${selectedSectionType === "hero" ? "ring-1 ring-brand-cyan/45 ring-inset" : ""}`}
             onClick={() => syncSelectedType("hero")}
           >
           <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: `url(${cfg.heroBanner.slides[heroSlide].image})` }} />
@@ -559,7 +560,7 @@ export function VisualEditor() {
         {Array.from({ length: sectionCount("services") }).map((_, servicesInstance) => (
           <section
             key={`services-preview-${servicesInstance}`}
-            className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 ${selectedSectionType === "services" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 ${selectedSectionType === "services" ? "rounded-3xl border border-brand-cyan/35 bg-brand-cyan/[0.03] p-3 sm:p-4" : ""}`}
             onClick={() => syncSelectedType("services")}
           >
           <EditableText
@@ -654,7 +655,7 @@ export function VisualEditor() {
         {Array.from({ length: sectionCount("estimate") }).map((_, estimateInstance) => (
           <section
             key={`estimate-preview-${estimateInstance}`}
-            className={`mx-auto max-w-7xl px-4 py-12 sm:px-6 ${selectedSectionType === "estimate" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            className={`mx-auto max-w-7xl px-4 py-12 sm:px-6 ${selectedSectionType === "estimate" ? "rounded-3xl border border-brand-cyan/35 bg-brand-cyan/[0.03] p-3 sm:p-4" : ""}`}
             onClick={() => syncSelectedType("estimate")}
           >
           <div className="rounded-3xl border border-white/10 bg-brand-dark2/60 p-6">
@@ -701,7 +702,7 @@ export function VisualEditor() {
         {Array.from({ length: sectionCount("process") }).map((_, processInstance) => (
           <section
             key={`process-preview-${processInstance}`}
-            className={`mx-auto max-w-7xl px-4 py-14 sm:px-6 ${selectedSectionType === "process" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            className={`mx-auto max-w-7xl px-4 py-14 sm:px-6 ${selectedSectionType === "process" ? "rounded-3xl border border-brand-cyan/35 bg-brand-cyan/[0.03] p-3 sm:p-4" : ""}`}
             onClick={() => syncSelectedType("process")}
           >
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -754,7 +755,7 @@ export function VisualEditor() {
         {Array.from({ length: sectionCount("location") }).map((_, locationInstance) => (
           <section
             key={`location-preview-${locationInstance}`}
-            className={`mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 ${selectedSectionType === "location" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            className={`mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 ${selectedSectionType === "location" ? "rounded-3xl border border-brand-cyan/35 bg-brand-cyan/[0.03] p-3 sm:p-4" : ""}`}
             onClick={() => syncSelectedType("location")}
           >
           <div className="rounded-3xl border border-white/10 bg-brand-dark2/55 p-6 text-left">
@@ -782,7 +783,7 @@ export function VisualEditor() {
         {Array.from({ length: sectionCount("cta") }).map((_, ctaInstance) => (
           <section
             key={`cta-preview-${ctaInstance}`}
-            className={`mx-auto max-w-4xl px-4 pb-20 text-center sm:px-6 ${selectedSectionType === "cta" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            className={`mx-auto max-w-4xl px-4 pb-20 text-center sm:px-6 ${selectedSectionType === "cta" ? "rounded-3xl border border-brand-cyan/35 bg-brand-cyan/[0.03] p-4 sm:p-5" : ""}`}
             onClick={() => syncSelectedType("cta")}
           >
           <EditableText
@@ -804,7 +805,7 @@ export function VisualEditor() {
             }}
             className="mx-auto mt-4 max-w-2xl text-brand-silver/85"
           />
-          <div className="mt-10 rounded-2xl border border-white/10 bg-brand-dark/40 p-4 text-sm text-brand-silver/75">
+          <div className="mx-auto mt-10 max-w-3xl rounded-2xl border border-white/10 bg-brand-dark/40 p-5 text-sm text-brand-silver/75">
             <EditableText
               value={footerText.reserveMessage}
               onSave={(next) => {
@@ -812,20 +813,22 @@ export function VisualEditor() {
                 else setLocalized("footer", (f: any) => ({ ...f, reserveMessage: next }));
               }}
             />
-            <div className="mt-2 text-xs">{BUSINESS.address.street}</div>
+            <div className="mt-3 text-xs">{BUSINESS.address.street}</div>
           </div>
-          <div className="mt-6 text-xs text-brand-silver/65">Modo construcao ativo: clique nos textos com lapis para editar.</div>
-          <div className="mt-2 text-xs text-brand-silver/65">{locationText.title} - {locationText.phone}</div>
+          <div className="mt-7 space-y-2 text-xs text-brand-silver/65">
+            <div>Modo construcao ativo: clique nos textos com lapis para editar.</div>
+            <div>{locationText.title} - {locationText.phone}</div>
+          </div>
           </section>
         ))}
 
         {Array.from({ length: sectionCount("footer") }).map((_, footerInstance) => (
           <section
             key={`footer-preview-${footerInstance}`}
-            className={`mx-auto max-w-7xl px-4 pb-16 ${selectedSectionType === "footer" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""}`}
+            className={`mx-auto max-w-7xl px-4 pb-16 ${selectedSectionType === "footer" ? "rounded-3xl border border-brand-cyan/35 bg-brand-cyan/[0.03] p-3 sm:p-4" : ""}`}
             onClick={() => syncSelectedType("footer")}
           >
-          <div className="rounded-2xl border border-white/10 bg-brand-dark/40 p-4 text-sm text-brand-silver/75">
+          <div className="mx-auto max-w-4xl rounded-2xl border border-white/10 bg-brand-dark/40 p-5 text-sm text-brand-silver/75">
             <EditableText
               value={footerText.reserveMessage}
               onSave={(next) => {
@@ -833,13 +836,26 @@ export function VisualEditor() {
                 else setLocalized("footer", (f: any) => ({ ...f, reserveMessage: next }));
               }}
             />
-            <div className="mt-2 text-xs">{BUSINESS.address.street}</div>
+            <div className="mt-3 text-xs">{BUSINESS.address.street}</div>
           </div>
           </section>
         ))}
       </main>
 
-      <aside className="fixed right-4 top-24 z-30 hidden w-[330px] rounded-2xl border border-white/10 bg-brand-dark2/92 p-4 backdrop-blur xl:block">
+      <button
+        type="button"
+        onClick={() => setShowBlocksPanel((s) => !s)}
+        className="fixed right-4 top-24 z-40 hidden items-center gap-2 rounded-xl border border-white/15 bg-brand-dark2/90 px-3 py-2 text-xs font-semibold text-brand-silver/85 backdrop-blur hover:border-brand-cyan/45 hover:text-brand-cyan xl:inline-flex"
+      >
+        {showBlocksPanel ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+        {showBlocksPanel ? "Esconder painel" : "Mostrar painel"}
+      </button>
+
+      <aside
+        className={`fixed right-4 top-36 z-30 hidden w-[330px] rounded-2xl border border-white/10 bg-brand-dark2/92 p-4 backdrop-blur transition-all duration-300 xl:block ${
+          showBlocksPanel ? "translate-x-0 opacity-100 pointer-events-auto" : "translate-x-[120%] opacity-0 pointer-events-none"
+        }`}
+      >
         <div className="text-sm font-black text-brand-cyan">Painel de Blocos</div>
         <div className="mt-1 text-xs text-brand-silver/70">Clique no bloco no canvas para selecionar e gerenciar.</div>
 
