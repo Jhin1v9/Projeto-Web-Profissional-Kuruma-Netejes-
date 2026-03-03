@@ -22,3 +22,19 @@ export function formatPrice(value: PriceValue): string {
 }
 
 export const eur = formatPrice;
+
+export function maskedPrice(value: PriceValue | number | string | null | undefined): string {
+  if (value === null || value === undefined) return "XXX";
+  const normalized = String(value).replace(",", ".").trim();
+  const numeric = Number(normalized);
+
+  if (Number.isFinite(numeric)) {
+    const digits = Math.max(1, Math.min(3, Math.floor(Math.abs(numeric)).toString().length));
+    return "X".repeat(digits);
+  }
+
+  const digitCount = (normalized.match(/\d/g) ?? []).length;
+  if (digitCount <= 1) return "X";
+  if (digitCount === 2) return "XX";
+  return "XXX";
+}

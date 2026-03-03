@@ -2,7 +2,7 @@
 
 import type { SiteConfig } from "@/types/site-config";
 import { SERVICE_PRICING_BY_ID } from "@/lib/constants";
-import { eur } from "@/lib/utils";
+import { maskedPrice } from "@/lib/utils";
 import { resolveBusinessStatus } from "@/lib/business-status";
 
 function numberPrice(value: string | number): number | null {
@@ -72,7 +72,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
                 <div className="p-4">
                   <div className="text-sm font-extrabold" style={{ color: colors.servicesCardTitle }}>{s.name}</div>
                   <div className="text-xs font-bold mt-1" style={{ color: colors.servicesCardPrice }}>
-                    Des de {eur(s.priceFrom ?? SERVICE_PRICING_BY_ID[s.id])}
+                    Des de {maskedPrice(s.priceFrom ?? SERVICE_PRICING_BY_ID[s.id])}
                   </div>
                   <div className="mt-2 text-xs" style={{ color: colors.servicesCardDescription }}>{s.description}</div>
                 </div>
@@ -89,7 +89,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
                 return (
                   <div key={`preview-estimate-${option.id}`} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-xs">
                     <div className="font-semibold">{option.estimateLabel?.trim() || option.name}</div>
-                    <div className="text-brand-silver/80">{numeric === null ? cfg.estimate.onRequest : eur(numeric)}</div>
+                    <div className="text-brand-silver/80">{numeric === null ? cfg.estimate.onRequest : maskedPrice(numeric)}</div>
                   </div>
                 );
               })}
@@ -133,4 +133,3 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
     </div>
   );
 }
-

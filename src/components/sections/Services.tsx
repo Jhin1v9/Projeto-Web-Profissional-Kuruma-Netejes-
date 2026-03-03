@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Check, Star } from "lucide-react";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { SERVICE_PRICING_BY_ID } from "@/lib/constants";
-import { eur } from "@/lib/utils";
+import { maskedPrice } from "@/lib/utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { adaptiveThemeColor } from "@/lib/theme-colors";
@@ -97,7 +97,7 @@ export function Services({ sectionId = "services" }: { sectionId?: string }) {
                       {name}
                     </h3>
                     <div className="mt-2 text-base font-black sm:text-lg" style={{ color: colors.servicesCardPrice }}>
-                      {t.services.fromLabel} {eur(service.priceFrom ?? SERVICE_PRICING_BY_ID[service.id])}
+                      {t.services.fromLabel} {maskedPrice(service.priceFrom ?? SERVICE_PRICING_BY_ID[service.id])}
                     </div>
                     <p className="mt-3 min-h-[5.4rem] whitespace-pre-line text-sm leading-relaxed sm:mt-4 sm:min-h-[6.2rem] sm:text-base" style={{ color: colors.servicesCardDescription }}>
                       {description}

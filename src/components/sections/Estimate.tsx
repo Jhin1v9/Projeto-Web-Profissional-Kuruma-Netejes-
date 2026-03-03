@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Check, Calculator, MessageCircleMore } from "lucide-react";
 import { BUSINESS, SERVICE_PRICING_BY_ID } from "@/lib/constants";
-import { eur, generateWhatsAppLink } from "@/lib/utils";
+import { generateWhatsAppLink, maskedPrice } from "@/lib/utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
 
@@ -49,7 +49,7 @@ export function Estimate({ sectionId = "estimate" }: { sectionId?: string }) {
   const waMessage = useMemo(() => {
     if (!selectedOptions.length) return copy.none;
     const serviceList = selectedOptions.map((item) => `- ${item.name}`).join("\n");
-    const totalLine = `${copy.total}: ${eur(total)}${hasUnknownPrice ? " +" : ""}`;
+    const totalLine = `${copy.total}: ${maskedPrice(total)}${hasUnknownPrice ? " +" : ""}`;
     return `${copy.cta}\n\n${serviceList}\n\n${totalLine}`;
   }, [copy.cta, copy.none, copy.total, hasUnknownPrice, selectedOptions, total]);
 
@@ -83,10 +83,10 @@ export function Estimate({ sectionId = "estimate" }: { sectionId?: string }) {
                       : "border-white/10 bg-black/20 text-brand-silver/90 hover:border-brand-cyan/25 hover:text-white",
                   ].join(" ")}
                 >
-                  <span>
+                    <span>
                     <span className="block text-sm font-bold">{option.name}</span>
                       <span className="mt-0.5 block text-xs">
-                      {copy.helper}: {option.numericPrice === null ? copy.onRequest : eur(option.numericPrice)}
+                      {copy.helper}: {option.numericPrice === null ? copy.onRequest : maskedPrice(option.numericPrice)}
                     </span>
                   </span>
                   <span
@@ -106,7 +106,7 @@ export function Estimate({ sectionId = "estimate" }: { sectionId?: string }) {
             <div>
               <div className="text-xs uppercase tracking-[0.2em] text-brand-silver/65">{copy.total}</div>
               <div className="mt-1 text-3xl font-black text-brand-cyan">
-                {eur(total)}
+                {maskedPrice(total)}
                 {hasUnknownPrice ? "+" : ""}
               </div>
               {hasUnknownPrice && <div className="mt-1 text-xs text-brand-silver/70">{copy.unknown}</div>}

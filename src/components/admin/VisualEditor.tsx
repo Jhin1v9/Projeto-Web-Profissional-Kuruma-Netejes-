@@ -6,7 +6,7 @@ import type { SectionType, SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import { BUSINESS, SERVICE_PRICING_BY_ID, type PriceValue } from "@/lib/constants";
 import { TRANSLATIONS, type Language } from "@/lib/i18n";
-import { eur } from "@/lib/utils";
+import { maskedPrice } from "@/lib/utils";
 
 function parsePriceInput(value: string): PriceValue {
   const trimmed = value.trim();
@@ -686,7 +686,7 @@ export function VisualEditor() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-sm font-bold">{option.name}</div>
-                      <div className="text-xs text-brand-silver/80">{option.numeric === null ? estimateText.onRequest : eur(option.numeric)}</div>
+                      <div className="text-xs text-brand-silver/80">{option.numeric === null ? estimateText.onRequest : maskedPrice(option.numeric)}</div>
                     </div>
                     {estimateSelection[option.id] && <Check className="h-4 w-4 text-brand-cyan" />}
                   </div>
@@ -694,7 +694,7 @@ export function VisualEditor() {
               ))}
             </div>
             <div className="mt-4 text-2xl font-black text-brand-cyan">
-              {estimateText.total}: {eur(total)}
+              {estimateText.total}: {maskedPrice(total)}
             </div>
           </div>
           </section>
