@@ -16,7 +16,7 @@ function toNumberPrice(value: string | number): number | null {
   return null;
 }
 
-export function Estimate() {
+export function Estimate({ sectionId = "estimate" }: { sectionId?: string }) {
   const cfg = useSiteConfig();
   const { language, t } = useLanguage();
   const copy = language === "ca" ? cfg.estimate : cfg.i18n?.[language]?.estimate ?? t.estimate;
@@ -54,7 +54,7 @@ export function Estimate() {
   }, [copy.cta, copy.none, copy.total, hasUnknownPrice, selectedOptions, total]);
 
   return (
-    <section id="estimate" className="relative py-16 sm:py-20">
+    <section id={sectionId} className="relative py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="rounded-3xl border border-white/10 bg-brand-dark2/70 p-5 backdrop-blur-xl sm:p-8 lg:p-10">
           <div className="max-w-3xl">

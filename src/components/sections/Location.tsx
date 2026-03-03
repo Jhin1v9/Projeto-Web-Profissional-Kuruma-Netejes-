@@ -8,7 +8,7 @@ import { useLanguage } from "@/components/providers/LanguageProvider";
 import { generateWhatsAppLink } from "@/lib/utils";
 import { useSiteConfig } from "./useSiteConfig";
 
-export function Location() {
+export function Location({ sectionId = "location" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
@@ -16,7 +16,7 @@ export function Location() {
   const maps = "https://www.google.com/maps?q=Carrer%20d%27Alfons%20Sala%2C%2057%2C%2008202%20Sabadell&output=embed";
 
   return (
-    <section id="location" className="relative py-16 sm:py-20 lg:py-24">
+    <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <motion.div

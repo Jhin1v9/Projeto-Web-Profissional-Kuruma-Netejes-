@@ -10,7 +10,7 @@ import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
 
-export function Hero() {
+export function Hero({ sectionId = "hero" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const cfg = useSiteConfig();
   const { language, t } = useLanguage();
@@ -55,7 +55,7 @@ export function Hero() {
   const bottomFadeStart = `${bannerSettings.bottomFadeStartPercent}%`;
 
   return (
-    <section id="hero" className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-16 sm:pt-20">
+    <section id={sectionId} className="relative flex min-h-[100svh] items-center justify-center overflow-hidden pt-16 sm:pt-20">
       <div
         className="absolute inset-0"
         style={{

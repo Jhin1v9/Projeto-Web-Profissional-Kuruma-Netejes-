@@ -7,13 +7,13 @@ import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "@/components/sections/useSiteConfig";
 
-export function Footer() {
+export function Footer({ sectionId = "footer" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
   const text = language === "ca" ? cfg.footer : cfg.i18n?.[language]?.footer ?? t.footer;
   return (
-    <footer className="border-t border-white/10 bg-brand-dark/40 backdrop-blur">
+    <footer id={sectionId} className="border-t border-white/10 bg-brand-dark/40 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center md:gap-6 md:py-10">
         <div>
           <div className="text-lg font-black">Kuruma Netejes</div>

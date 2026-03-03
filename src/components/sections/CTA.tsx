@@ -8,7 +8,7 @@ import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
 
-export function CTA() {
+export function CTA({ sectionId = "cta" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
@@ -16,7 +16,7 @@ export function CTA() {
   const displayCta = language === "ca" ? cfg.cta : cfg.i18n?.[language]?.cta ?? t.cta;
 
   return (
-    <section className="relative py-16 sm:py-20 lg:py-24">
+    <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
         <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-3xl font-black sm:text-5xl lg:text-6xl" style={{ color: colors.ctaTitle }}>

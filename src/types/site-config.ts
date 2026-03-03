@@ -12,6 +12,7 @@ import type {
 } from "@/lib/i18n";
 
 export type CursorMode = "realistic" | "neon" | "off";
+export type SectionType = "hero" | "services" | "estimate" | "process" | "location" | "cta" | "footer";
 
 export type HeroBannerSettings = {
   autoSlideIntervalMs: number;
@@ -54,6 +55,15 @@ export type SiteConfig = {
     subtitle: string;
     badge?: string;
     imageUrl: string;
+  };
+  layout: {
+    sections: Array<{
+      id: string;
+      type: SectionType;
+      enabled: boolean;
+      mobile: boolean;
+      desktop: boolean;
+    }>;
   };
   heroBanner: {
     settings: HeroBannerSettings;

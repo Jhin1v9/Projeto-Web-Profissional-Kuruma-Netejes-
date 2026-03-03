@@ -9,7 +9,7 @@ import { eur } from "@/lib/utils";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
 
-export function Services() {
+export function Services({ sectionId = "services" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
@@ -35,7 +35,7 @@ export function Services() {
       : "xl:grid-cols-4";
 
   return (
-    <section id="services" className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
+    <section id={sectionId} className="relative overflow-hidden py-16 sm:py-20 lg:py-24">
       <div className="absolute inset-0">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/30 to-transparent" />
       </div>

@@ -5,14 +5,14 @@ import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useSiteConfig } from "./useSiteConfig";
 
-export function Process() {
+export function Process({ sectionId = "process" }: { sectionId?: string }) {
   const { setHover } = useCursor();
   const { language, t } = useLanguage();
   const cfg = useSiteConfig();
   const text = language === "ca" ? cfg.process : cfg.i18n?.[language]?.process ?? t.process;
 
   return (
-    <section id="process" className="relative py-16 sm:py-20 lg:py-24">
+    <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-black text-white sm:text-5xl">

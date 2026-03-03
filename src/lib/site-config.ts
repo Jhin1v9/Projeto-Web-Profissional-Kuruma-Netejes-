@@ -19,6 +19,8 @@ const HeroBannerSettingsSchema = z.object({
   bottomFadeStartPercent: z.number().min(0).max(100),
 });
 
+const SECTION_TYPES = ["hero", "services", "estimate", "process", "location", "cta", "footer"] as const;
+
 const HeroBannerSlideSchema = z.object({
   image: z.string().min(1),
   badge: z.string().min(1),
@@ -142,6 +144,19 @@ export const SiteConfigSchema = z.object({
     badge: z.string().optional(),
     imageUrl: z.string().min(1),
   }),
+  layout: z
+    .object({
+      sections: z.array(
+        z.object({
+          id: z.string().min(1),
+          type: z.enum(SECTION_TYPES),
+          enabled: z.boolean(),
+          mobile: z.boolean(),
+          desktop: z.boolean(),
+        })
+      ),
+    })
+    .optional(),
   heroBanner: z
     .object({
       settings: HeroBannerSettingsSchema,
@@ -177,6 +192,37 @@ export const SiteConfigSchema = z.object({
 });
 
 export type SiteConfigInput = z.infer<typeof SiteConfigSchema>;
+
+function getDefaultLayout(): SiteConfig["layout"] {
+  return {
+    sections: [
+      { id: "hero-main", type: "hero", enabled: true, mobile: true, desktop: true },
+      { id: "services-main", type: "services", enabled: true, mobile: true, desktop: true },
+      { id: "estimate-main", type: "estimate", enabled: true, mobile: true, desktop: true },
+      { id: "process-main", type: "process", enabled: true, mobile: true, desktop: true },
+      { id: "location-main", type: "location", enabled: true, mobile: true, desktop: true },
+      { id: "cta-main", type: "cta", enabled: true, mobile: true, desktop: true },
+      { id: "footer-main", type: "footer", enabled: true, mobile: true, desktop: true },
+    ],
+  };
+}
+
+function normalizeLayout(layout?: SiteConfigInput["layout"]): SiteConfig["layout"] {
+  const defaults = getDefaultLayout();
+  const source = layout?.sections?.length ? layout.sections : defaults.sections;
+  const normalized = source
+    .filter((section) => SECTION_TYPES.includes(section.type as (typeof SECTION_TYPES)[number]))
+    .map((section) => ({
+      id: section.id,
+      type: section.type,
+      enabled: section.enabled ?? true,
+      mobile: section.mobile ?? true,
+      desktop: section.desktop ?? true,
+    }));
+
+  if (!normalized.length) return defaults;
+  return { sections: normalized };
+}
 
 function getDefaultServices(): SiteConfig["services"] {
   return [
@@ -272,6 +318,7 @@ function getDefaultI18n(): NonNullable<SiteConfig["i18n"]> {
 }
 
 export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
+  const layout = normalizeLayout(input.layout);
   const heroBanner = input.heroBanner ?? getDefaultHeroBanner();
   const navbar = input.navbar ?? { ...TRANSLATIONS.ca.navbar };
   const process = input.process ?? {
@@ -329,6 +376,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       ...input.appearance,
       textColors,
     },
+    layout,
     heroBanner,
     navbar,
     process,
@@ -357,6 +405,7 @@ export function getDefaultConfig(): SiteConfig {
       badge: "Resultats reals, sense maquillatge",
       imageUrl: DEFAULT_IMAGE_PATHS.hero,
     },
+    layout: getDefaultLayout(),
     heroBanner: getDefaultHeroBanner(),
     navbar: { ...TRANSLATIONS.ca.navbar },
     process: {

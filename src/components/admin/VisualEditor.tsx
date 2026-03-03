@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { GripVertical, Pencil, Save, Rocket, RefreshCw, ImagePlus, Move, Check } from "lucide-react";
-import type { SiteConfig } from "@/types/site-config";
+import { useEffect, useRef, useState } from "react";
+import { GripVertical, Pencil, Save, Rocket, RefreshCw, ImagePlus, Move, Check, Undo2, Redo2, Copy, Trash2 } from "lucide-react";
+import type { SectionType, SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 import { BUSINESS, SERVICE_PRICING_BY_ID, type PriceValue } from "@/lib/constants";
 import { TRANSLATIONS, type Language } from "@/lib/i18n";
@@ -145,7 +145,13 @@ export function VisualEditor() {
   const [heroSlide, setHeroSlide] = useState(0);
   const [dragService, setDragService] = useState<number | null>(null);
   const [dragStep, setDragStep] = useState<number | null>(null);
+  const [dragSection, setDragSection] = useState<number | null>(null);
   const [estimateSelection, setEstimateSelection] = useState<Record<string, boolean>>({});
+  const [selectedSectionType, setSelectedSectionType] = useState<SectionType | null>(null);
+  const [selectedLayoutSectionId, setSelectedLayoutSectionId] = useState<string | null>(null);
+  const [history, setHistory] = useState<SiteConfig[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const historyLock = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -159,6 +165,21 @@ export function VisualEditor() {
       }
     })();
   }, []);
+
+  useEffect(() => {
+    if (!cfg) return;
+    if (historyLock.current) {
+      historyLock.current = false;
+      return;
+    }
+    const current = history[historyIndex];
+    const same = current && JSON.stringify(current) === JSON.stringify(cfg);
+    if (same) return;
+    const next = history.slice(0, historyIndex + 1);
+    next.push(cfg);
+    setHistory(next.slice(-40));
+    setHistoryIndex((idx) => Math.min(idx + 1, 39));
+  }, [cfg]);
 
   function langPack(lang: Language) {
     return TRANSLATIONS[lang];
@@ -243,6 +264,62 @@ export function VisualEditor() {
 
   if (!cfg) return <div className="p-8 text-brand-silver">Carregando editor visual...</div>;
 
+  function undo() {
+    if (historyIndex <= 0) return;
+    historyLock.current = true;
+    setHistoryIndex(historyIndex - 1);
+    setCfg(history[historyIndex - 1]);
+    setMsg("Undo aplicado.");
+  }
+
+  function redo() {
+    if (historyIndex >= history.length - 1) return;
+    historyLock.current = true;
+    setHistoryIndex(historyIndex + 1);
+    setCfg(history[historyIndex + 1]);
+    setMsg("Redo aplicado.");
+  }
+
+  function visibleByType(type: SectionType): boolean {
+    return !!cfg && cfg.layout.sections.some((section) => section.type === type && section.enabled);
+  }
+
+  function sectionCount(type: SectionType): number {
+    return cfg ? cfg.layout.sections.filter((section) => section.type === type && section.enabled).length : 0;
+  }
+
+  function moveLayoutSection(from: number, to: number) {
+    if (!cfg) return;
+    if (from === to) return;
+    const sections = [...cfg.layout.sections];
+    const [moved] = sections.splice(from, 1);
+    sections.splice(to, 0, moved);
+    setCfg({ ...cfg, layout: { ...cfg.layout, sections } });
+  }
+
+  function duplicateLayoutSection(index: number) {
+    if (!cfg) return;
+    const source = cfg.layout.sections[index];
+    if (!source) return;
+    const clone = { ...source, id: `${source.type}-${Date.now()}` };
+    const sections = [...cfg.layout.sections];
+    sections.splice(index + 1, 0, clone);
+    setCfg({ ...cfg, layout: { ...cfg.layout, sections } });
+  }
+
+  function removeLayoutSection(index: number) {
+    if (!cfg) return;
+    const sections = cfg.layout.sections.filter((_, i) => i !== index);
+    setCfg({ ...cfg, layout: { ...cfg.layout, sections: sections.length ? sections : cfg.layout.sections } });
+  }
+
+  function syncSelectedType(type: SectionType) {
+    if (!cfg) return;
+    setSelectedSectionType(type);
+    const first = cfg.layout.sections.find((s) => s.type === type);
+    if (first) setSelectedLayoutSectionId(first.id);
+  }
+
   const isCa = language === "ca";
   const t = TRANSLATIONS[language];
   const nav = isCa ? cfg.navbar : cfg.i18n?.[language]?.navbar ?? t.navbar;
@@ -286,6 +363,12 @@ export function VisualEditor() {
             <button onClick={() => { setCfg(getDefaultConfig()); setMsg("Resetado no editor."); }} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold hover:border-brand-cyan/30">
               <RefreshCw className="h-4 w-4" /> Reset
             </button>
+            <button onClick={undo} disabled={historyIndex <= 0} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold disabled:opacity-50">
+              <Undo2 className="h-4 w-4" /> Undo
+            </button>
+            <button onClick={redo} disabled={historyIndex >= history.length - 1} className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-semibold disabled:opacity-50">
+              <Redo2 className="h-4 w-4" /> Redo
+            </button>
             <button onClick={save} disabled={saving} className="inline-flex items-center gap-2 rounded-xl bg-brand-cyan px-4 py-2 text-sm font-black text-brand-dark disabled:opacity-60">
               <Save className="h-4 w-4" /> {saving ? "Guardando" : "Guardar"}
             </button>
@@ -297,8 +380,13 @@ export function VisualEditor() {
         {msg && <div className="border-t border-white/10 px-4 py-2 text-xs text-brand-silver/80">{msg}</div>}
       </div>
 
-      <main className="relative">
-        <section className="relative min-h-[92svh] overflow-hidden pt-24">
+      <main className="relative xl:pr-[360px]">
+        <section
+          className={`relative min-h-[92svh] overflow-hidden pt-24 ${!visibleByType("hero") ? "hidden" : ""} ${
+            selectedSectionType === "hero" ? "ring-2 ring-brand-cyan/60 ring-inset" : ""
+          }`}
+          onClick={() => syncSelectedType("hero")}
+        >
           <div className="absolute inset-0 bg-cover bg-center opacity-45" style={{ backgroundImage: `url(${cfg.heroBanner.slides[heroSlide].image})` }} />
           <div className="absolute right-6 top-24 z-10">
             <ImageTool
@@ -404,7 +492,12 @@ export function VisualEditor() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+        <section
+          className={`mx-auto max-w-7xl px-4 py-16 sm:px-6 ${!visibleByType("services") ? "hidden" : ""} ${
+            selectedSectionType === "services" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
+          }`}
+          onClick={() => syncSelectedType("services")}
+        >
           <EditableText
             value={`${isCa ? cfg.navbar.services : nav.services} ${t.services.highlight}`}
             onSave={() => {}}
@@ -482,7 +575,12 @@ export function VisualEditor() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <section
+          className={`mx-auto max-w-7xl px-4 py-12 sm:px-6 ${!visibleByType("estimate") ? "hidden" : ""} ${
+            selectedSectionType === "estimate" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
+          }`}
+          onClick={() => syncSelectedType("estimate")}
+        >
           <div className="rounded-3xl border border-white/10 bg-brand-dark2/60 p-6">
             <EditableText value={`${estimateText.title} ${estimateText.highlight}`} onSave={(next) => {
               const parts = next.split(" ");
@@ -523,7 +621,12 @@ export function VisualEditor() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+        <section
+          className={`mx-auto max-w-7xl px-4 py-14 sm:px-6 ${!visibleByType("process") ? "hidden" : ""} ${
+            selectedSectionType === "process" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
+          }`}
+          onClick={() => syncSelectedType("process")}
+        >
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {processText.steps.map((step, index) => (
               <div
@@ -570,7 +673,39 @@ export function VisualEditor() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-4xl px-4 pb-20 text-center sm:px-6">
+        <section
+          className={`mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 ${!visibleByType("location") ? "hidden" : ""} ${
+            selectedSectionType === "location" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
+          }`}
+          onClick={() => syncSelectedType("location")}
+        >
+          <div className="rounded-3xl border border-white/10 bg-brand-dark2/55 p-6 text-left">
+            <EditableText
+              value={locationText.title}
+              onSave={(next) => {
+                if (isCa) setCfg({ ...cfg, location: { ...cfg.location, title: next } });
+                else setLocalized("location", (loc: any) => ({ ...loc, title: next }));
+              }}
+              className="text-3xl font-black"
+            />
+            <EditableText
+              value={locationText.intro}
+              multiline
+              onSave={(next) => {
+                if (isCa) setCfg({ ...cfg, location: { ...cfg.location, intro: next } });
+                else setLocalized("location", (loc: any) => ({ ...loc, intro: next }));
+              }}
+              className="mt-3 text-brand-silver/85"
+            />
+          </div>
+        </section>
+
+        <section
+          className={`mx-auto max-w-4xl px-4 pb-20 text-center sm:px-6 ${!visibleByType("cta") ? "hidden" : ""} ${
+            selectedSectionType === "cta" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
+          }`}
+          onClick={() => syncSelectedType("cta")}
+        >
           <EditableText
             value={`${ctaText.title} ${ctaText.highlight}`}
             onSave={(next) => {
@@ -603,7 +738,133 @@ export function VisualEditor() {
           <div className="mt-6 text-xs text-brand-silver/65">Modo construcao ativo: clique nos textos com lapis para editar.</div>
           <div className="mt-2 text-xs text-brand-silver/65">{locationText.title} - {locationText.phone}</div>
         </section>
+
+        <section
+          className={`mx-auto max-w-7xl px-4 pb-16 ${!visibleByType("footer") ? "hidden" : ""} ${
+            selectedSectionType === "footer" ? "ring-2 ring-brand-cyan/60 ring-inset rounded-2xl" : ""
+          }`}
+          onClick={() => syncSelectedType("footer")}
+        >
+          <div className="rounded-2xl border border-white/10 bg-brand-dark/40 p-4 text-sm text-brand-silver/75">
+            <EditableText
+              value={footerText.reserveMessage}
+              onSave={(next) => {
+                if (isCa) setCfg({ ...cfg, footer: { ...cfg.footer, reserveMessage: next } });
+                else setLocalized("footer", (f: any) => ({ ...f, reserveMessage: next }));
+              }}
+            />
+            <div className="mt-2 text-xs">{BUSINESS.address.street}</div>
+          </div>
+        </section>
       </main>
+
+      <aside className="fixed right-4 top-24 z-30 hidden w-[330px] rounded-2xl border border-white/10 bg-brand-dark2/92 p-4 backdrop-blur xl:block">
+        <div className="text-sm font-black text-brand-cyan">Painel de Blocos</div>
+        <div className="mt-1 text-xs text-brand-silver/70">Clique no bloco no canvas para selecionar e gerenciar.</div>
+
+        <div className="mt-4 max-h-[62vh] space-y-2 overflow-y-auto pr-1">
+          {cfg.layout.sections.map((section, index) => {
+            const active = section.id === selectedLayoutSectionId;
+            return (
+              <div
+                key={section.id}
+                draggable
+                onDragStart={() => setDragSection(index)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (dragSection !== null) moveLayoutSection(dragSection, index);
+                  setDragSection(null);
+                }}
+                className={`rounded-xl border p-2 ${active ? "border-brand-cyan/50 bg-brand-cyan/10" : "border-white/10 bg-black/20"}`}
+                onClick={() => {
+                  setSelectedLayoutSectionId(section.id);
+                  setSelectedSectionType(section.type);
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <GripVertical className="h-4 w-4 text-brand-silver/70" />
+                  <div className="flex-1 text-sm font-semibold capitalize">{section.type}</div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      duplicateLayoutSection(index);
+                    }}
+                    className="rounded-lg border border-white/10 p-1.5 text-brand-silver/85 hover:text-brand-cyan"
+                    title="Duplicar bloco"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeLayoutSection(index);
+                    }}
+                    className="rounded-lg border border-red-400/35 p-1.5 text-red-300"
+                    title="Remover bloco"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
+                  <label className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={section.enabled}
+                      onChange={(e) =>
+                        setCfg({
+                          ...cfg,
+                          layout: {
+                            ...cfg.layout,
+                            sections: cfg.layout.sections.map((s, i) => (i === index ? { ...s, enabled: e.target.checked } : s)),
+                          },
+                        })
+                      }
+                    />
+                    on
+                  </label>
+                  <label className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={section.mobile}
+                      onChange={(e) =>
+                        setCfg({
+                          ...cfg,
+                          layout: {
+                            ...cfg.layout,
+                            sections: cfg.layout.sections.map((s, i) => (i === index ? { ...s, mobile: e.target.checked } : s)),
+                          },
+                        })
+                      }
+                    />
+                    m
+                  </label>
+                  <label className="inline-flex items-center gap-1 rounded-lg border border-white/10 px-2 py-1">
+                    <input
+                      type="checkbox"
+                      checked={section.desktop}
+                      onChange={(e) =>
+                        setCfg({
+                          ...cfg,
+                          layout: {
+                            ...cfg.layout,
+                            sections: cfg.layout.sections.map((s, i) => (i === index ? { ...s, desktop: e.target.checked } : s)),
+                          },
+                        })
+                      }
+                    />
+                    d
+                  </label>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-brand-silver/75">
+          Selecionado: {selectedSectionType ?? "nenhum"} | Hero x{sectionCount("hero")} | Services x{sectionCount("services")} | Process x{sectionCount("process")}
+        </div>
+      </aside>
     </div>
   );
 }
