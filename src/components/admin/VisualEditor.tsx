@@ -35,6 +35,11 @@ function EditableText({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
 
+  function commit() {
+    onSave(draft);
+    setEditing(false);
+  }
+
   useEffect(() => {
     setDraft(value);
   }, [value]);
@@ -48,9 +53,17 @@ function EditableText({
             rows={3}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            onBlur={() => {
-              onSave(draft);
-              setEditing(false);
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                commit();
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                setDraft(value);
+                setEditing(false);
+              }
             }}
             className="w-full rounded-xl border border-brand-cyan/40 bg-black/40 px-3 py-2 text-inherit outline-none"
           />
@@ -59,9 +72,17 @@ function EditableText({
             autoFocus
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
-            onBlur={() => {
-              onSave(draft);
-              setEditing(false);
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commit();
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                setDraft(value);
+                setEditing(false);
+              }
             }}
             className="w-full rounded-xl border border-brand-cyan/40 bg-black/40 px-3 py-2 text-inherit outline-none"
           />
@@ -335,7 +356,7 @@ export function VisualEditor() {
   const estimateOptions = cfg.services.filter((s) => s.estimateEnabled !== false).map((s) => {
     const tr = cfg.i18n?.[language]?.services?.[s.id] ?? t.services.items[s.id];
     const name = s.estimateLabel?.trim() || (isCa ? s.name : tr?.name ?? s.name);
-    const price = SERVICE_PRICING_BY_ID[s.id] ?? s.priceFrom;
+    const price = s.priceFrom ?? SERVICE_PRICING_BY_ID[s.id];
     return { id: s.id, name, price, numeric: numberPrice(price) };
   });
   const total = estimateOptions
@@ -508,7 +529,7 @@ export function VisualEditor() {
               const tr = cfg.i18n?.[language]?.services?.[service.id] ?? t.services.items[service.id];
               const name = isCa ? service.name : tr?.name ?? service.name;
               const desc = isCa ? service.description : tr?.description ?? service.description;
-              const price = SERVICE_PRICING_BY_ID[service.id] ?? service.priceFrom;
+              const price = service.priceFrom ?? SERVICE_PRICING_BY_ID[service.id];
               return (
                 <div
                   key={service.id}

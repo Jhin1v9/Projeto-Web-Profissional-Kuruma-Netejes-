@@ -85,7 +85,7 @@ export function Services({ sectionId = "services" }: { sectionId?: string }) {
                       {name}
                     </h3>
                     <div className="mt-2 text-base font-black sm:text-lg" style={{ color: colors.servicesCardPrice }}>
-                      {t.services.fromLabel} {eur(SERVICE_PRICING_BY_ID[service.id] ?? service.priceFrom)}
+                      {t.services.fromLabel} {eur(service.priceFrom ?? SERVICE_PRICING_BY_ID[service.id])}
                     </div>
                     <p className="mt-3 min-h-[5.4rem] whitespace-pre-line text-sm leading-relaxed sm:mt-4 sm:min-h-[6.2rem] sm:text-base" style={{ color: colors.servicesCardDescription }}>
                       {description}

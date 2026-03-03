@@ -30,7 +30,7 @@ export function Estimate({ sectionId = "estimate" }: { sectionId?: string }) {
         const translated = cfg.i18n?.[language]?.services?.[service.id] ?? t.services.items[service.id];
         const translatedName = language === "ca" ? service.name : translated?.name ?? service.name;
         const name = (service.estimateLabel && service.estimateLabel.trim()) || translatedName;
-        const rawPrice = SERVICE_PRICING_BY_ID[service.id] ?? service.priceFrom;
+        const rawPrice = service.priceFrom ?? SERVICE_PRICING_BY_ID[service.id];
         const numericPrice = toNumberPrice(rawPrice);
         return {
           id: service.id,

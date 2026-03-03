@@ -61,7 +61,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
                 <div className="h-24 bg-cover bg-center" style={{ backgroundImage: `url(${s.imageUrl})` }} />
                 <div className="p-4">
                   <div className="text-sm font-extrabold" style={{ color: colors.servicesCardTitle }}>{s.name}</div>
-                  <div className="text-xs font-bold mt-1" style={{ color: colors.servicesCardPrice }}>Des de {eur(SERVICE_PRICING_BY_ID[s.id] ?? s.priceFrom)}</div>
+                  <div className="text-xs font-bold mt-1" style={{ color: colors.servicesCardPrice }}>Des de {eur(s.priceFrom ?? SERVICE_PRICING_BY_ID[s.id])}</div>
                 </div>
               </div>
             ))}
