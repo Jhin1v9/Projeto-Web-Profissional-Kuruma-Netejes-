@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ImageIcon, Sparkles, ListChecks, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, ImageIcon, Sparkles, ListChecks, LogOut, ExternalLink, PenSquare } from "lucide-react";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/editor", label: "Editor", icon: PenSquare },
   { href: "/admin/hero", label: "Hero", icon: Sparkles },
   { href: "/admin/services", label: "Serveis", icon: ListChecks },
   { href: "/admin/appearance", label: "Aparenca", icon: ImageIcon },

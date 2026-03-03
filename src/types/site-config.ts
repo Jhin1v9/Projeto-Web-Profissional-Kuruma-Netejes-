@@ -68,6 +68,8 @@ export type SiteConfig = {
     priceFrom: PriceValue;
     imageUrl: string;
     popular?: boolean;
+    estimateEnabled?: boolean;
+    estimateLabel?: string;
     highlights: string[];
   }>;
 };

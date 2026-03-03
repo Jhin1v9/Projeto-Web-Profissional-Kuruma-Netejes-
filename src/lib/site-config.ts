@@ -130,6 +130,8 @@ export const SiteConfigSchema = z.object({
       priceFrom: z.union([z.number().min(0), z.string().min(1)]),
       imageUrl: z.string().min(1),
       popular: z.boolean().optional(),
+      estimateEnabled: z.boolean().optional(),
+      estimateLabel: z.string().optional(),
       highlights: z.array(z.string().min(1)).min(1),
     })
   ),
@@ -146,6 +148,7 @@ function getDefaultServices(): SiteConfig["services"] {
       priceFrom: PRICING.interiorFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceBeforeAfter,
       popular: true,
+      estimateEnabled: true,
       highlights: ["Extraccio profunda", "Taques i olors", "Acabat real, sense maquillatge"],
     },
     {
@@ -154,6 +157,7 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Correccio de micro-ratllades i acabat mirall amb brillantor real.",
       priceFrom: PRICING.polishingFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.servicePolishing,
+      estimateEnabled: true,
       highlights: ["Gloss mirall", "Correccio swirl", "Acabat premium"],
     },
     {
@@ -162,6 +166,7 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Escuma activa, detall de llandes i assecat sense marques.",
       priceFrom: PRICING.washFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceFoam,
+      estimateEnabled: true,
       highlights: ["Escuma activa", "Llandes", "Assecat microfibra"],
     },
     {
@@ -170,6 +175,7 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Tractament amb ozono orientat a eliminar olor de tabac/cigarro, olor fort d'humitat i altres olors persistents de l'habitacle.",
       priceFrom: PRICING.ozoneFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceOzone,
+      estimateEnabled: true,
       highlights: ["Reduccio d'olor a tabac/cigarro", "Combat olors persistents", "Ideal com a extra de neteja interior"],
     },
   ];
@@ -226,7 +232,10 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     ...getDefaultTextColors(),
     ...(input.appearance.textColors ?? {}),
   };
-  const services = input.services.length > 0 ? input.services : getDefaultServices();
+  const services = (input.services.length > 0 ? input.services : getDefaultServices()).map((service) => ({
+    ...service,
+    estimateEnabled: service.estimateEnabled ?? true,
+  }));
   const defaults = getDefaultI18n();
 
   const i18n: NonNullable<SiteConfig["i18n"]> = {

@@ -8,7 +8,7 @@ import type { PriceValue } from "@/lib/constants";
 import { LANGUAGES, TRANSLATIONS, type CtaText, type EstimateText, type Language, type ServiceText, type SlideText } from "@/lib/i18n";
 import { LivePreview } from "./LivePreview";
 
-export type AdminSection = "dashboard" | "hero" | "services" | "appearance";
+export type AdminSection = "dashboard" | "hero" | "services" | "appearance" | "editor";
 
 type Props = {
   section?: AdminSection;
@@ -136,6 +136,7 @@ function createPlaceholderService(index: number): SiteConfig["services"][number]
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.",
     priceFrom: "XXX",
     imageUrl: "/images/hero.webp",
+    estimateEnabled: true,
     highlights: [
       "Lorem ipsum dolor",
       "Sit amet consectetur",
@@ -150,6 +151,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
   const [publishing, setPublishing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [draggingServiceIndex, setDraggingServiceIndex] = useState<number | null>(null);
+  const [draggingHeroIndex, setDraggingHeroIndex] = useState<number | null>(null);
   const [heroTextLang, setHeroTextLang] = useState<Language>("ca");
   const [serviceTextLang, setServiceTextLang] = useState<Language>("ca");
   const [ctaTextLang, setCtaTextLang] = useState<Language>("ca");
@@ -318,6 +320,18 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     setCfg({ ...cfg, services: [...cfg.services, next] });
   }
 
+  function moveHeroSlide(fromIndex: number, toIndex: number) {
+    if (!cfg) return;
+    if (fromIndex === toIndex) return;
+    if (fromIndex < 0 || toIndex < 0) return;
+    if (fromIndex >= cfg.heroBanner.slides.length || toIndex >= cfg.heroBanner.slides.length) return;
+
+    const slides = [...cfg.heroBanner.slides];
+    const [moved] = slides.splice(fromIndex, 1);
+    slides.splice(toIndex, 0, moved);
+    setCfg({ ...cfg, heroBanner: { ...cfg.heroBanner, slides } });
+  }
+
   function removeService(index: number) {
     if (!cfg) return;
     const service = cfg.services[index];
@@ -362,6 +376,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     hero: "Hero",
     services: "Serveis",
     appearance: "Aparenca",
+    editor: "Editor Completo",
   };
 
   return (
@@ -414,6 +429,67 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
               <div className="text-xs text-brand-silver/70">Intervalo do carrossel</div>
               <div className="text-3xl font-black mt-1">{cfg.heroBanner.settings.autoSlideIntervalMs}ms</div>
+            </div>
+          </div>
+          <LivePreview cfg={cfg} />
+        </div>
+      )}
+
+      {section === "editor" && (
+        <div className="mt-8 grid gap-8 xl:grid-cols-[1.25fr_1fr]">
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-white/10 bg-black/20 p-6">
+              <div className="text-2xl font-black text-white">Edicao completa do site</div>
+              <p className="mt-2 text-sm text-brand-silver/80">
+                Aqui voce controla os textos, imagens e ordem dos blocos mais importantes sem ficar perdido.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <a href="/admin/hero" className="rounded-xl border border-white/10 px-3 py-2 text-sm text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan">Hero e wallpapers</a>
+                <a href="/admin/services" className="rounded-xl border border-white/10 px-3 py-2 text-sm text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan">Servicos e cards</a>
+                <a href="/admin/appearance" className="rounded-xl border border-white/10 px-3 py-2 text-sm text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan">Cores e visual</a>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-black/20 p-6">
+              <div className="font-extrabold text-white">Checkboxes do orcamento (claro e direto)</div>
+              <p className="mt-1 text-xs text-brand-silver/70">
+                Cada linha abaixo vira um checkbox na secao de orcamento do site.
+              </p>
+
+              <div className="mt-4 space-y-3">
+                {cfg.services.map((service, index) => (
+                  <div key={`estimate-link-${service.id}`} className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                    <div className="grid gap-3 sm:grid-cols-[auto_1fr_1fr]">
+                      <label className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-sm text-brand-silver/90">
+                        <input
+                          type="checkbox"
+                          checked={service.estimateEnabled !== false}
+                          onChange={(e) => updateService(index, { estimateEnabled: e.target.checked })}
+                        />
+                        Mostrar
+                      </label>
+                      <label className="block">
+                        <div className="mb-1 text-xs text-brand-silver/70">Nome do checkbox</div>
+                        <input
+                          value={service.estimateLabel ?? ""}
+                          placeholder={service.name}
+                          onChange={(e) => updateService(index, { estimateLabel: e.target.value })}
+                          className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60"
+                        />
+                      </label>
+                      <label className="block">
+                        <div className="mb-1 text-xs text-brand-silver/70">Preco aproximado</div>
+                        <input
+                          value={String(service.priceFrom)}
+                          onChange={(e) => updateService(index, { priceFrom: parsePriceInput(e.target.value) })}
+                          className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-2.5 outline-none focus:border-brand-cyan/60"
+                        />
+                      </label>
+                    </div>
+                    <div className="mt-2 text-xs text-brand-silver/60">Servico original: {service.name}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <LivePreview cfg={cfg} />
@@ -500,8 +576,32 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
               const textSource = langSlide ?? slide;
 
               return (
-                <div key={`banner-${index}`} className="rounded-3xl border border-white/10 bg-black/20 p-6">
-                  <div className="font-extrabold text-white mb-4">{`Banner ${index + 1}`}</div>
+                <div
+                  key={`banner-${index}`}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (draggingHeroIndex === null) return;
+                    moveHeroSlide(draggingHeroIndex, index);
+                    setDraggingHeroIndex(null);
+                  }}
+                  className={`rounded-3xl border bg-black/20 p-6 transition ${
+                    draggingHeroIndex === index ? "border-brand-cyan/50 opacity-75" : "border-white/10"
+                  }`}
+                >
+                  <div className="mb-4 flex items-center gap-3">
+                    <button
+                      type="button"
+                      draggable
+                      onDragStart={() => setDraggingHeroIndex(index)}
+                      onDragEnd={() => setDraggingHeroIndex(null)}
+                      className="cursor-move select-none text-brand-silver/60 hover:text-brand-cyan"
+                      title="Arraste para reordenar"
+                    >
+                      ::
+                    </button>
+                    <div className="font-extrabold text-white">{`Banner ${index + 1}`}</div>
+                  </div>
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="sm:col-span-2">
                       <ImageUrlInput
@@ -872,6 +972,23 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                 <label className="block">
                   <div className="text-xs text-brand-silver/70 mb-1">Preco base</div>
                   <input value={String(service.priceFrom)} onChange={(e) => updateService(index, { priceFrom: parsePriceInput(e.target.value) })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
+                </label>
+                <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={service.estimateEnabled !== false}
+                    onChange={(e) => updateService(index, { estimateEnabled: e.target.checked })}
+                  />
+                  <span className="text-sm text-brand-silver/85">Mostrar no orcamento (checkbox)</span>
+                </label>
+                <label className="block">
+                  <div className="text-xs text-brand-silver/70 mb-1">Nome do checkbox no orcamento (opcional)</div>
+                  <input
+                    value={service.estimateLabel ?? ""}
+                    placeholder={source.name}
+                    onChange={(e) => updateService(index, { estimateLabel: e.target.value })}
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
                 </label>
                 <label className="block sm:col-span-2">
                   <div className="text-xs text-brand-silver/70 mb-1">Descricao</div>
