@@ -103,6 +103,7 @@ export type SiteConfig = {
     description: string;
     priceFrom: PriceValue;
     imageUrl: string;
+    videoUrl?: string;
     popular?: boolean;
     estimateEnabled?: boolean;
     estimateLabel?: string;

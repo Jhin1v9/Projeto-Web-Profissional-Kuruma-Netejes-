@@ -263,6 +263,7 @@ export function VisualEditor() {
       name: "Novo servico",
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       priceFrom: 0,
+      videoUrl: "",
       popular: false,
       estimateEnabled: true,
       estimateLabel: "",

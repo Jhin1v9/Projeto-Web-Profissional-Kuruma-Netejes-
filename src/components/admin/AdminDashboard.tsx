@@ -149,6 +149,7 @@ function createPlaceholderService(index: number): SiteConfig["services"][number]
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt.",
     priceFrom: "XXX",
     imageUrl: "/images/hero.webp",
+    videoUrl: "",
     estimateEnabled: true,
     highlights: [
       "Lorem ipsum dolor",
@@ -1379,6 +1380,15 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                     onError={setMsg}
                   />
                 </div>
+                <label className="block sm:col-span-2">
+                  <div className="text-xs text-brand-silver/70 mb-1">Video URL (opcional: mp4/webm ou YouTube)</div>
+                  <input
+                    value={service.videoUrl ?? ""}
+                    placeholder="https://.../video.mp4 ou https://youtube.com/watch?v=..."
+                    onChange={(e) => updateService(index, { videoUrl: e.target.value })}
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
+                </label>
                 <label className="block sm:col-span-2">
                   <div className="text-xs text-brand-silver/70 mb-1">Highlights (uma linha por item)</div>
                   <textarea

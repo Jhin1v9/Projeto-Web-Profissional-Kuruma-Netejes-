@@ -8,6 +8,22 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import { adaptiveThemeColor } from "@/lib/theme-colors";
 import { useSiteConfig } from "./useSiteConfig";
 
+function getYouTubeEmbed(url: string): string | null {
+  const value = url.trim();
+  if (!value) return null;
+  const watchMatch = value.match(/[?&]v=([^&]+)/);
+  if (watchMatch?.[1]) return `https://www.youtube.com/embed/${watchMatch[1]}`;
+  const shortMatch = value.match(/youtu\.be\/([^?&]+)/);
+  if (shortMatch?.[1]) return `https://www.youtube.com/embed/${shortMatch[1]}`;
+  const embedMatch = value.match(/youtube\.com\/embed\/([^?&]+)/);
+  if (embedMatch?.[1]) return value;
+  return null;
+}
+
+function isDirectVideo(url: string): boolean {
+  return /\.(mp4|webm|ogg)(\?|#|$)/i.test(url.trim());
+}
+
 export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?: string }) {
   const cfg = useSiteConfig();
   const { language, t } = useLanguage();
@@ -92,6 +108,9 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
             const description = language === "ca" ? service.description : translated?.description ?? service.description;
             const highlights = language === "ca" ? service.highlights : translated?.highlights ?? service.highlights;
             const showReadMore = description.length > 130;
+            const videoUrl = (service.videoUrl ?? "").trim();
+            const youtubeEmbed = getYouTubeEmbed(videoUrl);
+            const directVideo = isDirectVideo(videoUrl);
 
             return (
               <motion.article
@@ -104,7 +123,29 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
               >
                 <div className="absolute -inset-0.5 rounded-3xl bg-gradient-to-r from-brand-cyan/50 to-brand-blue/40 opacity-0 blur transition group-hover:opacity-70" />
                 <div className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-brand-dark2/70">
-                  <div className="h-44 bg-cover bg-center" style={{ backgroundImage: `url(${service.imageUrl})` }} />
+                  <div className="h-44 overflow-hidden border-b border-white/10 bg-black/20">
+                    {youtubeEmbed ? (
+                      <iframe
+                        src={youtubeEmbed}
+                        title={`${name} video`}
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="h-full w-full"
+                      />
+                    ) : directVideo ? (
+                      <video
+                        src={videoUrl}
+                        muted
+                        loop
+                        autoPlay
+                        playsInline
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${service.imageUrl})` }} />
+                    )}
+                  </div>
                   <div className="flex flex-1 flex-col p-5">
                     <h3 className="min-h-[3.2rem] text-xl font-black leading-tight" style={{ color: colors.cardTitle }}>
                       {name}
@@ -169,6 +210,33 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                 <X className="h-4 w-4" />
               </button>
             </div>
+            {(() => {
+              const modalVideoUrl = (activeService.videoUrl ?? "").trim();
+              const modalYouTube = getYouTubeEmbed(modalVideoUrl);
+              const modalDirectVideo = isDirectVideo(modalVideoUrl);
+              if (!modalYouTube && !modalDirectVideo) return null;
+              return (
+                <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black/25">
+                  {modalYouTube ? (
+                    <iframe
+                      src={modalYouTube}
+                      title={`${activeName} video`}
+                      loading="lazy"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="h-56 w-full sm:h-72"
+                    />
+                  ) : (
+                    <video
+                      src={modalVideoUrl}
+                      controls
+                      playsInline
+                      className="h-56 w-full object-cover sm:h-72"
+                    />
+                  )}
+                </div>
+              );
+            })()}
             <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-brand-silver/90 sm:text-base">{activeDescription}</p>
             <ul className="mt-5 space-y-2.5">
               {activeHighlights.map((item, i) => (

@@ -188,6 +188,7 @@ export const SiteConfigSchema = z.object({
       description: z.string().min(1),
       priceFrom: z.union([z.number().min(0), z.string().min(1)]),
       imageUrl: z.string().min(1),
+      videoUrl: z.string().min(1).optional(),
       popular: z.boolean().optional(),
       estimateEnabled: z.boolean().optional(),
       estimateLabel: z.string().optional(),
