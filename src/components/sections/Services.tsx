@@ -20,9 +20,9 @@ export function Services({ sectionId = "services" }: { sectionId?: string }) {
     servicesTitle: adaptiveThemeColor(cfg.appearance.textColors.servicesTitle, theme, "#0F172A"),
     servicesHighlight: adaptiveThemeColor(cfg.appearance.textColors.servicesHighlight, theme, "#0EA5E9"),
     servicesCardTitle: adaptiveThemeColor(cfg.appearance.textColors.servicesCardTitle, theme, "#0F172A"),
-    servicesCardPrice: adaptiveThemeColor(cfg.appearance.textColors.servicesCardPrice, theme, "#0284C7"),
-    servicesCardDescription: adaptiveThemeColor(cfg.appearance.textColors.servicesCardDescription, theme, "#334155"),
-    servicesCardBullet: adaptiveThemeColor(cfg.appearance.textColors.servicesCardBullet, theme, "#334155"),
+    servicesCardPrice: adaptiveThemeColor(cfg.appearance.textColors.servicesCardPrice, theme, "#0284C7", 0.62),
+    servicesCardDescription: adaptiveThemeColor(cfg.appearance.textColors.servicesCardDescription, theme, "#334155", 0.42),
+    servicesCardBullet: adaptiveThemeColor(cfg.appearance.textColors.servicesCardBullet, theme, "#334155", 0.42),
   };
   const totalServices = cfg.services.length;
 
@@ -55,7 +55,9 @@ export function Services({ sectionId = "services" }: { sectionId?: string }) {
           <h2 className="text-3xl font-black sm:text-5xl" style={{ color: colors.servicesTitle }}>
             {t.services.title} <span style={{ color: colors.servicesHighlight }}>{t.services.highlight}</span>
           </h2>
-          <p className="mt-3 text-base text-brand-silver/90 sm:mt-4 sm:text-lg">{t.services.subtitle}</p>
+          <p className="mt-3 text-base sm:mt-4 sm:text-lg" style={{ color: theme === "light" ? "#334155" : "rgba(192,192,200,0.9)" }}>
+            {t.services.subtitle}
+          </p>
         </div>
 
         <div className={`mt-10 grid gap-5 sm:mt-14 sm:grid-cols-2 ${desktopColsClass} xl:gap-7`}>

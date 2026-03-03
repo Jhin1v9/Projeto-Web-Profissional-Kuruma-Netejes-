@@ -25,9 +25,14 @@ function luminance(hex: string): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-export function adaptiveThemeColor(color: string, theme: ThemeMode, lightFallback: string): string {
+export function adaptiveThemeColor(
+  color: string,
+  theme: ThemeMode,
+  lightFallback: string,
+  maxLuminanceInLight = 0.72
+): string {
   if (theme !== "light") return color;
   const lum = luminance(color);
-  if (lum > 0.72) return lightFallback;
+  if (lum > maxLuminanceInLight) return lightFallback;
   return color;
 }
