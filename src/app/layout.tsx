@@ -5,9 +5,9 @@ import { BUSINESS, SEO_DEFAULTS } from "@/lib/constants";
 import { generateLocalBusinessSchema, generateWebSiteSchema } from "@/lib/seo";
 import { getDefaultConfig } from "@/lib/site-config";
 import { CursorProvider } from "@/components/providers/CursorProvider";
-import { CustomCursor } from "@/components/layout/CustomCursor";
 import { LanguageProvider } from "@/components/providers/LanguageProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AppearanceRuntime } from "@/components/layout/AppearanceRuntime";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
@@ -37,21 +37,21 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const cfg = getDefaultConfig();
   const schema = [generateLocalBusinessSchema(), generateWebSiteSchema()];
+  const cfg = getDefaultConfig();
 
   return (
     <html lang="ca" className={inter.variable}>
       <head>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-        <style dangerouslySetInnerHTML={{ __html: `:root{--overlay:${cfg.appearance.overlay};--brightness:${cfg.appearance.brightness};--texture:url('${cfg.appearance.textureUrl}');}` }} />
+        <style dangerouslySetInnerHTML={{ __html: `:root{--overlay:${cfg.appearance.overlay};--brightness:${cfg.appearance.brightness};--texture-dark:url('${cfg.appearance.textureUrl}');--texture-light:url('${cfg.appearance.lightTextureUrl || cfg.appearance.textureUrl}');--texture-active:url('${cfg.appearance.textureUrl}');--texture-opacity:${cfg.appearance.showTexture ? "0.36" : "0"};}` }} />
       </head>
       <body className={`${inter.className} antialiased text-white`}>
         <div className="k-bg" />
         <ThemeProvider>
           <LanguageProvider>
             <CursorProvider>
-              {cfg.appearance.cursorMode !== "off" && <CustomCursor mode={cfg.appearance.cursorMode} />}
+              <AppearanceRuntime />
               {children}
             </CursorProvider>
           </LanguageProvider>

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { SiteConfig } from "@/types/site-config";
-import { getDefaultConfig } from "@/lib/site-config";
+import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
 
 export function useSiteConfig() {
   const [cfg, setCfg] = useState<SiteConfig>(getDefaultConfig());
@@ -15,7 +15,8 @@ export function useSiteConfig() {
         const res = await fetch("/api/site-config?view=published", { cache: "no-store", signal: controller.signal });
         if (!res.ok) return;
         const json = await res.json().catch(() => null);
-        if (json) setCfg(json);
+        const parsed = SiteConfigSchema.safeParse(json);
+        if (parsed.success) setCfg(normalizeSiteConfig(parsed.data));
       } catch {
         setCfg(getDefaultConfig());
       } finally {

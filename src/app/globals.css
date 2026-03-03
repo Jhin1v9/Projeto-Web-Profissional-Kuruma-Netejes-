@@ -7,7 +7,10 @@ html { scroll-behavior: smooth; }
 :root{
   --overlay: 0.52;
   --brightness: 0.85;
-  --texture: url("/images/texture.webp");
+  --texture-dark: url("/images/texture.webp");
+  --texture-light: url("/images/texture.webp");
+  --texture-active: var(--texture-dark);
+  --texture-opacity: 0.36;
   --app-bg: #0A0A0F;
   --app-text: #FFFFFF;
   --app-muted: #C0C0C8;
@@ -35,11 +38,6 @@ html[data-theme="light"] {
   --app-surface-soft: rgba(255, 255, 255, 0.88);
   --app-header: rgba(255, 255, 255, 0.9);
   --app-mobile-overlay: rgba(244, 247, 251, 0.97);
-}
-
-html[data-theme="light"] .k-bg::before {
-  opacity: 0.12;
-  filter: saturate(0.85) brightness(1.08);
 }
 
 html[data-theme="light"] .k-bg::after {
@@ -102,11 +100,11 @@ html[data-theme="light"] .shadow-glowStrong {
 .k-bg{ position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 .k-bg::before{
   content:""; position:absolute; inset:0;
-  background-image: var(--texture);
+  background-image: var(--texture-active);
   background-size: cover;
   background-position: center;
-  opacity: 0.30;
-  filter: saturate(1.05) brightness(var(--brightness));
+  opacity: var(--texture-opacity);
+  filter: saturate(1.02) brightness(var(--brightness));
 }
 .k-bg::after{
   content:""; position:absolute; inset:0;

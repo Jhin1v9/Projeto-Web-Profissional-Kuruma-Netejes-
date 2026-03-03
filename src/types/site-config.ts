@@ -31,6 +31,7 @@ export type SiteConfig = {
     overlay: number;
     showTexture: boolean;
     textureUrl: string;
+    lightTextureUrl?: string;
     cursorMode: CursorMode;
     textColors: {
       heroBadge: string;

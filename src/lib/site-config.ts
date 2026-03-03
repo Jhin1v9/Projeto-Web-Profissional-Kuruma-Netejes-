@@ -135,6 +135,7 @@ export const SiteConfigSchema = z.object({
     overlay: z.number().min(0).max(1),
     showTexture: z.boolean(),
     textureUrl: z.string().min(1),
+    lightTextureUrl: z.string().min(1).optional(),
     cursorMode: z.enum(["realistic", "neon", "off"]),
     textColors: TextColorsSchema.optional(),
   }),
@@ -374,6 +375,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     ...input,
     appearance: {
       ...input.appearance,
+      lightTextureUrl: input.appearance.lightTextureUrl ?? input.appearance.textureUrl,
       textColors,
     },
     layout,
@@ -396,6 +398,7 @@ export function getDefaultConfig(): SiteConfig {
       overlay: 0.52,
       showTexture: true,
       textureUrl: DEFAULT_IMAGE_PATHS.texture,
+      lightTextureUrl: DEFAULT_IMAGE_PATHS.texture,
       cursorMode: "realistic",
       textColors: getDefaultTextColors(),
     },

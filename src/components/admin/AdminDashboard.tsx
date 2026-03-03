@@ -1317,10 +1317,19 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                 </label>
                 <div className="sm:col-span-2">
                   <ImageUrlInput
-                    label="Texture URL"
+                    label="Texture URL (Dark)"
                     value={cfg.appearance.textureUrl}
                     folder="appearance/texture"
                     onChange={(next) => setCfg({ ...cfg, appearance: { ...cfg.appearance, textureUrl: next } })}
+                    onError={setMsg}
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <ImageUrlInput
+                    label="Texture URL (Light)"
+                    value={cfg.appearance.lightTextureUrl ?? cfg.appearance.textureUrl}
+                    folder="appearance/texture-light"
+                    onChange={(next) => setCfg({ ...cfg, appearance: { ...cfg.appearance, lightTextureUrl: next } })}
                     onError={setMsg}
                   />
                 </div>
@@ -1331,6 +1340,9 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                     <option value="neon">neon</option>
                     <option value="off">off</option>
                   </select>
+                  <div className="mt-2 text-xs text-brand-silver/65">
+                    realistic = carro metalico, neon = farois e bordas azul neon, off = cursor normal.
+                  </div>
                 </label>
                 <label className="flex items-center gap-3 mt-6">
                   <input type="checkbox" checked={cfg.appearance.showTexture} onChange={(e) => setCfg({ ...cfg, appearance: { ...cfg.appearance, showTexture: e.target.checked } })} />
