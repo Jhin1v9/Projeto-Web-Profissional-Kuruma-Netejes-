@@ -21,6 +21,22 @@ body {
   cursor: auto !important;
 }
 
+.admin-cursor-default button,
+.admin-cursor-default a,
+.admin-cursor-default [role="button"],
+.admin-cursor-default input[type="button"],
+.admin-cursor-default input[type="submit"],
+.admin-cursor-default input[type="checkbox"],
+.admin-cursor-default select,
+.admin-cursor-default summary {
+  cursor: pointer !important;
+}
+
+.admin-cursor-default input,
+.admin-cursor-default textarea {
+  cursor: text !important;
+}
+
 .k-bg{ position: fixed; inset: 0; z-index: -1; pointer-events: none; }
 .k-bg::before{
   content:""; position:absolute; inset:0;

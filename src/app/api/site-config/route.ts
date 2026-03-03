@@ -7,6 +7,8 @@ import type { SiteConfig } from "@/types/site-config";
 
 const KEY = "default";
 const LOCAL_CONFIG_FILE = path.join(process.cwd(), "data", "site-config.local.json");
+const STORAGE_BUCKET = "site-config-data";
+const STORAGE_PATH = "default.json";
 
 type StoredRecord = {
   data?: SiteConfig;
@@ -33,6 +35,12 @@ function pickPayload(record: StoredRecord | null, view: ViewMode): SiteConfig {
   return record.published_data ?? getDefaultConfig();
 }
 
+function isMissingSiteConfigTableError(message?: string | null): boolean {
+  if (!message) return false;
+  const text = message.toLowerCase();
+  return text.includes("could not find the table") && text.includes("site_config");
+}
+
 async function readLocalRecord(): Promise<StoredRecord | null> {
   try {
     const raw = await readFile(LOCAL_CONFIG_FILE, "utf8");
@@ -46,6 +54,33 @@ async function readLocalRecord(): Promise<StoredRecord | null> {
 async function writeLocalRecord(record: StoredRecord): Promise<void> {
   await mkdir(path.dirname(LOCAL_CONFIG_FILE), { recursive: true });
   await writeFile(LOCAL_CONFIG_FILE, JSON.stringify(record, null, 2), "utf8");
+}
+
+async function ensureStorageBucket() {
+  const supabase = createClient();
+  const { data } = await supabase.storage.listBuckets();
+  const exists = data?.some((b) => b.name === STORAGE_BUCKET);
+  if (!exists) {
+    await supabase.storage.createBucket(STORAGE_BUCKET, { public: false, fileSizeLimit: "1MB" });
+  }
+  return supabase;
+}
+
+async function readStorageRecord(): Promise<StoredRecord | null> {
+  const supabase = await ensureStorageBucket();
+  const { data, error } = await supabase.storage.from(STORAGE_BUCKET).download(STORAGE_PATH);
+  if (error || !data) return null;
+  const raw = await data.text();
+  return JSON.parse(raw) as StoredRecord;
+}
+
+async function writeStorageRecord(record: StoredRecord): Promise<void> {
+  const supabase = await ensureStorageBucket();
+  const payload = new Blob([JSON.stringify(record)], { type: "application/json" });
+  await supabase.storage.from(STORAGE_BUCKET).upload(STORAGE_PATH, payload, {
+    contentType: "application/json",
+    upsert: true,
+  });
 }
 
 export async function GET(req: Request) {
@@ -71,7 +106,24 @@ export async function GET(req: Request) {
 
   const supabase = createClient();
   const { data, error } = await supabase.from("site_config").select("published_data,data").eq("key", KEY).single();
-  if (error || !data) return NextResponse.json(getDefaultConfig());
+  if (error || !data) {
+    if (isMissingSiteConfigTableError(error?.message)) {
+      const localFallback = await readStorageRecord();
+      const draft = parseConfigPayload(localFallback?.data);
+      const published = parseConfigPayload(localFallback?.published_data);
+      return NextResponse.json(
+        pickPayload(
+          {
+            data: draft ?? undefined,
+            published_data: published ?? undefined,
+            published_at: localFallback?.published_at,
+          },
+          view
+        )
+      );
+    }
+    return NextResponse.json(getDefaultConfig());
+  }
 
   const draft = parseConfigPayload(data.data);
   const published = parseConfigPayload(data.published_data);
@@ -102,7 +154,14 @@ export async function PATCH(req: Request) {
 
   const supabase = createClient();
   const { error } = await supabase.from("site_config").upsert({ key: KEY, data: parsed }, { onConflict: "key" });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) {
+    if (isMissingSiteConfigTableError(error.message)) {
+      const existing = await readStorageRecord();
+      await writeStorageRecord({ ...existing, data: parsed });
+      return NextResponse.json({ ok: true, persisted: true, storage: "supabase-storage", mode: "draft" });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
   return NextResponse.json({ ok: true, persisted: true, storage: "supabase", mode: "draft" });
 }
 
@@ -134,7 +193,23 @@ export async function POST() {
 
   const supabase = createClient();
   const { data, error } = await supabase.from("site_config").select("data").eq("key", KEY).single();
-  if (error || !data) return NextResponse.json({ error: "No config" }, { status: 400 });
+  if (error || !data) {
+    if (isMissingSiteConfigTableError(error?.message)) {
+      const existing = await readStorageRecord();
+      const source = existing?.data ?? existing?.published_data;
+      if (!source) return NextResponse.json({ error: "No config" }, { status: 400 });
+      const parsedStorage = parseConfigPayload(source);
+      if (!parsedStorage) return NextResponse.json({ error: "Invalid config" }, { status: 400 });
+      await writeStorageRecord({
+        ...existing,
+        data: parsedStorage,
+        published_data: parsedStorage,
+        published_at: now,
+      });
+      return NextResponse.json({ ok: true, persisted: true, storage: "supabase-storage", mode: "published" });
+    }
+    return NextResponse.json({ error: "No config" }, { status: 400 });
+  }
 
   const parsed = parseConfigPayload(data.data);
   if (!parsed) return NextResponse.json({ error: "Invalid config" }, { status: 400 });

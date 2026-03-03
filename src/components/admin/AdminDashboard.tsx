@@ -601,15 +601,36 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
 
       {section === "services" && (
         <div className="mt-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="text-sm text-brand-silver/75">Gerencie os servicos exibidos no site.</div>
-            <button
-              type="button"
-              onClick={addService}
-              className="rounded-xl border border-brand-cyan/40 text-brand-cyan px-4 py-2 text-sm font-semibold hover:bg-brand-cyan/10"
-            >
-              + Add service
-            </button>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-brand-silver/75">Gerencie os servicos exibidos no site.</div>
+              <button
+                type="button"
+                onClick={addService}
+                className="rounded-xl border border-brand-cyan/40 text-brand-cyan px-4 py-2 text-sm font-semibold hover:bg-brand-cyan/10"
+              >
+                + Add service
+              </button>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+              <div className="mb-2 text-xs text-brand-silver/70">Idioma dos textos de servicos</div>
+              <div className="flex flex-wrap items-center gap-2">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={`service-lang-${lang.code}`}
+                    type="button"
+                    onClick={() => setServiceTextLang(lang.code)}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                      serviceTextLang === lang.code
+                        ? "border border-brand-cyan/40 bg-brand-cyan/20 text-brand-cyan"
+                        : "border border-white/10 bg-black/20 text-brand-silver/80"
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
           {cfg.services.map((service, index) => (
             <div
@@ -650,10 +671,25 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   </button>
                 </div>
               </div>
+              {(() => {
+                const localized =
+                  serviceTextLang === "ca"
+                    ? null
+                    : cfg.i18n?.[serviceTextLang]?.services?.[service.id] ?? TRANSLATIONS[serviceTextLang].services.items[service.id];
+                const source = localized ?? service;
+                return (
               <div className="grid sm:grid-cols-2 gap-4">
                 <label className="block">
                   <div className="text-xs text-brand-silver/70 mb-1">Nome</div>
-                  <input value={service.name} onChange={(e) => updateService(index, { name: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
+                  <input
+                    value={source.name}
+                    onChange={(e) =>
+                      serviceTextLang === "ca"
+                        ? updateService(index, { name: e.target.value })
+                        : updateLocalizedService(serviceTextLang, service.id, { name: e.target.value })
+                    }
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
                 </label>
                 <label className="block">
                   <div className="text-xs text-brand-silver/70 mb-1">Preco base</div>
@@ -661,7 +697,16 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                 </label>
                 <label className="block sm:col-span-2">
                   <div className="text-xs text-brand-silver/70 mb-1">Descricao</div>
-                  <textarea rows={3} value={service.description} onChange={(e) => updateService(index, { description: e.target.value })} className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60" />
+                  <textarea
+                    rows={3}
+                    value={source.description}
+                    onChange={(e) =>
+                      serviceTextLang === "ca"
+                        ? updateService(index, { description: e.target.value })
+                        : updateLocalizedService(serviceTextLang, service.id, { description: e.target.value })
+                    }
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
                 </label>
                 <div className="sm:col-span-2">
                   <ImageUrlInput
@@ -676,19 +721,28 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   <div className="text-xs text-brand-silver/70 mb-1">Highlights (uma linha por item)</div>
                   <textarea
                     rows={4}
-                    value={service.highlights.join("\n")}
+                    value={source.highlights.join("\n")}
                     onChange={(e) =>
-                      updateService(index, {
-                        highlights: e.target.value
-                          .split("\n")
-                          .map((x) => x.trim())
-                          .filter(Boolean),
-                      })
+                      serviceTextLang === "ca"
+                        ? updateService(index, {
+                            highlights: e.target.value
+                              .split("\n")
+                              .map((x) => x.trim())
+                              .filter(Boolean),
+                          })
+                        : updateLocalizedService(serviceTextLang, service.id, {
+                            highlights: e.target.value
+                              .split("\n")
+                              .map((x) => x.trim())
+                              .filter(Boolean),
+                          })
                     }
                     className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
                   />
                 </label>
               </div>
+                );
+              })()}
             </div>
           ))}
         </div>
