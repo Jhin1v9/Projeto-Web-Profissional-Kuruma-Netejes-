@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ImageIcon, Sparkles, ListChecks, LogOut } from "lucide-react";
+import { LayoutDashboard, ImageIcon, Sparkles, ListChecks, LogOut, ExternalLink } from "lucide-react";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -64,6 +64,16 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <LogOut className="h-4 w-4" />
               Sortir
             </button>
+
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 px-4 py-3 text-brand-silver/85 hover:border-brand-cyan/30 hover:bg-white/5 hover:text-white"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Voltar ao site
+            </a>
 
             <div className="mt-4 text-xs text-brand-silver/60 sm:mt-6">
               Tip: clica <b>Publicar</b> quan estiguis llest.
