@@ -368,6 +368,31 @@ function genericFaqFallback(): Array<{ q: string; a: string }> {
   ];
 }
 
+function mergeFaqWithDefaults(
+  current: Array<{ q: string; a: string }>,
+  defaults: Array<{ q: string; a: string }>,
+  minCount = 3
+): Array<{ q: string; a: string }> {
+  const seen = new Set<string>();
+  const merged: Array<{ q: string; a: string }> = [];
+
+  current.forEach((item) => {
+    const key = item.q.trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    merged.push(item);
+  });
+
+  defaults.forEach((item) => {
+    const key = item.q.trim().toLowerCase();
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    merged.push(item);
+  });
+
+  return merged.slice(0, Math.max(minCount, merged.length));
+}
+
 function isWeakFaq(faq?: Array<{ q: string; a: string }>): boolean {
   if (!faq?.length || faq.length < 2) return true;
   const genericQuestions = [
@@ -471,7 +496,12 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       infoEnabled: service.infoEnabled ?? true,
       infoImageUrl: service.infoImageUrl?.trim() || service.imageUrl,
       infoSummary: isWeakSummary(service.infoSummary) ? defaultSummary : service.infoSummary!.trim(),
-      faq: isWeakFaq(service.faq) ? defaultFaq : service.faq!,
+      faq:
+        service.id === "ozone"
+          ? mergeFaqWithDefaults(isWeakFaq(service.faq) ? defaultFaq : service.faq!, defaultFaq, 5)
+          : isWeakFaq(service.faq)
+          ? defaultFaq
+          : service.faq!,
     };
   });
   const defaults = getDefaultI18n();
@@ -524,7 +554,16 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
         infoSummary: isWeakSummary(current.infoSummary)
           ? langDefault?.infoSummary ?? service.infoSummary
           : current.infoSummary,
-        faq: isWeakFaq(current.faq) ? langDefault?.faq ?? service.faq : current.faq,
+        faq:
+          service.id === "ozone"
+            ? mergeFaqWithDefaults(
+                isWeakFaq(current.faq) ? langDefault?.faq ?? service.faq : current.faq!,
+                langDefault?.faq ?? service.faq,
+                5
+              )
+            : isWeakFaq(current.faq)
+            ? langDefault?.faq ?? service.faq
+            : current.faq,
       };
     });
   });

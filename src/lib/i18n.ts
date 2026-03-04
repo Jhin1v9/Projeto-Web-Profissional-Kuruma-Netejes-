@@ -215,19 +215,31 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
           description: "Tractament amb ozono orientat a eliminar olor de tabac/cigarro i olors persistents.",
           highlights: ["Reduccio d'olor a tabac", "Combat olors persistents", "Ideal com a extra interior"],
           infoSummary:
-            "El tractament amb ozó s'utilitza com a suport per reduir olors persistents dins del vehicle mitjancant oxidacio. Com que l'ozó en concentracions elevades pot irritar vies respiratories, l'aplicacio s'ha de fer sense ocupants i amb ventilacio adequada abans de la entrega.",
+            "El tractament amb ozono te com a objectiu principal eliminar males olors de l'habitacle, sobretot olor de tabac/cigarro. Combinat amb neteja de tapisseries i superficies, dona un resultat mes net i estable. Es fa amb protocol segur i ventilacio completa abans de lliurar el vehicle.",
           faq: [
             {
-              q: "L'ozó es segur?",
+              q: "Retira olor de cigarro?",
+              a: "Si. Amb ozono + neteja profunda de tapisseries, l'olor de tabac es retira de forma efectiva en la gran majoria de casos.",
+            },
+            {
+              q: "L'ozono es segur?",
               a: "Si, amb protocol correcte: cabina buida, temps controlat i ventilacio completa abans d'utilitzar el vehicle.",
             },
             {
               q: "Elimina qualsevol olor per sempre?",
-              a: "Pot reduir molt les olors, pero la durada depen de la causa i dels habits d'ús posteriors.",
+              a: "Elimina les olors acumulades en el moment del tractament. Si torna la font d'olor, cal manteniment.",
             },
             {
               q: "Puc conduir just despres del servei?",
-              a: "Despres del temps de ventilacio indicat per l'equip, si.",
+              a: "Si, despres del temps de ventilacio indicat per l'equip.",
+            },
+            {
+              q: "Val la pena si vull vendre el cotxe?",
+              a: "Si. Un interior sense olor de tabac millora molt la primera impressio i dona mes confianca al comprador.",
+            },
+            {
+              q: "Cal combinar-ho amb neteja interior?",
+              a: "Si. Es la combinacio amb millor resultat, perque neutralitza l'olor i elimina residus que la poden fer tornar.",
             },
           ],
         },
@@ -389,19 +401,31 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
           description: "Tratamiento orientado a eliminar olor a tabaco/cigarro y olores persistentes.",
           highlights: ["Reduce olor a tabaco", "Combate olores persistentes", "Extra ideal para interior"],
           infoSummary:
-            "El tratamiento con ozono se usa como apoyo para reducir olores persistentes en el interior del vehiculo mediante oxidacion. Como el ozono en concentraciones altas puede irritar las vias respiratorias, la aplicacion debe hacerse sin ocupantes y con ventilacion adecuada antes de entregar el coche.",
+            "El tratamiento con ozono esta enfocado en eliminar malos olores del habitaculo, especialmente olor a tabaco/cigarro. Combinado con limpieza profunda de tapiceria y superficies, consigue un resultado mas limpio y estable. Se aplica con protocolo seguro y ventilacion completa antes de entregar el coche.",
           faq: [
+            {
+              q: "Quita el olor a cigarro?",
+              a: "Si. Con ozono + limpieza profunda de tapiceria, el olor a tabaco se elimina de forma efectiva en la mayoria de casos.",
+            },
             {
               q: "El ozono es seguro?",
               a: "Si, con protocolo correcto: cabina vacia, tiempo controlado y ventilacion completa antes de usar el vehiculo.",
             },
             {
               q: "Elimina cualquier olor para siempre?",
-              a: "Puede reducir mucho los olores, pero la duracion depende de la causa y de los habitos de uso posteriores.",
+              a: "Elimina los olores acumulados en el momento del tratamiento. Si vuelve la fuente de olor, hay que hacer mantenimiento.",
             },
             {
               q: "Puedo usar el coche justo despues?",
-              a: "Despues del tiempo de ventilacion indicado por el equipo, si.",
+              a: "Si, despues del tiempo de ventilacion indicado por el equipo.",
+            },
+            {
+              q: "Merece la pena para vender el coche?",
+              a: "Si. Un interior sin olor a tabaco mejora la impresion del comprador y ayuda a cerrar la venta.",
+            },
+            {
+              q: "Es mejor combinarlo con limpieza interior?",
+              a: "Si. Es la combinacion mas eficaz: neutraliza olor y elimina residuos que pueden reactivar el mal olor.",
             },
           ],
         },
@@ -563,19 +587,31 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
           description: "Treatment focused on removing cigarette/tobacco smell and persistent odors.",
           highlights: ["Reduces smoke smell", "Targets persistent odors", "Great interior add-on"],
           infoSummary:
-            "Ozone treatment can be used as support to reduce persistent interior odors through oxidation. Because high ozone concentration can irritate airways, treatment must be done with no occupants inside and with proper ventilation before vehicle return.",
+            "Ozone treatment is focused on removing strong cabin odors, especially cigarette/tobacco smell. Combined with deep upholstery and interior cleaning, it delivers a cleaner and more stable result. Application follows a safe protocol with full ventilation before handover.",
           faq: [
             {
+              q: "Does it remove cigarette smell?",
+              a: "Yes. Ozone combined with deep upholstery cleaning removes cigarette odor effectively in most cases.",
+            },
+            {
               q: "Is ozone treatment safe?",
-              a: "Yes, with correct protocol: empty cabin, controlled exposure time and full ventilation before use.",
+              a: "Yes, with proper protocol: empty cabin, controlled timing and full ventilation before use.",
             },
             {
               q: "Does it permanently remove all odors?",
-              a: "It can reduce odors significantly, but durability depends on source and later usage habits.",
+              a: "It removes built-up odor at treatment time. If odor sources return, maintenance is needed.",
             },
             {
               q: "Can I drive immediately after treatment?",
               a: "Yes, after the recommended ventilation period is completed.",
+            },
+            {
+              q: "Is this useful before selling a car?",
+              a: "Absolutely. A smoke-free cabin increases buyer confidence and improves first impression.",
+            },
+            {
+              q: "Should I combine ozone with interior cleaning?",
+              a: "Yes. That combination is most effective because it neutralizes odor and removes residue that can bring odor back.",
             },
           ],
         },
