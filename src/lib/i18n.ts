@@ -166,6 +166,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
               q: "Netegeu cuir sense ressecar-lo?",
               a: "Si. S'utilitzen netejadors adequats i proteccio final per mantenir flexibilitat i acabat.",
             },
+            {
+              q: "Quins materials es netegen?",
+              a: "Teixits, moqueta, plastics, panells de porta, maleter i cuir amb producte adequat per cada superficie.",
+            },
+            {
+              q: "La neteja interior treu taques antigues?",
+              a: "Moltes taques milloren molt, pero les mes antigues o fixades per calor poden deixar rastre segons el material.",
+            },
+            {
+              q: "Cada quant convé fer una neteja interior profunda?",
+              a: "Com a base, cada 4 a 6 mesos. Si hi ha mascotes, nens o fum, convé fer-la amb mes frequencia.",
+            },
           ],
         },
         polishing: {
@@ -187,6 +199,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
               q: "Cal protegir despres del poliment?",
               a: "Si, es recomana segellant, cera o coating per allargar brillantor i facilitar manteniment.",
             },
+            {
+              q: "Quantes etapes de poliment feu?",
+              a: "Depen de l'estat del vehicle: pot ser d'una etapa (millora rapida) o multietapa per mes correccio i acabat.",
+            },
+            {
+              q: "El poliment elimina hologrames i swirls?",
+              a: "Si, aquesta es una de les millores principals quan el proces es fa amb tecnica i inspeccio correcta.",
+            },
+            {
+              q: "Quant dura el resultat del poliment?",
+              a: "Depen del manteniment i del tipus de proteccio aplicada despres, pero pot mantenir-se mesos amb cures correctes.",
+            },
           ],
         },
         wash: {
@@ -207,6 +231,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
             {
               q: "Inclou neteja de llandes?",
               a: "Si, llandes i zones de dificil accés formen part del detall exterior.",
+            },
+            {
+              q: "Inclou pre-rentat amb escuma activa?",
+              a: "Si. El pre-rentat redueix bruticia adherida abans del contacte per minimitzar micro-ratllades.",
+            },
+            {
+              q: "Es fa assecat sense marques?",
+              a: "Si, es fa amb microfibra i tecnica adequada per reduir marques d'aigua.",
+            },
+            {
+              q: "Quina frequencia recomaneu per rentat premium?",
+              a: "Cada 2 o 4 setmanes segons us i exposicio, especialment si el cotxe dorm al carrer.",
             },
           ],
         },
@@ -352,6 +388,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
               q: "Limpiais cuero sin resecar?",
               a: "Si. Se usan limpiadores adecuados y proteccion final para mantener flexibilidad y acabado.",
             },
+            {
+              q: "Que zonas del coche se limpian?",
+              a: "Asientos, alfombras, moqueta, paneles, maletero, plasticos y cuero con producto especifico por material.",
+            },
+            {
+              q: "La limpieza interior quita manchas antiguas?",
+              a: "Muchas mejoran mucho, pero las muy antiguas o fijadas por calor pueden dejar alguna marca segun el tejido.",
+            },
+            {
+              q: "Cada cuanto conviene hacer limpieza interior profunda?",
+              a: "Como referencia, cada 4 a 6 meses. Si hay mascotas, ninos o humo, conviene hacerlo antes.",
+            },
           ],
         },
         polishing: {
@@ -373,6 +421,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
               q: "Hay que proteger despues del pulido?",
               a: "Si, se recomienda sellante, cera o coating para alargar brillo y facilitar mantenimiento.",
             },
+            {
+              q: "Cuantas etapas de pulido se recomiendan?",
+              a: "Depende del estado de la pintura: una etapa para mejora general o varias etapas para maxima correccion.",
+            },
+            {
+              q: "El pulido elimina swirls y hologramas?",
+              a: "Si, es uno de los objetivos principales cuando el trabajo se hace con tecnica e inspeccion correcta.",
+            },
+            {
+              q: "Cuanto dura el resultado del pulido?",
+              a: "Depende del mantenimiento y de la proteccion aplicada, pero puede durar meses con buen cuidado.",
+            },
           ],
         },
         wash: {
@@ -393,6 +453,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
             {
               q: "Incluye limpieza de llantas?",
               a: "Si, llantas y zonas de dificil acceso forman parte del detalle exterior.",
+            },
+            {
+              q: "Incluye prelavado con espuma activa?",
+              a: "Si. El prelavado ayuda a desprender suciedad antes del contacto y reduce micro-rayas.",
+            },
+            {
+              q: "Se seca sin marcas de agua?",
+              a: "Si, se usa microfibra y tecnica de secado cuidada para minimizar marcas.",
+            },
+            {
+              q: "Cada cuanto conviene hacer lavado premium?",
+              a: "Cada 2 a 4 semanas segun uso y exposicion del coche al sol, lluvia y polvo.",
             },
           ],
         },
@@ -538,6 +610,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
               q: "Do you clean leather without drying it out?",
               a: "Yes. Proper leather-safe cleaners and a protective finish are used to preserve flexibility and appearance.",
             },
+            {
+              q: "Which interior areas are cleaned?",
+              a: "Seats, carpets, mats, trunk, door panels, plastics and leather surfaces using material-safe products.",
+            },
+            {
+              q: "Can interior cleaning remove old stains?",
+              a: "Many old stains improve a lot, but heat-set or deeply embedded stains may leave a light trace.",
+            },
+            {
+              q: "How often should I do deep interior cleaning?",
+              a: "A good baseline is every 4 to 6 months, or sooner with pets, kids, smokers or heavy daily use.",
+            },
           ],
         },
         polishing: {
@@ -559,6 +643,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
               q: "Should I protect the car after polishing?",
               a: "Yes. Sealant, wax or coating is recommended to maintain gloss and simplify maintenance.",
             },
+            {
+              q: "How many polishing stages are needed?",
+              a: "It depends on paint condition: one-step for visible improvement or multi-step for higher correction and finish.",
+            },
+            {
+              q: "Can polishing remove swirls and holograms?",
+              a: "Yes, that is one of the main goals when polishing is done with proper lighting and paint-safe technique.",
+            },
+            {
+              q: "How long do polishing results last?",
+              a: "Results can last for months depending on wash habits, storage conditions and post-polish protection.",
+            },
           ],
         },
         wash: {
@@ -579,6 +675,18 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
             {
               q: "Are wheels included?",
               a: "Yes. Wheels and hard-to-reach exterior areas are part of the detailing workflow.",
+            },
+            {
+              q: "Does it include active foam pre-wash?",
+              a: "Yes. Pre-wash helps loosen grime before contact, reducing the risk of wash-induced micro-marring.",
+            },
+            {
+              q: "Is the car dried to avoid water spotting?",
+              a: "Yes. We use microfiber drying and safe technique to reduce streaks and spotting.",
+            },
+            {
+              q: "How often should I book a premium wash?",
+              a: "Every 2 to 4 weeks is a good cadence for most daily-driven vehicles.",
             },
           ],
         },

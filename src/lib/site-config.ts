@@ -390,6 +390,16 @@ function mergeFaqWithDefaults(
     merged.push(item);
   });
 
+  if (merged.length < minCount) {
+    genericFaqFallback().forEach((item) => {
+      if (merged.length >= minCount) return;
+      const key = item.q.trim().toLowerCase();
+      if (!key || seen.has(key)) return;
+      seen.add(key);
+      merged.push(item);
+    });
+  }
+
   return merged.slice(0, Math.max(minCount, merged.length));
 }
 
@@ -496,12 +506,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       infoEnabled: service.infoEnabled ?? true,
       infoImageUrl: service.infoImageUrl?.trim() || service.imageUrl,
       infoSummary: isWeakSummary(service.infoSummary) ? defaultSummary : service.infoSummary!.trim(),
-      faq:
-        service.id === "ozone"
-          ? mergeFaqWithDefaults(isWeakFaq(service.faq) ? defaultFaq : service.faq!, defaultFaq, 5)
-          : isWeakFaq(service.faq)
-          ? defaultFaq
-          : service.faq!,
+      faq: mergeFaqWithDefaults(isWeakFaq(service.faq) ? defaultFaq : service.faq!, defaultFaq, 5),
     };
   });
   const defaults = getDefaultI18n();
@@ -554,16 +559,11 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
         infoSummary: isWeakSummary(current.infoSummary)
           ? langDefault?.infoSummary ?? service.infoSummary
           : current.infoSummary,
-        faq:
-          service.id === "ozone"
-            ? mergeFaqWithDefaults(
-                isWeakFaq(current.faq) ? langDefault?.faq ?? service.faq : current.faq!,
-                langDefault?.faq ?? service.faq,
-                5
-              )
-            : isWeakFaq(current.faq)
-            ? langDefault?.faq ?? service.faq
-            : current.faq,
+        faq: mergeFaqWithDefaults(
+          isWeakFaq(current.faq) ? langDefault?.faq ?? service.faq : current.faq!,
+          langDefault?.faq ?? service.faq,
+          5
+        ),
       };
     });
   });
