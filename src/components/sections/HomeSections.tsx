@@ -21,6 +21,13 @@ function visibilityClass(mobile: boolean, desktop: boolean): string {
 export function HomeSections() {
   const cfg = useSiteConfig();
   const usedAnchors = useMemo(() => new Map<string, number>(), [cfg.layout.sections.length]);
+  const serviceSectionVisibility = useMemo(() => {
+    const services = cfg.layout.sections.filter((section) => section.type === "services" && section.enabled);
+    return {
+      mobile: services.some((section) => section.mobile),
+      desktop: services.some((section) => section.desktop),
+    };
+  }, [cfg.layout.sections]);
 
   return (
     <>
@@ -35,12 +42,7 @@ export function HomeSections() {
           case "hero":
             return <div key={section.id} className={cls}><Hero sectionId={sectionId} /></div>;
           case "services":
-            return (
-              <div key={section.id} className={cls}>
-                <Services sectionId={sectionId} />
-                {count === 0 ? <ServiceSummaries /> : null}
-              </div>
-            );
+            return <div key={section.id} className={cls}><Services sectionId={sectionId} /></div>;
           case "estimate":
             return <div key={section.id} className={cls}><Estimate sectionId={sectionId} /></div>;
           case "process":
@@ -55,6 +57,9 @@ export function HomeSections() {
             return null;
         }
       })}
+      <div className={visibilityClass(serviceSectionVisibility.mobile, serviceSectionVisibility.desktop)}>
+        <ServiceSummaries />
+      </div>
     </>
   );
 }
