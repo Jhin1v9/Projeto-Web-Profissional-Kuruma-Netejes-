@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { ChevronDown, HelpCircle } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
@@ -58,23 +58,26 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
   const youtubeEmbed = getYouTubeEmbed(mediaVideo);
   const directVideo = isDirectVideo(mediaVideo);
 
-  const openOzoneFaq = () => {
-    const ozoneService = infoServices.find((service) => service.id === "ozone");
-    if (!ozoneService) return;
-    const ozoneTranslated = cfg.i18n?.[language]?.services?.[ozoneService.id] ?? t.services.items[ozoneService.id];
-    const ozoneFaq =
+  const openServiceFaq = (serviceId: string, preferredMatch: RegExp) => {
+    const targetService = infoServices.find((service) => service.id === serviceId);
+    if (!targetService) return;
+    const targetTranslated = cfg.i18n?.[language]?.services?.[targetService.id] ?? t.services.items[targetService.id];
+    const targetFaq =
       language === "ca"
-        ? ozoneService.faq ?? []
-        : ozoneTranslated?.faq?.length
-        ? ozoneTranslated.faq
-        : ozoneService.faq ?? [];
+        ? targetService.faq ?? []
+        : targetTranslated?.faq?.length
+        ? targetTranslated.faq
+        : targetService.faq ?? [];
     const bestIndex =
-      ozoneFaq.findIndex((item) => /cigar|tabac|smoke/i.test(`${item.q} ${item.a}`)) >= 0
-        ? ozoneFaq.findIndex((item) => /cigar|tabac|smoke/i.test(`${item.q} ${item.a}`))
+      targetFaq.findIndex((item) => preferredMatch.test(`${item.q} ${item.a}`)) >= 0
+        ? targetFaq.findIndex((item) => preferredMatch.test(`${item.q} ${item.a}`))
         : 0;
-    setActiveServiceId("ozone");
+    setActiveServiceId(serviceId);
     setOpenFaqIndex(bestIndex);
   };
+
+  const openOzoneFaq = () => openServiceFaq("ozone", /cigar|tabac|smoke|humo/i);
+  const openInteriorFaq = () => openServiceFaq("interior", /interior|tapicer|upholstery|tapisseria/i);
 
   const colors = {
     sectionTitle: adaptiveThemeColor(cfg.appearance.textColors.servicesTitle, theme, "#0F172A"),
@@ -107,12 +110,24 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     },
   } as const;
   const copy = labels[language];
-  const faqLinkTokenByLanguage: Record<"ca" | "es" | "en", string> = {
-    ca: "neutralitzacio d'olor",
-    es: "neutralizacion de olor",
-    en: "odor neutralization",
+  const faqLinkRulesByLanguage: Record<
+    "ca" | "es" | "en",
+    Array<{ token: string; onClick: () => void }>
+  > = {
+    ca: [
+      { token: "neutralitzacio d'olor", onClick: openOzoneFaq },
+      { token: "neteja profunda", onClick: openInteriorFaq },
+    ],
+    es: [
+      { token: "neutralizacion de olor", onClick: openOzoneFaq },
+      { token: "limpieza profunda", onClick: openInteriorFaq },
+    ],
+    en: [
+      { token: "odor neutralization", onClick: openOzoneFaq },
+      { token: "deep cleaning", onClick: openInteriorFaq },
+    ],
   };
-  const faqLinkToken = faqLinkTokenByLanguage[language];
+  const faqLinkRules = faqLinkRulesByLanguage[language];
 
   if (!infoServices.length) {
     return (
@@ -208,26 +223,42 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                       </button>
                       {open ? (
                         <div className="border-t border-white/10 px-4 py-3 text-sm text-brand-silver/85">
-                          {item.a.toLowerCase().includes(faqLinkToken.toLowerCase()) ? (
-                            <>
-                              {item.a.split(new RegExp(`(${faqLinkToken})`, "i")).map((chunk, partIndex) =>
-                                chunk.toLowerCase() === faqLinkToken.toLowerCase() ? (
-                                  <button
-                                    key={`faq-link-${index}-${partIndex}`}
-                                    type="button"
-                                    onClick={openOzoneFaq}
-                                    className="font-semibold text-brand-cyan underline underline-offset-4 transition hover:text-cyan-300"
-                                  >
-                                    {chunk}
-                                  </button>
-                                ) : (
-                                  <span key={`faq-text-${index}-${partIndex}`}>{chunk}</span>
-                                )
-                              )}
-                            </>
-                          ) : (
-                            item.a
-                          )}
+                          {(() => {
+                            let parts: ReactNode[] = [item.a];
+                            faqLinkRules.forEach((rule) => {
+                              const nextParts: ReactNode[] = [];
+                              parts.forEach((part, partIndex) => {
+                                if (typeof part !== "string") {
+                                  nextParts.push(part);
+                                  return;
+                                }
+                                if (!part.toLowerCase().includes(rule.token.toLowerCase())) {
+                                  nextParts.push(part);
+                                  return;
+                                }
+                                part.split(new RegExp(`(${rule.token})`, "i")).forEach((chunk, splitIndex) => {
+                                  if (chunk.toLowerCase() === rule.token.toLowerCase()) {
+                                    nextParts.push(
+                                      <button
+                                        key={`faq-link-${index}-${partIndex}-${splitIndex}`}
+                                        type="button"
+                                        onClick={rule.onClick}
+                                        className="font-semibold text-brand-cyan underline underline-offset-4 transition hover:text-cyan-300"
+                                      >
+                                        {chunk}
+                                      </button>
+                                    );
+                                  } else {
+                                    nextParts.push(
+                                      <span key={`faq-text-${index}-${partIndex}-${splitIndex}`}>{chunk}</span>
+                                    );
+                                  }
+                                });
+                              });
+                              parts = nextParts;
+                            });
+                            return parts;
+                          })()}
                         </div>
                       ) : null}
                     </div>
