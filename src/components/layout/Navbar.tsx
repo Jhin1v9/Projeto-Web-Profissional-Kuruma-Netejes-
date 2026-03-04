@@ -55,9 +55,13 @@ export function Navbar() {
             onMouseEnter={() => setHover(true, "cta")}
             onMouseLeave={() => setHover(false)}
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue text-sm font-black text-brand-dark shadow-glow sm:h-10 sm:w-10">
-              K
-            </div>
+            {cfg.logoUrl ? (
+              <img src={cfg.logoUrl} alt="Logo" className="h-9 w-9 rounded-xl border border-white/10 object-cover sm:h-10 sm:w-10" />
+            ) : (
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-brand-cyan to-brand-blue text-sm font-black text-brand-dark shadow-glow sm:h-10 sm:w-10">
+                K
+              </div>
+            )}
             <div className="text-left leading-none hidden sm:block">
               <div className="font-black">Kuruma Netejes</div>
               <div className="text-xs text-brand-silver/70">Sabadell</div>

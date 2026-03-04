@@ -15,9 +15,14 @@ export function Footer({ sectionId = "footer" }: { sectionId?: string }) {
   return (
     <footer id={sectionId} className="border-t border-white/10 bg-brand-dark/40 backdrop-blur">
       <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center md:gap-6 md:py-10">
-        <div>
+        <div className="flex items-start gap-3">
+          {cfg.logoUrl ? (
+            <img src={cfg.logoUrl} alt="Logo" className="mt-0.5 h-10 w-10 rounded-xl border border-white/10 object-cover" />
+          ) : null}
+          <div>
           <div className="text-lg font-black">Kuruma Netejes</div>
           <div className="mt-1 text-sm text-brand-silver/75">{BUSINESS.address.street}</div>
+          </div>
         </div>
         <a
           href={generateWhatsAppLink(BUSINESS.whatsapp, text.reserveMessage)}

@@ -28,6 +28,7 @@ export type HeroBannerSettings = {
 };
 
 export type SiteConfig = {
+  logoUrl?: string;
   appearance: {
     brightness: number;
     overlay: number;

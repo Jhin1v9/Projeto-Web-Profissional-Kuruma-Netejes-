@@ -589,6 +589,28 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       {section === "dashboard" && (
         <div className="mt-8 space-y-6">
           <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
+            <div className="mb-3 text-sm font-bold text-white">Logo da empresa</div>
+            <div className="grid gap-4 lg:grid-cols-[1fr_auto]">
+              <ImageUrlInput
+                label="Logo URL"
+                value={cfg.logoUrl ?? ""}
+                folder="branding/logo"
+                onChange={(next) => setCfg({ ...cfg, logoUrl: next })}
+                onError={setMsg}
+              />
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => setCfg({ ...cfg, logoUrl: undefined })}
+                  className="rounded-xl border border-white/10 px-4 py-2.5 text-sm text-brand-silver/80 hover:border-brand-cyan/35 hover:text-brand-cyan"
+                >
+                  Remover logo
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <div className="text-xs text-brand-silver/70">Status da loja (topo rapido)</div>

@@ -130,6 +130,7 @@ const LocalizedLanguageSchema = z.object({
 });
 
 export const SiteConfigSchema = z.object({
+  logoUrl: z.string().optional(),
   appearance: z.object({
     brightness: z.number().min(0).max(1),
     overlay: z.number().min(0).max(1),
@@ -467,6 +468,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
 
   return {
     ...input,
+    logoUrl: input.logoUrl?.trim() || undefined,
     appearance: {
       ...input.appearance,
       lightTextureUrl: input.appearance.lightTextureUrl ?? input.appearance.textureUrl,
@@ -491,6 +493,7 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
 
 export function getDefaultConfig(): SiteConfig {
   return {
+    logoUrl: undefined,
     appearance: {
       brightness: 0.85,
       overlay: 0.52,
