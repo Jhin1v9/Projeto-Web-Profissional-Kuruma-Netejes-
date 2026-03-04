@@ -58,6 +58,24 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
   const youtubeEmbed = getYouTubeEmbed(mediaVideo);
   const directVideo = isDirectVideo(mediaVideo);
 
+  const openOzoneFaq = () => {
+    const ozoneService = infoServices.find((service) => service.id === "ozone");
+    if (!ozoneService) return;
+    const ozoneTranslated = cfg.i18n?.[language]?.services?.[ozoneService.id] ?? t.services.items[ozoneService.id];
+    const ozoneFaq =
+      language === "ca"
+        ? ozoneService.faq ?? []
+        : ozoneTranslated?.faq?.length
+        ? ozoneTranslated.faq
+        : ozoneService.faq ?? [];
+    const bestIndex =
+      ozoneFaq.findIndex((item) => /cigar|tabac|smoke/i.test(`${item.q} ${item.a}`)) >= 0
+        ? ozoneFaq.findIndex((item) => /cigar|tabac|smoke/i.test(`${item.q} ${item.a}`))
+        : 0;
+    setActiveServiceId("ozone");
+    setOpenFaqIndex(bestIndex);
+  };
+
   const colors = {
     sectionTitle: adaptiveThemeColor(cfg.appearance.textColors.servicesTitle, theme, "#0F172A"),
     sectionHighlight: adaptiveThemeColor(cfg.appearance.textColors.servicesHighlight, theme, "#0EA5E9"),
@@ -89,6 +107,12 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     },
   } as const;
   const copy = labels[language];
+  const faqLinkTokenByLanguage: Record<"ca" | "es" | "en", string> = {
+    ca: "neutralitzacio d'olor",
+    es: "neutralizacion de olor",
+    en: "odor neutralization",
+  };
+  const faqLinkToken = faqLinkTokenByLanguage[language];
 
   if (!infoServices.length) {
     return (
@@ -182,7 +206,30 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                         <span>{item.q}</span>
                         <ChevronDown className={`h-4 w-4 text-brand-cyan transition ${open ? "rotate-180" : ""}`} />
                       </button>
-                      {open ? <div className="border-t border-white/10 px-4 py-3 text-sm text-brand-silver/85">{item.a}</div> : null}
+                      {open ? (
+                        <div className="border-t border-white/10 px-4 py-3 text-sm text-brand-silver/85">
+                          {item.a.toLowerCase().includes(faqLinkToken.toLowerCase()) ? (
+                            <>
+                              {item.a.split(new RegExp(`(${faqLinkToken})`, "i")).map((chunk, partIndex) =>
+                                chunk.toLowerCase() === faqLinkToken.toLowerCase() ? (
+                                  <button
+                                    key={`faq-link-${index}-${partIndex}`}
+                                    type="button"
+                                    onClick={openOzoneFaq}
+                                    className="font-semibold text-brand-cyan underline underline-offset-4 transition hover:text-cyan-300"
+                                  >
+                                    {chunk}
+                                  </button>
+                                ) : (
+                                  <span key={`faq-text-${index}-${partIndex}`}>{chunk}</span>
+                                )
+                              )}
+                            </>
+                          ) : (
+                            item.a
+                          )}
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })
