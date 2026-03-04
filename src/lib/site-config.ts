@@ -351,6 +351,43 @@ function getDefaultServices(): SiteConfig["services"] {
   ];
 }
 
+function genericFaqFallback(): Array<{ q: string; a: string }> {
+  return [
+    {
+      q: "Como funciona este servico?",
+      a: "A equipe avalia o estado do veiculo e aplica um processo tecnico adequado para garantir resultado consistente.",
+    },
+    {
+      q: "Quanto tempo demora?",
+      a: "Depende do estado do veiculo e do nivel de detalhe contratado.",
+    },
+    {
+      q: "Posso combinar com outro servico?",
+      a: "Sim. Podemos montar um pacote personalizado conforme sua necessidade.",
+    },
+  ];
+}
+
+function isWeakFaq(faq?: Array<{ q: string; a: string }>): boolean {
+  if (!faq?.length || faq.length < 2) return true;
+  const genericQuestions = [
+    "como funciona este servico?",
+    "quanto tempo demora?",
+    "posso combinar com outro servico?",
+    "how does this service work?",
+  ];
+  const normalizedQs = faq.map((item) => item.q.trim().toLowerCase());
+  const genericHits = normalizedQs.filter((q) => genericQuestions.includes(q)).length;
+  const shortAnswers = faq.filter((item) => item.a.trim().length < 50).length;
+  return genericHits >= 2 || shortAnswers >= 2;
+}
+
+function isWeakSummary(summary?: string): boolean {
+  if (!summary?.trim()) return true;
+  const text = summary.trim().toLowerCase();
+  return text.startsWith("servico profissional executado");
+}
+
 function getDefaultHeroBanner(): SiteConfig["heroBanner"] {
   return {
     settings: { ...HERO_BANNER_SETTINGS },
@@ -420,21 +457,23 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
     ...getDefaultTextColors(),
     ...(input.appearance.textColors ?? {}),
   };
-  const services = (input.services.length > 0 ? input.services : getDefaultServices()).map((service) => ({
-    ...service,
-    videoUrl: service.videoUrl?.trim() || undefined,
-    estimateEnabled: service.estimateEnabled ?? true,
-    infoEnabled: service.infoEnabled ?? true,
-    infoImageUrl: service.infoImageUrl?.trim() || service.imageUrl,
-    infoSummary:
-      (service.infoSummary?.trim() || undefined) ??
-      "Servico profissional executado com processo tecnico, foco em acabamento real e orientacao clara para manutencao posterior.",
-    faq: service.faq ?? [
-      { q: "Como funciona este servico?", a: "A equipe avalia o estado do veiculo e aplica um processo tecnico adequado para garantir resultado consistente." },
-      { q: "Quanto tempo demora?", a: "Depende do estado do veiculo e do nivel de detalhe contratado." },
-      { q: "Posso combinar com outro servico?", a: "Sim. Podemos montar um pacote personalizado conforme sua necessidade." },
-    ],
-  }));
+  const services = (input.services.length > 0 ? input.services : getDefaultServices()).map((service) => {
+    const defaultCaService = TRANSLATIONS.ca.services.items[service.id];
+    const defaultSummary =
+      defaultCaService?.infoSummary ??
+      "Servico profissional executado com processo tecnico, foco em acabamento real e orientacao clara para manutencao posterior.";
+    const defaultFaq = defaultCaService?.faq ?? genericFaqFallback();
+
+    return {
+      ...service,
+      videoUrl: service.videoUrl?.trim() || undefined,
+      estimateEnabled: service.estimateEnabled ?? true,
+      infoEnabled: service.infoEnabled ?? true,
+      infoImageUrl: service.infoImageUrl?.trim() || service.imageUrl,
+      infoSummary: isWeakSummary(service.infoSummary) ? defaultSummary : service.infoSummary!.trim(),
+      faq: isWeakFaq(service.faq) ? defaultFaq : service.faq!,
+    };
+  });
   const defaults = getDefaultI18n();
 
   const i18n: NonNullable<SiteConfig["i18n"]> = {
@@ -467,6 +506,28 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
       estimate: { ...defaults.en!.estimate, ...(input.i18n?.en?.estimate ?? {}) },
     },
   };
+
+  (["es", "en"] as const).forEach((lang) => {
+    const langPack = i18n[lang] ?? getDefaultI18nLanguage(lang);
+    if (!langPack) return;
+    i18n[lang] = langPack;
+    services.forEach((service) => {
+      const langDefault = TRANSLATIONS[lang].services.items[service.id];
+      const current = langPack.services[service.id] ?? {
+        name: service.name,
+        description: service.description,
+        highlights: [...service.highlights],
+      };
+
+      langPack.services[service.id] = {
+        ...current,
+        infoSummary: isWeakSummary(current.infoSummary)
+          ? langDefault?.infoSummary ?? service.infoSummary
+          : current.infoSummary,
+        faq: isWeakFaq(current.faq) ? langDefault?.faq ?? service.faq : current.faq,
+      };
+    });
+  });
 
   return {
     ...input,
