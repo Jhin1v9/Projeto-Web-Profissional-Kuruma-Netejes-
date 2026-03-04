@@ -331,8 +331,14 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
 
   function updateLocalizedService(lang: Language, serviceId: string, patch: Partial<ServiceText>) {
     if (!cfg || lang === "ca") return;
-    const fallbackService = TRANSLATIONS[lang].services.items[serviceId];
-    if (!fallbackService) return;
+    const baseService = cfg.services.find((service) => service.id === serviceId);
+    const fallbackService = TRANSLATIONS[lang].services.items[serviceId] ?? {
+      name: baseService?.name ?? serviceId,
+      description: baseService?.description ?? "",
+      highlights: baseService?.highlights ?? [],
+      infoSummary: baseService?.infoSummary,
+      faq: baseService?.faq,
+    };
     const currentServices = cfg.i18n?.[lang]?.services ?? TRANSLATIONS[lang].services.items;
     const nextService = { ...(currentServices[serviceId] ?? fallbackService), ...patch };
     setCfg({
@@ -1458,8 +1464,12 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   <div className="text-xs text-brand-silver/70 mb-1">Resumo informativo do servico</div>
                   <textarea
                     rows={4}
-                    value={service.infoSummary ?? ""}
-                    onChange={(e) => updateService(index, { infoSummary: e.target.value })}
+                    value={source.infoSummary ?? service.infoSummary ?? ""}
+                    onChange={(e) =>
+                      serviceTextLang === "ca"
+                        ? updateService(index, { infoSummary: e.target.value })
+                        : updateLocalizedService(serviceTextLang, service.id, { infoSummary: e.target.value })
+                    }
                     className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
                   />
                 </label>
@@ -1467,8 +1477,12 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   <div className="text-xs text-brand-silver/70 mb-1">FAQ do servico (uma linha por item: pergunta || resposta)</div>
                   <textarea
                     rows={5}
-                    value={faqToText(service.faq)}
-                    onChange={(e) => updateService(index, { faq: textToFaq(e.target.value) })}
+                    value={faqToText(source.faq ?? service.faq)}
+                    onChange={(e) =>
+                      serviceTextLang === "ca"
+                        ? updateService(index, { faq: textToFaq(e.target.value) })
+                        : updateLocalizedService(serviceTextLang, service.id, { faq: textToFaq(e.target.value) })
+                    }
                     className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
                   />
                 </label>

@@ -168,6 +168,7 @@ export function VisualEditor() {
   const [dragStep, setDragStep] = useState<number | null>(null);
   const [dragSection, setDragSection] = useState<number | null>(null);
   const [estimateSelection, setEstimateSelection] = useState<Record<string, boolean>>({});
+  const [infoServiceIndex, setInfoServiceIndex] = useState(0);
   const [selectedSectionType, setSelectedSectionType] = useState<SectionType | null>(null);
   const [selectedLayoutSectionId, setSelectedLayoutSectionId] = useState<string | null>(null);
   const [showBlocksPanel, setShowBlocksPanel] = useState(true);
@@ -210,7 +211,16 @@ export function VisualEditor() {
   function ensureI18nLang(current: SiteConfig, lang: Language) {
     const t = langPack(lang);
     const fallbackServices = Object.fromEntries(
-      current.services.map((s) => [s.id, t.services.items[s.id] ?? { name: s.name, description: s.description, highlights: [...s.highlights] }])
+      current.services.map((s) => [
+        s.id,
+        t.services.items[s.id] ?? {
+          name: s.name,
+          description: s.description,
+          highlights: [...s.highlights],
+          infoSummary: s.infoSummary,
+          faq: s.faq,
+        },
+      ])
     );
     return {
       navbar: { ...t.navbar },
@@ -388,6 +398,29 @@ export function VisualEditor() {
   const total = estimateOptions
     .filter((o) => estimateSelection[o.id])
     .reduce((acc, o) => acc + (o.numeric ?? 0), 0);
+  const totalServices = cfg.services.length;
+  const desktopCols = (() => {
+    if (totalServices <= 1) return 1;
+    if (totalServices === 2) return 2;
+    if (totalServices === 3) return 3;
+    if (totalServices % 4 !== 1) return 4;
+    if (totalServices % 3 !== 1) return 3;
+    return 2;
+  })();
+  const desktopColsClass =
+    desktopCols === 1
+      ? "xl:grid-cols-1"
+      : desktopCols === 2
+      ? "xl:grid-cols-2"
+      : desktopCols === 3
+      ? "xl:grid-cols-3"
+      : "xl:grid-cols-4";
+  const infoServices = cfg.services.filter((s) => s.infoEnabled !== false);
+  const safeInfoIndex = Math.min(infoServiceIndex, Math.max(0, infoServices.length - 1));
+  const activeInfoService = infoServices[safeInfoIndex] ?? null;
+  const activeInfoTranslation = activeInfoService
+    ? cfg.i18n?.[language]?.services?.[activeInfoService.id] ?? t.services.items[activeInfoService.id]
+    : null;
 
   return (
     <div className="min-h-screen bg-brand-dark text-white">
@@ -576,12 +609,15 @@ export function VisualEditor() {
             onSave={() => {}}
             className="text-center text-4xl font-black"
           />
-          <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          <div className={`mt-10 grid gap-5 sm:grid-cols-2 ${desktopColsClass}`}>
             {cfg.services.map((service, index) => {
               const tr = cfg.i18n?.[language]?.services?.[service.id] ?? t.services.items[service.id];
               const name = isCa ? service.name : tr?.name ?? service.name;
               const desc = isCa ? service.description : tr?.description ?? service.description;
               const price = service.priceFrom ?? SERVICE_PRICING_BY_ID[service.id];
+              const isLast = index === totalServices - 1;
+              const isOddOnMobileGrid = totalServices % 2 === 1;
+              const shouldCenterLastOnMobile = isLast && isOddOnMobileGrid && totalServices > 1;
               return (
                 <div
                   key={service.id}
@@ -592,7 +628,11 @@ export function VisualEditor() {
                     if (dragService !== null) moveService(dragService, index);
                     setDragService(null);
                   }}
-                  className="group relative overflow-hidden rounded-3xl border border-white/10 bg-brand-dark2/70"
+                  className={`group relative overflow-hidden rounded-3xl border border-white/10 bg-brand-dark2/70 ${
+                    shouldCenterLastOnMobile
+                      ? "sm:col-span-2 sm:mx-auto sm:w-full sm:max-w-[420px] xl:col-span-1 xl:mx-0 xl:max-w-none"
+                      : ""
+                  }`}
                 >
                   <div className="absolute right-3 top-3 z-10 flex items-center gap-2">
                     <span className="rounded-full border border-white/20 bg-brand-dark/70 p-1.5 text-brand-silver/80" title="Arraste para ordenar">
@@ -652,11 +692,170 @@ export function VisualEditor() {
                       />
                       Checkbox no orcamento
                     </label>
+                    <label className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-2 py-1 text-xs text-brand-silver/85">
+                      <input
+                        type="checkbox"
+                        checked={service.infoEnabled !== false}
+                        onChange={(e) => setCfg({ ...cfg, services: cfg.services.map((s, i) => (i === index ? { ...s, infoEnabled: e.target.checked } : s)) })}
+                      />
+                      Em infos + FAQ
+                    </label>
                   </div>
                 </div>
               );
             })}
           </div>
+          </section>
+        ))}
+
+        {Array.from({ length: sectionCount("services") > 0 ? 1 : 0 }).map((_, infoInstance) => (
+          <section
+            key={`services-info-preview-${infoInstance}`}
+            className="mx-auto max-w-7xl px-4 py-10 sm:px-6"
+            onClick={() => syncSelectedType("services")}
+          >
+            <div className="rounded-3xl border border-white/10 bg-brand-dark2/60 p-5 sm:p-6">
+              <div className="text-center">
+                <div className="text-3xl font-black">Infos + FAQ por servico</div>
+                <div className="mt-2 text-sm text-brand-silver/80">Abas por servico com conteudo e perguntas frequentes editaveis.</div>
+              </div>
+
+              {infoServices.length ? (
+                <>
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {infoServices.map((service, idx) => {
+                      const tr = cfg.i18n?.[language]?.services?.[service.id] ?? t.services.items[service.id];
+                      const label = isCa ? service.name : tr?.name ?? service.name;
+                      const active = idx === safeInfoIndex;
+                      return (
+                        <button
+                          key={`info-tab-${service.id}`}
+                          type="button"
+                          onClick={() => setInfoServiceIndex(idx)}
+                          className={`rounded-xl border px-3 py-2 text-xs font-semibold ${
+                            active
+                              ? "border-brand-cyan/50 bg-brand-cyan/15 text-brand-cyan"
+                              : "border-white/10 bg-black/20 text-brand-silver/80"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {activeInfoService ? (
+                    <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                      <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+                        <div
+                          className="h-52 bg-cover bg-center sm:h-64"
+                          style={{
+                            backgroundImage: `url(${
+                              activeInfoService.infoImageUrl?.trim() ||
+                              activeInfoService.imageUrl
+                            })`,
+                          }}
+                        />
+                        <div className="p-4">
+                          <div className="text-xl font-black">
+                            {isCa
+                              ? activeInfoService.name
+                              : activeInfoTranslation?.name ?? activeInfoService.name}
+                          </div>
+                          <EditableText
+                            value={
+                              isCa
+                                ? activeInfoService.infoSummary ?? activeInfoService.description
+                                : activeInfoTranslation?.infoSummary ??
+                                  activeInfoService.infoSummary ??
+                                  activeInfoTranslation?.description ??
+                                  activeInfoService.description
+                            }
+                            multiline
+                            onSave={(next) => {
+                              if (isCa) {
+                                setCfg({
+                                  ...cfg,
+                                  services: cfg.services.map((s) =>
+                                    s.id === activeInfoService.id ? { ...s, infoSummary: next } : s
+                                  ),
+                                });
+                              } else {
+                                setLocalized("services", (map: Record<string, any>) => ({
+                                  ...map,
+                                  [activeInfoService.id]: {
+                                    ...(map[activeInfoService.id] ?? activeInfoTranslation ?? {
+                                      name: activeInfoService.name,
+                                      description: activeInfoService.description,
+                                      highlights: activeInfoService.highlights,
+                                    }),
+                                    infoSummary: next,
+                                  },
+                                }));
+                              }
+                            }}
+                            className="mt-2 text-sm text-brand-silver/85"
+                          />
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+                        <div className="text-sm font-bold text-brand-cyan">FAQ do servico ativo</div>
+                        {(() => {
+                          const faqSource = (isCa
+                            ? activeInfoService.faq
+                            : activeInfoTranslation?.faq ?? activeInfoService.faq) ?? [];
+                          return (
+                        <textarea
+                          rows={10}
+                          value={faqSource
+                            .map((item: any) => `${item.q} || ${item.a}`)
+                            .join("\n")}
+                          onChange={(e) => {
+                            const faq = e.target.value
+                              .split("\n")
+                              .map((line) => line.trim())
+                              .filter(Boolean)
+                              .map((line) => {
+                                const [q, ...rest] = line.split("||");
+                                return { q: (q ?? "").trim(), a: rest.join("||").trim() };
+                              })
+                              .filter((item) => item.q && item.a);
+                            if (isCa) {
+                              setCfg({
+                                ...cfg,
+                                services: cfg.services.map((s) =>
+                                  s.id === activeInfoService.id ? { ...s, faq } : s
+                                ),
+                              });
+                            } else {
+                              setLocalized("services", (map: Record<string, any>) => ({
+                                ...map,
+                                [activeInfoService.id]: {
+                                  ...(map[activeInfoService.id] ?? activeInfoTranslation ?? {
+                                    name: activeInfoService.name,
+                                    description: activeInfoService.description,
+                                    highlights: activeInfoService.highlights,
+                                  }),
+                                  faq,
+                                },
+                              }));
+                            }
+                          }}
+                          className="mt-3 w-full rounded-xl border border-white/10 bg-black/30 px-3 py-2 text-sm outline-none focus:border-brand-cyan/50"
+                        />
+                          );
+                        })()}
+                        <div className="mt-2 text-xs text-brand-silver/70">Formato: pergunta || resposta (1 linha por item)</div>
+                      </div>
+                    </div>
+                  ) : null}
+                </>
+              ) : (
+                <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-4 text-sm text-brand-silver/80">
+                  Nenhum servico marcado para infos + FAQ.
+                </div>
+              )}
+            </div>
           </section>
         ))}
 

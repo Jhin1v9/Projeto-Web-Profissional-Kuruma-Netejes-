@@ -40,9 +40,19 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
   const translated = activeService ? cfg.i18n?.[language]?.services?.[activeService.id] ?? t.services.items[activeService.id] : null;
   const serviceName = activeService ? (language === "ca" ? activeService.name : translated?.name ?? activeService.name) : "";
   const serviceDescription = activeService
-    ? activeService.infoSummary?.trim() || (language === "ca" ? activeService.description : translated?.description ?? activeService.description)
+    ? language === "ca"
+      ? activeService.infoSummary?.trim() || activeService.description
+      : translated?.infoSummary?.trim() ||
+        activeService.infoSummary?.trim() ||
+        translated?.description ||
+        activeService.description
     : "";
-  const serviceFaq = activeService?.faq ?? [];
+  const serviceFaq =
+    language === "ca"
+      ? activeService?.faq ?? []
+      : translated?.faq?.length
+      ? translated.faq
+      : activeService?.faq ?? [];
   const mediaImage = activeService?.infoImageUrl?.trim() || activeService?.imageUrl || "";
   const mediaVideo = activeService?.videoUrl?.trim() || "";
   const youtubeEmbed = getYouTubeEmbed(mediaVideo);
@@ -188,4 +198,3 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     </section>
   );
 }
-

@@ -56,6 +56,8 @@ const LocalizedServiceSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   highlights: z.array(z.string().min(1)).min(1),
+  infoSummary: z.string().optional(),
+  faq: z.array(z.object({ q: z.string().min(1), a: z.string().min(1) })).optional(),
 });
 
 const LocalizedHeroSlideSchema = z.object({

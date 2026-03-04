@@ -10,6 +10,8 @@ export type ServiceText = {
   name: string;
   description: string;
   highlights: string[];
+  infoSummary?: string;
+  faq?: Array<{ q: string; a: string }>;
 };
 
 export type NavbarText = {
@@ -149,21 +151,85 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
           name: "Neteja interior",
           description: "Tapisseria, cuir i plastics. Eliminem taques i olors amb extraccio professional.",
           highlights: ["Extraccio profunda", "Taques i olors", "Acabat real, sense maquillatge"],
+          infoSummary:
+            "La neteja interior professional combina aspiracio, extraccio i descontaminacio de superfícies per reduir bruticia, residus i olors persistents. El proces es fa per zones (teixits, plastics i cuir) amb productes específics per material per evitar danys i millorar el confort dins l'habitacle.",
+          faq: [
+            {
+              q: "La neteja interior elimina l'olor de tabac?",
+              a: "Sol reduir molt l'olor quan es combina higienitzacio profunda amb neutralitzacio. El resultat final depen del temps d'exposicio i de l'estat dels teixits.",
+            },
+            {
+              q: "Quant de temps dura una neteja interior completa?",
+              a: "Normalment entre 2 i 5 hores, segons mida del vehicle i nivell de bruticia.",
+            },
+            {
+              q: "Netegeu cuir sense ressecar-lo?",
+              a: "Si. S'utilitzen netejadors adequats i proteccio final per mantenir flexibilitat i acabat.",
+            },
+          ],
         },
         polishing: {
           name: "Poliment exterior",
           description: "Correccio de micro-ratllades i acabat mirall amb brillantor real.",
           highlights: ["Gloss mirall", "Correccio swirl", "Acabat premium"],
+          infoSummary:
+            "El poliment tecnic corregeix micro-ratllades i marques de rentat amb abrasio controlada sobre el vernís. L'objectiu es recuperar profunditat de color i reflex sense un desgast excessiu. Despres de la correccio, es recomana proteccio de superfície per mantenir el resultat.",
+          faq: [
+            {
+              q: "El poliment elimina ratllades profundes?",
+              a: "Les superficials i mitjanes solen millorar molt. Les profundes poden reduir-se visualment, pero no sempre desapareixen del tot.",
+            },
+            {
+              q: "El poliment pot danyar la pintura?",
+              a: "Si es fa correctament no. Es treballa amb combinacio adequada de boina, producte i control d'acabat.",
+            },
+            {
+              q: "Cal protegir despres del poliment?",
+              a: "Si, es recomana segellant, cera o coating per allargar brillantor i facilitar manteniment.",
+            },
+          ],
         },
         wash: {
           name: "Rentat exterior premium",
           description: "Escuma activa, detall de llandes i assecat sense marques.",
           highlights: ["Escuma activa", "Llandes", "Assecat microfibra"],
+          infoSummary:
+            "El rentat premium combina pre-rentat, escuma activa, neteja detallada de llandes i assecat amb microfibra per reduir marques i micro-ratllades. El proces prioritza menys agressio al vernís i millor acabat visual.",
+          faq: [
+            {
+              q: "Quina diferencia hi ha amb un rentat basic?",
+              a: "El premium afegeix pre-rentat, mes detall en zones critiques i assecat correcte per minimitzar marques.",
+            },
+            {
+              q: "El rentat premium protegeix la pintura?",
+              a: "Ajuda a conservar millor el vernís per tecnica menys agressiva. Per proteccio duradora, millor aplicar segellant o cera.",
+            },
+            {
+              q: "Inclou neteja de llandes?",
+              a: "Si, llandes i zones de dificil accés formen part del detall exterior.",
+            },
+          ],
         },
         ozone: {
           name: "Neteja per ozono",
           description: "Tractament amb ozono orientat a eliminar olor de tabac/cigarro i olors persistents.",
           highlights: ["Reduccio d'olor a tabac", "Combat olors persistents", "Ideal com a extra interior"],
+          infoSummary:
+            "El tractament amb ozó s'utilitza com a suport per reduir olors persistents dins del vehicle mitjancant oxidacio. Com que l'ozó en concentracions elevades pot irritar vies respiratories, l'aplicacio s'ha de fer sense ocupants i amb ventilacio adequada abans de la entrega.",
+          faq: [
+            {
+              q: "L'ozó es segur?",
+              a: "Si, amb protocol correcte: cabina buida, temps controlat i ventilacio completa abans d'utilitzar el vehicle.",
+            },
+            {
+              q: "Elimina qualsevol olor per sempre?",
+              a: "Pot reduir molt les olors, pero la durada depen de la causa i dels habits d'ús posteriors.",
+            },
+            {
+              q: "Puc conduir just despres del servei?",
+              a: "Despres del temps de ventilacio indicat per l'equip, si.",
+            },
+          ],
         },
       },
     },
@@ -259,21 +325,85 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
           name: "Limpieza interior",
           description: "Tapiceria, cuero y plasticos. Eliminamos manchas y olores con extraccion profesional.",
           highlights: ["Extraccion profunda", "Manchas y olores", "Acabado real sin maquillaje"],
+          infoSummary:
+            "La limpieza interior profesional combina aspirado, extraccion y descontaminacion de superficies para reducir suciedad, residuos y olores persistentes. El trabajo se realiza por zonas (tejidos, plasticos y cuero) con productos especificos por material para evitar danos y mejorar el confort del habitaculo.",
+          faq: [
+            {
+              q: "La limpieza interior elimina olor a tabaco?",
+              a: "Suele reducirlo mucho cuando se combina higiene profunda y neutralizacion de olor. El resultado final depende del tiempo de exposicion y del estado de los tejidos.",
+            },
+            {
+              q: "Cuanto tarda una limpieza interior completa?",
+              a: "Normalmente entre 2 y 5 horas, segun tamano del vehiculo y nivel de suciedad.",
+            },
+            {
+              q: "Limpiais cuero sin resecar?",
+              a: "Si. Se usan limpiadores adecuados y proteccion final para mantener flexibilidad y acabado.",
+            },
+          ],
         },
         polishing: {
           name: "Pulido exterior",
           description: "Correccion de micro-rayas y acabado espejo con brillo real.",
           highlights: ["Brillo espejo", "Correccion swirl", "Acabado premium"],
+          infoSummary:
+            "El pulido tecnico corrige micro-rayas y marcas de lavado mediante abrasion controlada sobre el barniz. El objetivo es recuperar profundidad de color y reflejo sin desgaste excesivo. Tras la correccion, se recomienda proteccion de superficie para mantener el resultado.",
+          faq: [
+            {
+              q: "El pulido quita rayas profundas?",
+              a: "Las superficiales y medias suelen mejorar mucho. Las profundas pueden disimularse, pero no siempre desaparecen por completo.",
+            },
+            {
+              q: "El pulido puede danar la pintura?",
+              a: "Si se realiza correctamente, no. Se trabaja con combinacion adecuada de boina, compuesto y control de acabado.",
+            },
+            {
+              q: "Hay que proteger despues del pulido?",
+              a: "Si, se recomienda sellante, cera o coating para alargar brillo y facilitar mantenimiento.",
+            },
+          ],
         },
         wash: {
           name: "Lavado exterior premium",
           description: "Espuma activa, detalle de llantas y secado sin marcas.",
           highlights: ["Espuma activa", "Llantas", "Secado microfibra"],
+          infoSummary:
+            "El lavado premium combina prelavado, espuma activa, limpieza detallada de llantas y secado con microfibra para reducir marcas y micro-rayas. El proceso prioriza menor agresion al barniz y un acabado visual mas limpio.",
+          faq: [
+            {
+              q: "Que diferencia hay frente a un lavado basico?",
+              a: "El premium anade prelavado, mas detalle en zonas criticas y secado correcto para minimizar marcas.",
+            },
+            {
+              q: "El lavado premium protege la pintura?",
+              a: "Ayuda a conservar mejor el barniz por tecnica menos agresiva. Para proteccion duradera conviene aplicar sellante o cera.",
+            },
+            {
+              q: "Incluye limpieza de llantas?",
+              a: "Si, llantas y zonas de dificil acceso forman parte del detalle exterior.",
+            },
+          ],
         },
         ozone: {
           name: "Limpieza por ozono",
           description: "Tratamiento orientado a eliminar olor a tabaco/cigarro y olores persistentes.",
           highlights: ["Reduce olor a tabaco", "Combate olores persistentes", "Extra ideal para interior"],
+          infoSummary:
+            "El tratamiento con ozono se usa como apoyo para reducir olores persistentes en el interior del vehiculo mediante oxidacion. Como el ozono en concentraciones altas puede irritar las vias respiratorias, la aplicacion debe hacerse sin ocupantes y con ventilacion adecuada antes de entregar el coche.",
+          faq: [
+            {
+              q: "El ozono es seguro?",
+              a: "Si, con protocolo correcto: cabina vacia, tiempo controlado y ventilacion completa antes de usar el vehiculo.",
+            },
+            {
+              q: "Elimina cualquier olor para siempre?",
+              a: "Puede reducir mucho los olores, pero la duracion depende de la causa y de los habitos de uso posteriores.",
+            },
+            {
+              q: "Puedo usar el coche justo despues?",
+              a: "Despues del tiempo de ventilacion indicado por el equipo, si.",
+            },
+          ],
         },
       },
     },
@@ -369,21 +499,85 @@ export const TRANSLATIONS: Record<Language, TranslationPack> = {
           name: "Interior cleaning",
           description: "Upholstery, leather and plastics. We remove stains and odors with professional extraction.",
           highlights: ["Deep extraction", "Stains and odors", "Real finish, no cover-ups"],
+          infoSummary:
+            "Professional interior cleaning combines vacuuming, extraction and surface decontamination to reduce dirt, residue and persistent odors. The process is done by zones (fabrics, plastics and leather) using material-specific products to avoid damage and improve cabin comfort.",
+          faq: [
+            {
+              q: "Does interior cleaning remove smoke smell?",
+              a: "It usually reduces it significantly when deep cleaning is combined with odor neutralization. Final results depend on exposure time and fabric condition.",
+            },
+            {
+              q: "How long does a full interior clean take?",
+              a: "Usually 2 to 5 hours, depending on vehicle size and contamination level.",
+            },
+            {
+              q: "Do you clean leather without drying it out?",
+              a: "Yes. Proper leather-safe cleaners and a protective finish are used to preserve flexibility and appearance.",
+            },
+          ],
         },
         polishing: {
           name: "Exterior polishing",
           description: "Micro-scratch correction and mirror finish with real gloss.",
           highlights: ["Mirror gloss", "Swirl correction", "Premium finish"],
+          infoSummary:
+            "Technical polishing corrects micro-scratches and wash marks through controlled abrasion on the clear coat. The goal is to recover depth and reflection without excessive removal. After correction, surface protection is recommended to keep the finish longer.",
+          faq: [
+            {
+              q: "Can polishing remove deep scratches?",
+              a: "Light and medium scratches usually improve a lot. Deep scratches can often be reduced visually, but not always fully removed.",
+            },
+            {
+              q: "Can polishing damage paint?",
+              a: "When performed correctly, no. It relies on the right pad/compound combination and controlled technique.",
+            },
+            {
+              q: "Should I protect the car after polishing?",
+              a: "Yes. Sealant, wax or coating is recommended to maintain gloss and simplify maintenance.",
+            },
+          ],
         },
         wash: {
           name: "Premium exterior wash",
           description: "Active foam, wheel detailing and streak-free drying.",
           highlights: ["Active foam", "Wheels", "Microfiber dry"],
+          infoSummary:
+            "A premium exterior wash combines pre-wash, active foam, wheel detailing and microfiber drying to reduce marks and micro-marring. The process is designed to be gentler on clear coat while delivering a cleaner finish.",
+          faq: [
+            {
+              q: "What is the difference vs a basic wash?",
+              a: "Premium wash adds pre-wash, more detail work and proper drying to minimize marks.",
+            },
+            {
+              q: "Does premium wash protect paint?",
+              a: "It helps preserve clear coat by using gentler technique. For lasting protection, apply sealant or wax.",
+            },
+            {
+              q: "Are wheels included?",
+              a: "Yes. Wheels and hard-to-reach exterior areas are part of the detailing workflow.",
+            },
+          ],
         },
         ozone: {
           name: "Ozone cleaning",
           description: "Treatment focused on removing cigarette/tobacco smell and persistent odors.",
           highlights: ["Reduces smoke smell", "Targets persistent odors", "Great interior add-on"],
+          infoSummary:
+            "Ozone treatment can be used as support to reduce persistent interior odors through oxidation. Because high ozone concentration can irritate airways, treatment must be done with no occupants inside and with proper ventilation before vehicle return.",
+          faq: [
+            {
+              q: "Is ozone treatment safe?",
+              a: "Yes, with correct protocol: empty cabin, controlled exposure time and full ventilation before use.",
+            },
+            {
+              q: "Does it permanently remove all odors?",
+              a: "It can reduce odors significantly, but durability depends on source and later usage habits.",
+            },
+            {
+              q: "Can I drive immediately after treatment?",
+              a: "Yes, after the recommended ventilation period is completed.",
+            },
+          ],
         },
       },
     },
