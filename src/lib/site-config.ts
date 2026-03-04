@@ -188,7 +188,11 @@ export const SiteConfigSchema = z.object({
       description: z.string().min(1),
       priceFrom: z.union([z.number().min(0), z.string().min(1)]),
       imageUrl: z.string().min(1),
-      videoUrl: z.string().min(1).optional(),
+      videoUrl: z.string().optional(),
+      infoEnabled: z.boolean().optional(),
+      infoSummary: z.string().optional(),
+      infoImageUrl: z.string().optional(),
+      faq: z.array(z.object({ q: z.string().min(1), a: z.string().min(1) })).optional(),
       popular: z.boolean().optional(),
       estimateEnabled: z.boolean().optional(),
       estimateLabel: z.string().optional(),
@@ -238,6 +242,24 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Tapisseria, cuir i plastics. Eliminem taques i olors amb extraccio professional.",
       priceFrom: PRICING.interiorFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceBeforeAfter,
+      infoEnabled: true,
+      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Carinterior.jpg",
+      infoSummary:
+        "A limpeza interna profissional combina aspiração, extração e descontaminação de superfícies para remover poeira, resíduos orgânicos e odores persistentes. Em detailing, esse processo é feito por zonas (tecidos, plásticos e couro) com produtos específicos para cada material, reduzindo desgaste precoce e melhorando a experiência no habitáculo.",
+      faq: [
+        {
+          q: "A limpeza interna remove cheiro de cigarro?",
+          a: "Reduz bastante quando combinamos higienização profunda e neutralização de odor, mas o resultado final depende do tempo de exposição e do estado do estofado.",
+        },
+        {
+          q: "Quanto tempo leva a limpeza interna completa?",
+          a: "Normalmente entre 2 e 5 horas, variando conforme tamanho do veículo e nível de sujeira.",
+        },
+        {
+          q: "Vocês limpam couro sem ressecar?",
+          a: "Sim. Usamos limpadores de pH adequado e finalizamos com proteção para manter flexibilidade e acabamento.",
+        },
+      ],
       popular: true,
       estimateEnabled: true,
       highlights: ["Extraccio profunda", "Taques i olors", "Acabat real, sense maquillatge"],
@@ -248,6 +270,24 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Correccio de micro-ratllades i acabat mirall amb brillantor real.",
       priceFrom: PRICING.polishingFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.servicePolishing,
+      infoEnabled: true,
+      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Auto_Detailing.jpg",
+      infoSummary:
+        "O polimento técnico corrige micro-riscos, marcas de lavagem e perda de brilho através de abrasão controlada na camada de verniz. O objetivo é nivelar imperfeições sem exagerar no corte, recuperando profundidade de cor e reflexo. Após a correção, a proteção de superfície ajuda a manter o acabamento por mais tempo.",
+      faq: [
+        {
+          q: "Polimento tira risco profundo?",
+          a: "Riscos superficiais e médios costumam melhorar muito. Riscos profundos podem apenas reduzir visibilidade, pois atravessam mais camadas do verniz.",
+        },
+        {
+          q: "Polimento estraga pintura?",
+          a: "Quando feito corretamente, não. O processo é controlado e feito com combinação adequada de boina, composto e inspeção visual.",
+        },
+        {
+          q: "Precisa encerar depois do polimento?",
+          a: "Sim, recomendamos proteção (selante, cera ou coating) para prolongar brilho e facilitar manutenção.",
+        },
+      ],
       estimateEnabled: true,
       highlights: ["Gloss mirall", "Correccio swirl", "Acabat premium"],
     },
@@ -257,6 +297,24 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Escuma activa, detall de llandes i assecat sense marques.",
       priceFrom: PRICING.washFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceFoam,
+      infoEnabled: true,
+      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Touchless_Car_Wash.jpg",
+      infoSummary:
+        "A lavagem externa premium combina pré-lavagem, espuma ativa, limpeza detalhada de rodas e secagem com microfibra para reduzir marcas e riscos de contato. O processo prioriza menor agressão ao verniz e melhor resultado visual. Boas práticas também evitam descarte inadequado de resíduos para drenagem pluvial.",
+      faq: [
+        {
+          q: "Qual diferença da lavagem premium para a comum?",
+          a: "A premium inclui etapas de pré-lavagem, atenção maior em detalhes e secagem correta para reduzir marcas e micro-riscos.",
+        },
+        {
+          q: "Lavagem premium protege a pintura?",
+          a: "Ela preserva melhor o verniz por usar técnica menos agressiva. Para proteção prolongada, recomendamos aplicar selante ou cera.",
+        },
+        {
+          q: "Vocês limpam caixa de roda e rodas?",
+          a: "Sim. Rodas e áreas de difícil acesso entram no detalhamento do serviço.",
+        },
+      ],
       estimateEnabled: true,
       highlights: ["Escuma activa", "Llandes", "Assecat microfibra"],
     },
@@ -266,6 +324,24 @@ function getDefaultServices(): SiteConfig["services"] {
       description: "Tractament amb ozono orientat a eliminar olor de tabac/cigarro, olor fort d'humitat i altres olors persistents de l'habitacle.",
       priceFrom: PRICING.ozoneFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceOzone,
+      infoEnabled: true,
+      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/F._J._Horgan_ozone_generator.jpg",
+      infoSummary:
+        "O tratamento com ozônio é usado como apoio para neutralização de odores persistentes no interior do veículo, atuando por oxidação. Como o ozônio em concentração elevada é irritante para vias respiratórias, a aplicação deve ser feita sem ocupantes e seguida de ventilação adequada antes da entrega do carro.",
+      faq: [
+        {
+          q: "Ozônio é seguro?",
+          a: "Sim, quando aplicado com protocolo correto: cabine vazia, tempo controlado e ventilação completa antes do uso do veículo.",
+        },
+        {
+          q: "Resolve qualquer odor para sempre?",
+          a: "Ajuda muito na redução de odores, mas a durabilidade depende da origem do problema e dos hábitos de uso posteriores.",
+        },
+        {
+          q: "Posso usar o carro logo após o serviço?",
+          a: "Após ventilação adequada indicada pela equipe, sim. Seguimos o tempo seguro antes da liberação.",
+        },
+      ],
       estimateEnabled: true,
       highlights: ["Reduccio d'olor a tabac/cigarro", "Combat olors persistents", "Ideal com a extra de neteja interior"],
     },
@@ -343,7 +419,18 @@ export function normalizeSiteConfig(input: SiteConfigInput): SiteConfig {
   };
   const services = (input.services.length > 0 ? input.services : getDefaultServices()).map((service) => ({
     ...service,
+    videoUrl: service.videoUrl?.trim() || undefined,
     estimateEnabled: service.estimateEnabled ?? true,
+    infoEnabled: service.infoEnabled ?? true,
+    infoImageUrl: service.infoImageUrl?.trim() || service.imageUrl,
+    infoSummary:
+      (service.infoSummary?.trim() || undefined) ??
+      "Servico profissional executado com processo tecnico, foco em acabamento real e orientacao clara para manutencao posterior.",
+    faq: service.faq ?? [
+      { q: "Como funciona este servico?", a: "A equipe avalia o estado do veiculo e aplica um processo tecnico adequado para garantir resultado consistente." },
+      { q: "Quanto tempo demora?", a: "Depende do estado do veiculo e do nivel de detalhe contratado." },
+      { q: "Posso combinar com outro servico?", a: "Sim. Podemos montar um pacote personalizado conforme sua necessidade." },
+    ],
   }));
   const defaults = getDefaultI18n();
 

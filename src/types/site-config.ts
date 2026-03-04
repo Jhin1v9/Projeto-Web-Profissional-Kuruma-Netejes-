@@ -104,6 +104,13 @@ export type SiteConfig = {
     priceFrom: PriceValue;
     imageUrl: string;
     videoUrl?: string;
+    infoEnabled?: boolean;
+    infoSummary?: string;
+    infoImageUrl?: string;
+    faq?: Array<{
+      q: string;
+      a: string;
+    }>;
     popular?: boolean;
     estimateEnabled?: boolean;
     estimateLabel?: string;

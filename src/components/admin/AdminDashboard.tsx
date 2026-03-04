@@ -142,6 +142,25 @@ function parsePriceInput(value: string): PriceValue {
   return trimmed;
 }
 
+function faqToText(faq?: Array<{ q: string; a: string }>): string {
+  return (faq ?? []).map((item) => `${item.q} || ${item.a}`).join("\n");
+}
+
+function textToFaq(value: string): Array<{ q: string; a: string }> {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [q, ...rest] = line.split("||");
+      return {
+        q: (q ?? "").trim(),
+        a: rest.join("||").trim(),
+      };
+    })
+    .filter((item) => item.q && item.a);
+}
+
 function createPlaceholderService(index: number): SiteConfig["services"][number] {
   return {
     id: `service-${Date.now()}-${index}`,
@@ -150,6 +169,13 @@ function createPlaceholderService(index: number): SiteConfig["services"][number]
     priceFrom: "XXX",
     imageUrl: "/images/hero.webp",
     videoUrl: "",
+    infoEnabled: true,
+    infoSummary: "Resumo informativo deste servico para cliente.",
+    infoImageUrl: "/images/hero.webp",
+    faq: [
+      { q: "Como funciona este servico?", a: "Fazemos avaliacao inicial e aplicamos o processo tecnico mais adequado." },
+      { q: "Quanto tempo demora?", a: "Depende do estado do veiculo e do nivel de detalhe solicitado." },
+    ],
     estimateEnabled: true,
     highlights: [
       "Lorem ipsum dolor",
@@ -1337,6 +1363,14 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                   />
                   <span className="text-sm text-brand-silver/85">Mostrar no orcamento (checkbox)</span>
                 </label>
+                <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-black/20 px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={service.infoEnabled !== false}
+                    onChange={(e) => updateService(index, { infoEnabled: e.target.checked })}
+                  />
+                  <span className="text-sm text-brand-silver/85">Adicionar em infos + FAQ do site</span>
+                </label>
                 <label className="block">
                   <div className="text-xs text-brand-silver/70 mb-1">Nome do checkbox no orcamento (opcional)</div>
                   <input
@@ -1386,6 +1420,33 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
                     value={service.videoUrl ?? ""}
                     placeholder="https://.../video.mp4 ou https://youtube.com/watch?v=..."
                     onChange={(e) => updateService(index, { videoUrl: e.target.value })}
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
+                </label>
+                <label className="block sm:col-span-2">
+                  <div className="text-xs text-brand-silver/70 mb-1">Imagem da secao de infos (opcional)</div>
+                  <input
+                    value={service.infoImageUrl ?? ""}
+                    placeholder={service.imageUrl}
+                    onChange={(e) => updateService(index, { infoImageUrl: e.target.value })}
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
+                </label>
+                <label className="block sm:col-span-2">
+                  <div className="text-xs text-brand-silver/70 mb-1">Resumo informativo do servico</div>
+                  <textarea
+                    rows={4}
+                    value={service.infoSummary ?? ""}
+                    onChange={(e) => updateService(index, { infoSummary: e.target.value })}
+                    className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
+                  />
+                </label>
+                <label className="block sm:col-span-2">
+                  <div className="text-xs text-brand-silver/70 mb-1">FAQ do servico (uma linha por item: pergunta || resposta)</div>
+                  <textarea
+                    rows={5}
+                    value={faqToText(service.faq)}
+                    onChange={(e) => updateService(index, { faq: textToFaq(e.target.value) })}
                     className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-brand-cyan/60"
                   />
                 </label>

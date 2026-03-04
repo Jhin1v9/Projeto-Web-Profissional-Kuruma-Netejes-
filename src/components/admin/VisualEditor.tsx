@@ -264,6 +264,13 @@ export function VisualEditor() {
       description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
       priceFrom: 0,
       videoUrl: "",
+      infoEnabled: true,
+      infoSummary: "Resumo informativo deste servico para cliente.",
+      infoImageUrl: source.imageUrl,
+      faq: [
+        { q: "Como funciona este servico?", a: "Avaliamos o estado do veiculo e aplicamos o processo adequado." },
+        { q: "Quanto tempo demora?", a: "Depende do estado do veiculo e do nivel de detalhe necessario." },
+      ],
       popular: false,
       estimateEnabled: true,
       estimateLabel: "",

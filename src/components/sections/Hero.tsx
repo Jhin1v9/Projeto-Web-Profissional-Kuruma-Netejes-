@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { BUSINESS, HERO_BANNER_SETTINGS, HERO_BANNER_SLIDES } from "@/lib/constants";
 import { TRANSLATIONS } from "@/lib/i18n";
-import { maskedPrice, generateWhatsAppLink, scrollToSection } from "@/lib/utils";
+import { generateWhatsAppLink, scrollToSection } from "@/lib/utils";
 import { useCursor } from "@/components/providers/CursorProvider";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
@@ -128,7 +128,6 @@ export function Hero({ sectionId = "hero" }: { sectionId?: string }) {
           style={{ textShadow: "0 0 35px rgba(0,240,255,0.18)", color: colors.heroTitle }}
         >
           {slideText.title} <span style={{ color: colors.heroHighlight }}>{slideText.highlight}</span>
-          {activeSlide.price !== undefined ? ` ${maskedPrice(activeSlide.price)}` : ""}
         </motion.h1>
 
         <motion.p
