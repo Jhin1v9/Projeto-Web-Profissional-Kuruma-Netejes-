@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 import { Hero } from "@/components/sections/Hero";
 import { Services } from "@/components/sections/Services";
 import { ServiceSummaries } from "@/components/sections/ServiceSummaries";
@@ -31,12 +31,29 @@ export function HomeSections() {
 
   return (
     <>
-      {cfg.layout.sections.map((section) => {
+      {(() => {
+        let infoFaqInserted = false;
+        const hasInfoFaq = serviceSectionVisibility.mobile || serviceSectionVisibility.desktop;
+        const content = cfg.layout.sections.map((section) => {
         if (!section.enabled) return null;
         const cls = visibilityClass(section.mobile, section.desktop);
         const count = usedAnchors.get(section.type) ?? 0;
         usedAnchors.set(section.type, count + 1);
         const sectionId = count === 0 ? section.type : undefined;
+
+        if (section.type === "footer" && hasInfoFaq && !infoFaqInserted) {
+          infoFaqInserted = true;
+          return (
+            <Fragment key={`${section.id}-with-info`}>
+              <div className={visibilityClass(serviceSectionVisibility.mobile, serviceSectionVisibility.desktop)}>
+                <ServiceSummaries />
+              </div>
+              <div className={cls}>
+                <Footer sectionId={sectionId} />
+              </div>
+            </Fragment>
+          );
+        }
 
         switch (section.type) {
           case "hero":
@@ -56,10 +73,18 @@ export function HomeSections() {
           default:
             return null;
         }
-      })}
-      <div className={visibilityClass(serviceSectionVisibility.mobile, serviceSectionVisibility.desktop)}>
-        <ServiceSummaries />
-      </div>
+        });
+
+        if (!infoFaqInserted && hasInfoFaq) {
+          content.push(
+            <div key="service-summaries-fallback" className={visibilityClass(serviceSectionVisibility.mobile, serviceSectionVisibility.desktop)}>
+              <ServiceSummaries />
+            </div>
+          );
+        }
+
+        return content;
+      })()}
     </>
   );
 }

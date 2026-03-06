@@ -2,14 +2,26 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, ImageIcon, Sparkles, ListChecks, LogOut, ExternalLink, PenSquare } from "lucide-react";
+import {
+  LayoutDashboard,
+  ImageIcon,
+  Sparkles,
+  ListChecks,
+  LogOut,
+  ExternalLink,
+  PenSquare,
+  Palette,
+  Rocket,
+  Globe,
+  Link2,
+} from "lucide-react";
 
 const links = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/editor", label: "Editor", icon: PenSquare },
-  { href: "/admin/hero", label: "Hero", icon: Sparkles },
-  { href: "/admin/services", label: "Serveis", icon: ListChecks },
-  { href: "/admin/appearance", label: "Aparenca", icon: ImageIcon },
+  { href: "/admin", label: "Command", icon: LayoutDashboard, emoji: "📊" },
+  { href: "/admin/editor", label: "Editor Visual", icon: PenSquare, emoji: "🛠️" },
+  { href: "/admin/hero", label: "Hero Slides", icon: Sparkles, emoji: "✨" },
+  { href: "/admin/services", label: "Servicos + FAQ", icon: ListChecks, emoji: "🧩" },
+  { href: "/admin/appearance", label: "Aparencia", icon: ImageIcon, emoji: "🎨" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -63,11 +75,55 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                     ].join(" ")}
                   >
                     <Icon className="h-4 w-4" />
+                    <span className="text-base leading-none">{l.emoji}</span>
                     {l.label}
                   </Link>
                 );
               })}
             </nav>
+
+            <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-3 sm:mt-6">
+              <div className="mb-2 text-[11px] font-bold uppercase tracking-[0.08em] text-brand-silver/70">Acesso rapido</div>
+              <div className="space-y-2">
+                <a
+                  href="/#hero"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-xs text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan"
+                >
+                  <span className="inline-flex items-center gap-2"><Globe className="h-3.5 w-3.5" /> Hero no site</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href="/#service-details"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-xs text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan"
+                >
+                  <span className="inline-flex items-center gap-2"><Link2 className="h-3.5 w-3.5" /> Infos + FAQ</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+                <a
+                  href="/#cta"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-xs text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan"
+                >
+                  <span className="inline-flex items-center gap-2"><Rocket className="h-3.5 w-3.5" /> CTA final</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-white/10 bg-gradient-to-br from-brand-cyan/10 to-brand-blue/10 p-3">
+              <div className="inline-flex items-center gap-2 text-xs font-bold text-brand-cyan">
+                <Palette className="h-3.5 w-3.5" />
+                Tema ativo
+              </div>
+              <div className="mt-1 text-xs text-brand-silver/80">
+                Header, FAQ e cards com layout expandido para usar mais espaco horizontal.
+              </div>
+            </div>
 
             <button
               onClick={logout}

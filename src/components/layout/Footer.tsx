@@ -14,7 +14,7 @@ export function Footer({ sectionId = "footer" }: { sectionId?: string }) {
   const text = language === "ca" ? cfg.footer : cfg.i18n?.[language]?.footer ?? t.footer;
   return (
     <footer id={sectionId} className="border-t border-white/10 bg-brand-dark/40 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center md:gap-6 md:py-10">
+      <div className="mx-auto flex w-full max-w-[92rem] flex-col items-start justify-between gap-4 px-4 py-8 sm:px-6 md:flex-row md:items-center md:gap-6 md:py-10">
         <div className="flex items-start gap-3">
           {cfg.logoUrl ? (
             <img src={cfg.logoUrl} alt="Logo" className="mt-0.5 h-10 w-10 rounded-xl border border-white/10 object-cover" />

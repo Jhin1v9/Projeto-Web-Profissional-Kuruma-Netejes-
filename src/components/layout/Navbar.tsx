@@ -48,7 +48,7 @@ export function Navbar() {
         initial={{ y: -60 }}
         animate={{ y: 0 }}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:h-20 sm:px-6">
+        <div className="mx-auto flex h-16 w-full max-w-[92rem] items-center justify-between px-4 sm:h-20 sm:px-6">
           <button
             onClick={() => go("hero")}
             className="flex items-center gap-3"
@@ -68,7 +68,7 @@ export function Navbar() {
             </div>
           </button>
 
-          <nav className="hidden md:flex items-center gap-8">
+          <nav className="hidden lg:flex items-center gap-8">
             {nav.map((n) => (
               <button
                 key={n.id}
@@ -82,7 +82,21 @@ export function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex lg:hidden items-center gap-1 rounded-xl border border-white/10 px-2 py-1" style={{ backgroundColor: "var(--app-surface-soft)" }}>
+            {LANGUAGES.map((lang) => (
+              <button
+                key={`tablet-${lang.code}`}
+                type="button"
+                onClick={() => setLanguage(lang.code)}
+                className={`rounded-md px-2 py-1 text-sm ${language === lang.code ? "bg-white/15" : "hover:bg-white/10"}`}
+                title={lang.label}
+              >
+                <img src={lang.flagSrc} alt={lang.label} className="h-4 w-5 rounded-sm object-cover" />
+              </button>
+            ))}
+          </div>
+
+          <div className="hidden lg:flex items-center gap-3">
             <ThemeToggle />
             <div className="flex items-center gap-1 rounded-xl border border-white/10 px-2 py-1" style={{ backgroundColor: "var(--app-surface-soft)" }}>
               {LANGUAGES.map((lang) => (
@@ -111,7 +125,7 @@ export function Navbar() {
           </div>
 
           <button
-            className="rounded-lg p-2 md:hidden"
+            className="rounded-lg p-2 lg:hidden"
             onClick={() => setOpen(!open)}
             onMouseEnter={() => setHover(true, "hover")}
             onMouseLeave={() => setHover(false)}
@@ -123,7 +137,7 @@ export function Navbar() {
 
       <AnimatePresence>
         {open && (
-          <motion.div className="fixed inset-0 z-40 md:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div className="fixed inset-0 z-40 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="absolute inset-0 backdrop-blur-xl" style={{ backgroundColor: "var(--app-mobile-overlay)" }} onClick={() => setOpen(false)} />
             <motion.div className="absolute left-0 right-0 top-16 space-y-3 px-4 pb-6 pt-4 sm:top-20 sm:px-6" initial={{ y: -10 }} animate={{ y: 0 }}>
               <ThemeToggle />

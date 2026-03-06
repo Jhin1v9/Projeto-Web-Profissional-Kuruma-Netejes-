@@ -104,7 +104,7 @@ export function Hero({ sectionId = "hero" }: { sectionId?: string }) {
         transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       />
 
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 text-center sm:px-6 sm:pb-14 md:pb-20">
+      <div className="relative z-10 mx-auto w-full max-w-[92rem] px-4 pb-10 text-center sm:px-6 sm:pb-14 md:pb-20">
         <motion.div
           key={`${activeSlideIndex}-badge`}
           initial={{ opacity: 0, y: 18 }}
@@ -132,7 +132,7 @@ export function Hero({ sectionId = "hero" }: { sectionId?: string }) {
 
         <motion.p
           key={`${activeSlideIndex}-desc`}
-          className="mx-auto mt-5 max-w-3xl text-base leading-relaxed sm:mt-6 sm:text-lg lg:text-xl"
+          className="mx-auto mt-5 max-w-4xl text-base leading-relaxed sm:mt-6 sm:text-lg lg:text-xl"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}

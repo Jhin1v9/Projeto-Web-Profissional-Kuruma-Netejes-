@@ -1,11 +1,18 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { ChevronDown, HelpCircle } from "lucide-react";
+import { ChevronDown, HelpCircle, Search } from "lucide-react";
 import { useLanguage } from "@/components/providers/LanguageProvider";
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { adaptiveThemeColor } from "@/lib/theme-colors";
 import { useSiteConfig } from "./useSiteConfig";
+
+const SERVICE_MEDIA_FALLBACK: Record<string, string> = {
+  interior: "/images/antes-dps.png",
+  polishing: "/images/service-polishing.webp",
+  wash: "/images/service-foam.webp",
+  ozone: "/images/ozonio.png",
+};
 
 function getYouTubeEmbed(url: string): string | null {
   const value = url.trim();
@@ -33,6 +40,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
   );
   const [activeServiceId, setActiveServiceId] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number>(0);
+  const [faqQuery, setFaqQuery] = useState("");
 
   const activeService =
     infoServices.find((service) => service.id === (activeServiceId ?? infoServices[0]?.id)) ?? infoServices[0] ?? null;
@@ -47,13 +55,28 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
         translated?.description ||
         activeService.description
     : "";
+  const serviceHighlights =
+    language === "ca"
+      ? activeService?.highlights ?? []
+      : translated?.highlights?.length
+      ? translated.highlights
+      : activeService?.highlights ?? [];
   const serviceFaq =
     language === "ca"
       ? activeService?.faq ?? []
       : translated?.faq?.length
       ? translated.faq
       : activeService?.faq ?? [];
-  const mediaImage = activeService?.infoImageUrl?.trim() || activeService?.imageUrl || "";
+  const filteredFaq = useMemo(() => {
+    const term = faqQuery.trim().toLowerCase();
+    if (!term) return serviceFaq;
+    return serviceFaq.filter((item) => `${item.q} ${item.a}`.toLowerCase().includes(term));
+  }, [faqQuery, serviceFaq]);
+  const mediaImage =
+    activeService?.infoImageUrl?.trim() ||
+    activeService?.imageUrl?.trim() ||
+    (activeService ? SERVICE_MEDIA_FALLBACK[activeService.id] : "") ||
+    "/images/hero.webp";
   const mediaVideo = activeService?.videoUrl?.trim() || "";
   const youtubeEmbed = getYouTubeEmbed(mediaVideo);
   const directVideo = isDirectVideo(mediaVideo);
@@ -132,14 +155,14 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
   if (!infoServices.length) {
     return (
       <section id={sectionId} className="py-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4 text-center text-sm text-brand-silver/80 sm:px-6">{copy.empty}</div>
+        <div className="mx-auto w-full max-w-[92rem] px-4 text-center text-sm text-brand-silver/80 sm:px-6">{copy.empty}</div>
       </section>
     );
   }
 
   return (
     <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto w-full max-w-[92rem] px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-black sm:text-5xl" style={{ color: colors.sectionTitle }}>
             {copy.title} <span style={{ color: colors.sectionHighlight }}>{copy.highlight}</span>
@@ -161,6 +184,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                 onClick={() => {
                   setActiveServiceId(service.id);
                   setOpenFaqIndex(0);
+                  setFaqQuery("");
                 }}
                 className={`rounded-xl border px-4 py-2 text-sm font-semibold transition ${
                   active
@@ -189,7 +213,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
               ) : directVideo ? (
                 <video src={mediaVideo} controls playsInline className="h-full w-full object-cover" />
               ) : (
-                <div className="h-full w-full bg-cover bg-center" style={{ backgroundImage: `url(${mediaImage})` }} />
+                <img src={mediaImage} alt={serviceName} className="h-full w-full object-cover" />
               )}
             </div>
             <div className="p-5 sm:p-6">
@@ -199,6 +223,18 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
               <p className="mt-3 whitespace-pre-line text-sm leading-relaxed sm:text-base" style={{ color: colors.text }}>
                 {serviceDescription}
               </p>
+              {serviceHighlights.length ? (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {serviceHighlights.map((item, index) => (
+                    <span
+                      key={`summary-highlight-${index}`}
+                      className="rounded-full border border-brand-cyan/30 bg-brand-cyan/10 px-3 py-1 text-xs font-semibold text-brand-cyan"
+                    >
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </article>
 
@@ -207,9 +243,21 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
               <HelpCircle className="h-4 w-4" />
               {copy.faq}
             </div>
+            <label className="mt-4 flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+              <Search className="h-4 w-4 text-brand-silver/70" />
+              <input
+                value={faqQuery}
+                onChange={(event) => {
+                  setFaqQuery(event.target.value);
+                  setOpenFaqIndex(0);
+                }}
+                placeholder="Buscar na FAQ..."
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-brand-silver/65"
+              />
+            </label>
             <div className="mt-4 space-y-2">
-              {serviceFaq.length ? (
-                serviceFaq.map((item, index) => {
+              {filteredFaq.length ? (
+                filteredFaq.map((item, index) => {
                   const open = openFaqIndex === index;
                   return (
                     <div key={`faq-item-${index}`} className="rounded-xl border border-white/10 bg-black/20">
@@ -266,7 +314,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                 })
               ) : (
                 <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-brand-silver/80">
-                  FAQ ainda nao configurado para este servico.
+                  {serviceFaq.length ? "Nenhuma pergunta encontrada para esse filtro." : "FAQ ainda nao configurado para este servico."}
                 </div>
               )}
             </div>

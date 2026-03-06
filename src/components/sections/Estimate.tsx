@@ -55,7 +55,7 @@ export function Estimate({ sectionId = "estimate" }: { sectionId?: string }) {
 
   return (
     <section id={sectionId} className="relative py-16 sm:py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto w-full max-w-[92rem] px-4 sm:px-6">
         <div className="rounded-3xl border border-white/10 bg-brand-dark2/70 p-5 backdrop-blur-xl sm:p-8 lg:p-10">
           <div className="max-w-3xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-brand-cyan/35 bg-brand-cyan/10 px-3 py-1 text-xs font-semibold text-brand-cyan">

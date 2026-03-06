@@ -481,6 +481,11 @@ export function VisualEditor() {
                   {index + 1}. {section.type}
                 </button>
               ))}
+            {sectionCount("services") > 0 && (
+              <span className="shrink-0 rounded-lg border border-brand-cyan/25 bg-brand-cyan/10 px-2 py-1 font-semibold text-brand-cyan">
+                infos+faq (auto antes do footer)
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -751,8 +756,8 @@ export function VisualEditor() {
                           className="h-52 bg-cover bg-center sm:h-64"
                           style={{
                             backgroundImage: `url(${
-                              activeInfoService.infoImageUrl?.trim() ||
-                              activeInfoService.imageUrl
+                              activeInfoService.imageUrl ||
+                              activeInfoService.infoImageUrl?.trim()
                             })`,
                           }}
                         />
@@ -1166,7 +1171,7 @@ export function VisualEditor() {
           })}
         </div>
         <div className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-brand-silver/75">
-          Selecionado: {selectedSectionType ?? "nenhum"} | Hero x{sectionCount("hero")} | Services x{sectionCount("services")} | Process x{sectionCount("process")}
+          Selecionado: {selectedSectionType ?? "nenhum"} | Hero x{sectionCount("hero")} | Services x{sectionCount("services")} | Infos+FAQ {sectionCount("services") > 0 ? "on" : "off"} | Process x{sectionCount("process")}
         </div>
       </aside>
     </div>

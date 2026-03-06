@@ -25,12 +25,12 @@ export function CTA({ sectionId = "cta" }: { sectionId?: string }) {
 
   return (
     <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
-      <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
+      <div className="mx-auto w-full max-w-[92rem] px-4 text-center sm:px-6">
         <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
           <h2 className="text-3xl font-black sm:text-5xl lg:text-6xl" style={{ color: colors.ctaTitle }}>
             {displayCta.title} <span style={{ color: colors.ctaHighlight }}>{displayCta.highlight}</span>
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base sm:mt-5 sm:text-lg" style={{ color: colors.ctaDescription }}>
+          <p className="mx-auto mt-4 max-w-3xl text-base sm:mt-5 sm:text-lg" style={{ color: colors.ctaDescription }}>
             {displayCta.description}
           </p>
           <a

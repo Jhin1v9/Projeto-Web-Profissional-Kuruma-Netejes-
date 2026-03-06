@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Save, Rocket, RefreshCw, ImagePlus, Loader2, Clock3 } from "lucide-react";
+import { Save, Rocket, RefreshCw, ImagePlus, Loader2, Clock3, Globe, CircleHelp, BarChart3 } from "lucide-react";
 import type { SiteConfig } from "@/types/site-config";
 import { getDefaultConfig, normalizeSiteConfig, SiteConfigSchema } from "@/lib/site-config";
-import type { PriceValue } from "@/lib/constants";
+import { BUSINESS, type PriceValue } from "@/lib/constants";
 import { getAutoBusinessStatus, resolveBusinessStatus } from "@/lib/business-status";
+import { generateWhatsAppLink } from "@/lib/utils";
 import {
   LANGUAGES,
   TRANSLATIONS,
@@ -555,6 +556,10 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     appearance: "Aparenca",
     editor: "Editor Completo",
   };
+  const enabledSections = cfg.layout.sections.filter((item) => item.enabled).length;
+  const infoFaqServices = cfg.services.filter((service) => service.infoEnabled !== false).length;
+  const estimateServices = cfg.services.filter((service) => service.estimateEnabled !== false).length;
+  const hasLogo = !!cfg.logoUrl?.trim();
 
   return (
     <div>
@@ -591,6 +596,59 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
       </div>
 
       {msg && <div className="mt-4 text-sm text-brand-silver/85">{msg}</div>}
+
+      <div className="mt-6 grid gap-3 lg:grid-cols-4">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-brand-silver/70">Layout ativo</div>
+          <div className="mt-1 text-2xl font-black text-white">{enabledSections}</div>
+          <div className="text-xs text-brand-silver/75">secoes visiveis no site</div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-brand-silver/70">Infos + FAQ</div>
+          <div className="mt-1 text-2xl font-black text-white">{infoFaqServices}</div>
+          <div className="text-xs text-brand-silver/75">servicos com bloco informativo</div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-brand-silver/70">Orcamento</div>
+          <div className="mt-1 text-2xl font-black text-white">{estimateServices}</div>
+          <div className="text-xs text-brand-silver/75">itens habilitados para simular</div>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+          <div className="text-[11px] font-bold uppercase tracking-[0.08em] text-brand-silver/70">Branding</div>
+          <div className="mt-1 text-2xl font-black text-white">{hasLogo ? "OK" : "--"}</div>
+          <div className="text-xs text-brand-silver/75">{hasLogo ? "logo configurada" : "logo pendente"}</div>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-brand-silver/90 hover:border-brand-cyan/35 hover:text-brand-cyan"
+        >
+          <Globe className="h-4 w-4" />
+          Abrir site
+        </a>
+        <a
+          href="/#service-details"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-brand-silver/90 hover:border-brand-cyan/35 hover:text-brand-cyan"
+        >
+          <CircleHelp className="h-4 w-4" />
+          Abrir Infos + FAQ
+        </a>
+        <a
+          href={generateWhatsAppLink(BUSINESS.whatsapp, "Ola! Vim do painel admin e quero simular atendimento.")}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm font-semibold text-brand-silver/90 hover:border-brand-cyan/35 hover:text-brand-cyan"
+        >
+          <BarChart3 className="h-4 w-4" />
+          Testar fluxo no WhatsApp
+        </a>
+      </div>
 
       {section === "dashboard" && (
         <div className="mt-8 space-y-6">
@@ -680,7 +738,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             </div>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
               <div className="text-xs text-brand-silver/70">Slides Hero</div>
               <div className="text-3xl font-black mt-1">{cfg.heroBanner.slides.length}</div>
@@ -694,6 +752,10 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
               <div className="text-3xl font-black mt-1">{cfg.services.filter((service) => service.estimateEnabled !== false).length}</div>
             </div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="text-xs text-brand-silver/70">Servicos em infos + FAQ</div>
+              <div className="text-3xl font-black mt-1">{cfg.services.filter((service) => service.infoEnabled !== false).length}</div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
               <div className="text-xs text-brand-silver/70">Intervalo do carrossel</div>
               <div className="text-3xl font-black mt-1">{cfg.heroBanner.settings.autoSlideIntervalMs}ms</div>
             </div>
@@ -701,6 +763,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
 
           <div className="rounded-3xl border border-white/10 bg-black/20 p-5">
             <div className="text-sm font-bold text-white">Ligar/Desligar secoes (rapido)</div>
+            <div className="mt-1 text-xs text-brand-silver/70">Infos + FAQ segue automaticamente os servicos ativos e aparece antes do footer.</div>
             <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from(new Set(cfg.layout.sections.map((section) => section.type))).map((type) => {
                 const enabled = cfg.layout.sections.some((section) => section.type === type && section.enabled);

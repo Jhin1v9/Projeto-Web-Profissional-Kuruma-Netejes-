@@ -13,7 +13,7 @@ export function Process({ sectionId = "process" }: { sectionId?: string }) {
 
   return (
     <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto w-full max-w-[92rem] px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-black text-white sm:text-5xl">
             {text.title} <span className="text-brand-cyan">{text.highlight}</span>

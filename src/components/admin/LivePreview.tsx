@@ -15,6 +15,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
   const previewSlide = cfg.heroBanner.slides[0];
   const colors = cfg.appearance.textColors;
   const estimateOptions = cfg.services.filter((s) => s.estimateEnabled !== false);
+  const firstInfoService = cfg.services.find((service) => service.infoEnabled !== false);
   const status = resolveBusinessStatus({
     mode: cfg.businessStatusMode,
     manualStatus: cfg.businessStatus,
@@ -30,7 +31,7 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
     <div className="rounded-3xl border border-white/10 overflow-hidden">
       <div className="px-5 py-4 bg-black/25 border-b border-white/10">
         <div className="font-extrabold">Live preview completo</div>
-        <div className="text-xs text-brand-silver/70">Hero, services, orcamento, processo, localizacao, cta e footer</div>
+        <div className="text-xs text-brand-silver/70">Hero, services, orcamento, processo, localizacao, cta, infos + FAQ e footer</div>
       </div>
       <div className="relative max-h-[78vh] overflow-y-auto bg-brand-dark p-3 sm:p-6">
         <div
@@ -124,6 +125,18 @@ export function LivePreview({ cfg }: { cfg: SiteConfig }) {
             </div>
             <div className="mt-2 text-sm" style={{ color: colors.ctaDescription }}>{cfg.cta.description}</div>
           </div>
+
+          {firstInfoService && (
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div className="text-xs font-bold uppercase tracking-[0.08em] text-brand-cyan">Infos + FAQ</div>
+              <div className="mt-2 text-sm font-semibold text-white">
+                {firstInfoService.name}
+              </div>
+              <div className="mt-1 text-xs text-brand-silver/80">
+                {(firstInfoService.infoSummary ?? "").trim() || "Resumo do servico e perguntas frequentes."}
+              </div>
+            </div>
+          )}
 
           <div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-xs text-brand-silver/80">
             {cfg.footer.reserveMessage}

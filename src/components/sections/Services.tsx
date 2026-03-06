@@ -50,7 +50,7 @@ export function Services({ sectionId = "services" }: { sectionId?: string }) {
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-cyan/30 to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="relative z-10 mx-auto w-full max-w-[92rem] px-4 sm:px-6">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-black sm:text-5xl" style={{ color: colors.servicesTitle }}>
             {t.services.title} <span style={{ color: colors.servicesHighlight }}>{t.services.highlight}</span>

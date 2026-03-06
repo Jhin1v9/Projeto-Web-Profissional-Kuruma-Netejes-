@@ -246,7 +246,7 @@ function getDefaultServices(): SiteConfig["services"] {
       priceFrom: PRICING.interiorFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceBeforeAfter,
       infoEnabled: true,
-      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Carinterior.jpg",
+      infoImageUrl: DEFAULT_IMAGE_PATHS.serviceBeforeAfter,
       infoSummary:
         "A limpeza interna profissional combina aspiração, extração e descontaminação de superfícies para remover poeira, resíduos orgânicos e odores persistentes. Em detailing, esse processo é feito por zonas (tecidos, plásticos e couro) com produtos específicos para cada material, reduzindo desgaste precoce e melhorando a experiência no habitáculo.",
       faq: [
@@ -274,7 +274,7 @@ function getDefaultServices(): SiteConfig["services"] {
       priceFrom: PRICING.polishingFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.servicePolishing,
       infoEnabled: true,
-      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Auto_Detailing.jpg",
+      infoImageUrl: DEFAULT_IMAGE_PATHS.servicePolishing,
       infoSummary:
         "O polimento técnico corrige micro-riscos, marcas de lavagem e perda de brilho através de abrasão controlada na camada de verniz. O objetivo é nivelar imperfeições sem exagerar no corte, recuperando profundidade de cor e reflexo. Após a correção, a proteção de superfície ajuda a manter o acabamento por mais tempo.",
       faq: [
@@ -301,7 +301,7 @@ function getDefaultServices(): SiteConfig["services"] {
       priceFrom: PRICING.washFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceFoam,
       infoEnabled: true,
-      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/Touchless_Car_Wash.jpg",
+      infoImageUrl: DEFAULT_IMAGE_PATHS.serviceFoam,
       infoSummary:
         "A lavagem externa premium combina pré-lavagem, espuma ativa, limpeza detalhada de rodas e secagem com microfibra para reduzir marcas e riscos de contato. O processo prioriza menor agressão ao verniz e melhor resultado visual. Boas práticas também evitam descarte inadequado de resíduos para drenagem pluvial.",
       faq: [
@@ -328,7 +328,7 @@ function getDefaultServices(): SiteConfig["services"] {
       priceFrom: PRICING.ozoneFrom,
       imageUrl: DEFAULT_IMAGE_PATHS.serviceOzone,
       infoEnabled: true,
-      infoImageUrl: "https://commons.wikimedia.org/wiki/Special:FilePath/F._J._Horgan_ozone_generator.jpg",
+      infoImageUrl: DEFAULT_IMAGE_PATHS.serviceOzone,
       infoSummary:
         "O tratamento com ozônio é usado como apoio para neutralização de odores persistentes no interior do veículo, atuando por oxidação. Como o ozônio em concentração elevada é irritante para vias respiratórias, a aplicação deve ser feita sem ocupantes e seguida de ventilação adequada antes da entrega do carro.",
       faq: [

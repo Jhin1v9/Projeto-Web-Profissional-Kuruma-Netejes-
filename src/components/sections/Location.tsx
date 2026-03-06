@@ -33,7 +33,7 @@ export function Location({ sectionId = "location" }: { sectionId?: string }) {
 
   return (
     <section id={sectionId} className="relative py-16 sm:py-20 lg:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="mx-auto w-full max-w-[92rem] px-4 sm:px-6">
         <div className="grid gap-6 lg:grid-cols-2 lg:gap-8">
           <motion.div
             className="rounded-3xl border border-white/10 bg-brand-dark2/65 p-5 sm:p-8"
