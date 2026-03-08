@@ -197,6 +197,7 @@ function statusButtonClass(active: boolean, tone: "green" | "orange" | "red") {
 
 export function AdminDashboard({ section = "dashboard" }: Props) {
   const [cfg, setCfg] = useState<SiteConfig | null>(null);
+  const [publishedCfg, setPublishedCfg] = useState<SiteConfig | null>(null);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -207,6 +208,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
   const [ctaTextLang, setCtaTextLang] = useState<Language>("ca");
   const [estimateTextLang, setEstimateTextLang] = useState<Language>("ca");
   const [editorTextLang, setEditorTextLang] = useState<Language>("ca");
+  const [previewMode, setPreviewMode] = useState<"published" | "draft">("published");
 
   function getLangDefaults(lang: Language): NonNullable<SiteConfig["i18n"]>[Language] {
     return {
@@ -230,12 +232,24 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
 
     (async () => {
       try {
-        const res = await fetch("/api/site-config?view=draft", { cache: "no-store", signal: controller.signal });
-        const json = await res.json().catch(() => getDefaultConfig());
-        const parsed = SiteConfigSchema.safeParse(json);
-        setCfg(parsed.success ? normalizeSiteConfig(parsed.data) : getDefaultConfig());
+        const [draftRes, publishedRes] = await Promise.all([
+          fetch("/api/site-config?view=draft", { cache: "no-store", signal: controller.signal }),
+          fetch("/api/site-config?view=published", { cache: "no-store", signal: controller.signal }),
+        ]);
+        const draftJson = await draftRes.json().catch(() => getDefaultConfig());
+        const publishedJson = await publishedRes.json().catch(() => draftJson);
+        const parsedDraft = SiteConfigSchema.safeParse(draftJson);
+        const parsedPublished = SiteConfigSchema.safeParse(publishedJson);
+        const normalizedDraft = parsedDraft.success ? normalizeSiteConfig(parsedDraft.data) : getDefaultConfig();
+        const normalizedPublished = parsedPublished.success
+          ? normalizeSiteConfig(parsedPublished.data)
+          : normalizedDraft;
+        setCfg(normalizedDraft);
+        setPublishedCfg(normalizedPublished);
       } catch {
-        setCfg(getDefaultConfig());
+        const fallback = getDefaultConfig();
+        setCfg(fallback);
+        setPublishedCfg(fallback);
       } finally {
         window.clearTimeout(timeout);
       }
@@ -273,6 +287,17 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     });
   }
 
+  async function refreshPublishedPreview() {
+    try {
+      const res = await fetch("/api/site-config?view=published", { cache: "no-store" });
+      const json = await res.json().catch(() => null);
+      const parsed = SiteConfigSchema.safeParse(json);
+      if (parsed.success) setPublishedCfg(normalizeSiteConfig(parsed.data));
+    } catch {
+      // keep current preview fallback
+    }
+  }
+
   async function save() {
     if (!cfg) return;
     setSaving(true);
@@ -293,6 +318,10 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
     const res = await fetch("/api/site-config", { method: "POST" });
     const payload = await res.json().catch(() => null);
     setPublishing(false);
+    if (res.ok) {
+      setPreviewMode("published");
+      await refreshPublishedPreview();
+    }
     setMsg(res.ok ? "Publicado com sucesso no site." : payload?.error ?? "Erro ao publicar.");
   }
 
@@ -560,6 +589,8 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
   const infoFaqServices = cfg.services.filter((service) => service.infoEnabled !== false).length;
   const estimateServices = cfg.services.filter((service) => service.estimateEnabled !== false).length;
   const hasLogo = !!cfg.logoUrl?.trim();
+  const previewCfg = previewMode === "published" ? publishedCfg ?? cfg : cfg;
+  const hasDraftChanges = !!publishedCfg && JSON.stringify(publishedCfg) !== JSON.stringify(cfg);
 
   return (
     <div>
@@ -593,6 +624,35 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             {publishing ? "Publicando..." : "Publicar"}
           </button>
         </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="text-xs text-brand-silver/70">Preview:</span>
+        <button
+          type="button"
+          onClick={() => setPreviewMode("published")}
+          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+            previewMode === "published"
+              ? "border-brand-cyan/40 bg-brand-cyan/20 text-brand-cyan"
+              : "border-white/10 bg-black/20 text-brand-silver/80"
+          }`}
+        >
+          Site real (publicado)
+        </button>
+        <button
+          type="button"
+          onClick={() => setPreviewMode("draft")}
+          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
+            previewMode === "draft"
+              ? "border-brand-cyan/40 bg-brand-cyan/20 text-brand-cyan"
+              : "border-white/10 bg-black/20 text-brand-silver/80"
+          }`}
+        >
+          Rascunho
+        </button>
+        <span className={`text-xs ${hasDraftChanges ? "text-amber-300" : "text-emerald-300"}`}>
+          {hasDraftChanges ? "Rascunho diferente do publicado." : "Rascunho igual ao publicado."}
+        </span>
       </div>
 
       {msg && <div className="mt-4 text-sm text-brand-silver/85">{msg}</div>}
@@ -781,7 +841,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
             </div>
           </div>
 
-          <LivePreview cfg={cfg} />
+          <LivePreview cfg={previewCfg} />
         </div>
       )}
 
@@ -965,7 +1025,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
               </div>
             </div>
           </div>
-          <LivePreview cfg={cfg} />
+          <LivePreview cfg={previewCfg} />
         </div>
       )}
 
@@ -1197,7 +1257,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
               {ctaTextLang === "ca" && <div className="mt-3 text-xs text-brand-silver/60">Para CA, os textos continuam no dicionario base.</div>}
             </div>
           </div>
-          <LivePreview cfg={cfg} />
+          <LivePreview cfg={previewCfg} />
         </div>
       )}
 
@@ -1755,7 +1815,7 @@ export function AdminDashboard({ section = "dashboard" }: Props) {
               </div>
             </div>
           </div>
-          <LivePreview cfg={cfg} />
+          <LivePreview cfg={previewCfg} />
         </div>
       )}
     </div>

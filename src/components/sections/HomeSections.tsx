@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useMemo } from "react";
+import { useMemo } from "react";
 import { Hero } from "@/components/sections/Hero";
 import { Services } from "@/components/sections/Services";
 import { ServiceSummaries } from "@/components/sections/ServiceSummaries";
@@ -9,6 +9,7 @@ import { Process } from "@/components/sections/Process";
 import { Location } from "@/components/sections/Location";
 import { CTA } from "@/components/sections/CTA";
 import { Footer } from "@/components/layout/Footer";
+import { buildSectionRenderPlan } from "@/lib/section-flow";
 import { useSiteConfig } from "./useSiteConfig";
 
 function visibilityClass(mobile: boolean, desktop: boolean): string {
@@ -20,71 +21,63 @@ function visibilityClass(mobile: boolean, desktop: boolean): string {
 
 export function HomeSections() {
   const cfg = useSiteConfig();
-  const usedAnchors = useMemo(() => new Map<string, number>(), [cfg.layout.sections.length]);
-  const serviceSectionVisibility = useMemo(() => {
-    const services = cfg.layout.sections.filter((section) => section.type === "services" && section.enabled);
-    return {
-      mobile: services.some((section) => section.mobile),
-      desktop: services.some((section) => section.desktop),
-    };
-  }, [cfg.layout.sections]);
+  const renderPlan = useMemo(() => buildSectionRenderPlan(cfg), [cfg]);
 
   return (
     <>
-      {(() => {
-        let infoFaqInserted = false;
-        const hasInfoFaq = serviceSectionVisibility.mobile || serviceSectionVisibility.desktop;
-        const content = cfg.layout.sections.map((section) => {
-        if (!section.enabled) return null;
-        const cls = visibilityClass(section.mobile, section.desktop);
-        const count = usedAnchors.get(section.type) ?? 0;
-        usedAnchors.set(section.type, count + 1);
-        const sectionId = count === 0 ? section.type : undefined;
-
-        if (section.type === "footer" && hasInfoFaq && !infoFaqInserted) {
-          infoFaqInserted = true;
-          return (
-            <Fragment key={`${section.id}-with-info`}>
-              <div className={visibilityClass(serviceSectionVisibility.mobile, serviceSectionVisibility.desktop)}>
-                <ServiceSummaries />
-              </div>
-              <div className={cls}>
-                <Footer sectionId={sectionId} />
-              </div>
-            </Fragment>
-          );
+      {renderPlan.map((item) => {
+        if (item.kind === "infoFaq") {
+          return <ServiceSummaries key={item.key} sectionId={item.sectionId} />;
         }
 
-        switch (section.type) {
+        const cls = visibilityClass(item.section.mobile, item.section.desktop);
+        switch (item.section.type) {
           case "hero":
-            return <div key={section.id} className={cls}><Hero sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <Hero sectionId={item.sectionId} />
+              </div>
+            );
           case "services":
-            return <div key={section.id} className={cls}><Services sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <Services sectionId={item.sectionId} />
+              </div>
+            );
           case "estimate":
-            return <div key={section.id} className={cls}><Estimate sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <Estimate sectionId={item.sectionId} />
+              </div>
+            );
           case "process":
-            return <div key={section.id} className={cls}><Process sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <Process sectionId={item.sectionId} />
+              </div>
+            );
           case "location":
-            return <div key={section.id} className={cls}><Location sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <Location sectionId={item.sectionId} />
+              </div>
+            );
           case "cta":
-            return <div key={section.id} className={cls}><CTA sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <CTA sectionId={item.sectionId} />
+              </div>
+            );
           case "footer":
-            return <div key={section.id} className={cls}><Footer sectionId={sectionId} /></div>;
+            return (
+              <div key={item.key} className={cls}>
+                <Footer sectionId={item.sectionId} />
+              </div>
+            );
           default:
             return null;
         }
-        });
-
-        if (!infoFaqInserted && hasInfoFaq) {
-          content.push(
-            <div key="service-summaries-fallback" className={visibilityClass(serviceSectionVisibility.mobile, serviceSectionVisibility.desktop)}>
-              <ServiceSummaries />
-            </div>
-          );
-        }
-
-        return content;
-      })()}
+      })}
     </>
   );
 }
