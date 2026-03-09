@@ -1,5 +1,5 @@
-import { VisualEditor } from "@/components/admin/VisualEditor";
+import { AdminDashboard } from "@/components/admin/AdminDashboard";
 
 export default function AdminEditorPage() {
-  return <VisualEditor />;
+  return <AdminDashboard section="editor" />;
 }

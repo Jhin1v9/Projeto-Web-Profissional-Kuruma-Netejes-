@@ -96,3 +96,20 @@ Uso:
 Isso gera no repo destino:
 - `AGENTS.md`
 - `.github/workflows/ci.yml`
+
+## 8) Auditoria automatica do site (CMD)
+
+Ferramenta: `tools/sitepulse-qa`
+
+Uso rapido:
+```bash
+cd tools/sitepulse-qa
+npm install
+npm run audit
+npm run audit:mobile
+```
+
+Saidas:
+- relatorio JSON
+- relatorio Markdown
+- log com codigo da issue + explicacao leiga + resolucao recomendada

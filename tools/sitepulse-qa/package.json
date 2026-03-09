@@ -1,0 +1,16 @@
+﻿{
+  "name": "sitepulse-qa",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "audit": "node src/index.mjs --config audit.kuruma.json",
+    "audit:headed": "node src/index.mjs --config audit.kuruma.json --headed",
+    "audit:fresh": "node src/index.mjs --config audit.kuruma.json --fresh",
+    "audit:mobile": "node src/index.mjs --config audit.kuruma.mobile.json --fresh",
+    "audit:auto": "node src/run-until-done.mjs --config audit.kuruma.json"
+  },
+  "dependencies": {
+    "playwright": "^1.53.2"
+  }
+}
