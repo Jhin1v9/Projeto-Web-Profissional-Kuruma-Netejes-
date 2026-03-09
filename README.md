@@ -114,6 +114,8 @@ Atalhos pela raiz:
 ```bash
 npm run audit:run
 npm run audit:run:mobile
+npm run audit:hub
+npm run audit:hub:mobile
 npm run audit:cmd
 npm run audit:cmd:mobile
 ```
@@ -124,6 +126,17 @@ cd tools/sitepulse-qa
 run-audit-url.cmd https://meusite.com
 ```
 Esse comando ja usa `--no-server` para nao subir app local.
+
+Interface CMD guiada:
+```bash
+cd tools/sitepulse-qa
+run-audit-hub.cmd
+```
+ou:
+```bash
+npm run audit:hub
+```
+No final ele mostra resumo inteligente com prioridades, top issues e proximo comando de replay.
 
 Saidas:
 - relatorio JSON

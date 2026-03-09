@@ -35,6 +35,11 @@ Demo users:
 - `POST /api/run-plan`: returns execution plan + command template.
 
 ## Notes
-- This first version is focused on UI and workflow scaffolding.
+- Includes:
+  - control center (URL/mode/headed/no-server)
+  - live progress + run log
+  - issue center with severity filter and search
+  - assistant playbook panel
+  - command copy for guided CMD and direct CMD
+  - JSON import (file and paste) for real report inspection
 - Real audit execution can be plugged next (self-hosted runner or queue worker).
-

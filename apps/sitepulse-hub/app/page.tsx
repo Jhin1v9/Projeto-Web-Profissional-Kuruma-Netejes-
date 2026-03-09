@@ -1,28 +1,34 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type ChangeEvent } from "react";
 
 type Mode = "desktop" | "mobile";
+type Severity = "high" | "medium" | "low";
+type SeverityFilter = Severity | "all";
 
-type DemoIssue = {
+type AssistantHint = {
+  priority?: "P0" | "P1" | "P2";
+  firstChecks?: string[];
+  commandHints?: string[];
+  likelyAreas?: string[];
+};
+
+type IssueModel = {
   id: string;
   code: string;
-  severity: "high" | "medium" | "low";
+  severity: Severity;
   route: string;
   action: string;
   detail: string;
   recommendedResolution: string;
-  assistantHint?: {
-    priority: "P0" | "P1" | "P2";
-    firstChecks: string[];
-    commandHints: string[];
-  };
+  assistantHint: AssistantHint;
+  group: string;
 };
 
-type DemoReport = {
+type ReportModel = {
   meta: {
     project: string;
-    mode: Mode;
+    baseUrl: string;
     generatedAt: string;
   };
   summary: {
@@ -38,29 +44,212 @@ type DemoReport = {
     immediateSteps: string[];
     quickStartPrompt: string;
   };
-  issues: DemoIssue[];
+  issues: IssueModel[];
+};
+
+type RunPlanResponse = {
+  ok: boolean;
+  mode: Mode;
+  command: string;
+  startedAt: string;
+  steps: string[];
+  error?: string;
 };
 
 const DEFAULT_URL = "https://projeto-web-profissional-kuruma-net.vercel.app";
+const DEMO_USERS = [
+  { username: "admin", password: "admin123" },
+  { username: "mobile", password: "mobile123" },
+];
+
+const ISSUE_GROUP: Record<string, string> = {
+  ROUTE_LOAD_FAIL: "Flow break",
+  BTN_CLICK_ERROR: "Broken interaction",
+  BTN_NO_EFFECT: "Unexpected or missing action",
+  HTTP_4XX: "API contract/auth issue",
+  HTTP_5XX: "Backend failure",
+  NET_REQUEST_FAILED: "Network/CORS/connectivity",
+  JS_RUNTIME_ERROR: "Frontend runtime",
+  CONSOLE_ERROR: "Frontend runtime",
+  VISUAL_SECTION_ORDER_INVALID: "Visual and functional layout",
+  VISUAL_SECTION_MISSING: "Visual and functional layout",
+};
+
+function nowIso() {
+  return new Date().toISOString();
+}
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function priorityClass(priority?: string) {
-  if (priority === "P0") return "pill p0";
-  if (priority === "P1") return "pill p1";
-  return "pill p2";
+function parseSeverity(value: unknown, fallbackCode = ""): Severity {
+  if (value === "high" || value === "medium" || value === "low") return value;
+  if (fallbackCode === "HTTP_5XX" || fallbackCode === "JS_RUNTIME_ERROR" || fallbackCode === "VISUAL_SECTION_ORDER_INVALID") {
+    return "high";
+  }
+  if (fallbackCode === "HTTP_4XX" || fallbackCode === "BTN_CLICK_ERROR" || fallbackCode === "NET_REQUEST_FAILED") {
+    return "medium";
+  }
+  return "low";
 }
 
-function downloadJson(fileName: string, value: unknown) {
-  const blob = new Blob([JSON.stringify(value, null, 2)], { type: "application/json" });
+function normalizeIssue(raw: unknown, index: number): IssueModel {
+  const item = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const code = String(item.code ?? "UNKNOWN");
+  const severity = parseSeverity(item.severity, code);
+  const route = String(item.route ?? "/");
+  const action = String(item.action ?? "");
+  const detail = String(item.detail ?? "No detail provided.");
+  const recommendedResolution = String(item.recommendedResolution ?? "Review logs and fix root cause.");
+  const hintObj = item.assistantHint && typeof item.assistantHint === "object"
+    ? (item.assistantHint as Record<string, unknown>)
+    : {};
+  const assistantHint: AssistantHint = {
+    priority:
+      hintObj.priority === "P0" || hintObj.priority === "P1" || hintObj.priority === "P2"
+        ? hintObj.priority
+        : severity === "high"
+        ? "P0"
+        : severity === "medium"
+        ? "P1"
+        : "P2",
+    firstChecks: Array.isArray(hintObj.firstChecks) ? hintObj.firstChecks.map((v) => String(v)) : [],
+    commandHints: Array.isArray(hintObj.commandHints) ? hintObj.commandHints.map((v) => String(v)) : [],
+    likelyAreas: Array.isArray(hintObj.likelyAreas) ? hintObj.likelyAreas.map((v) => String(v)) : [],
+  };
+  const group = ISSUE_GROUP[code] ?? "Other";
+  return {
+    id: String(item.id ?? `issue-${index + 1}`),
+    code,
+    severity,
+    route,
+    action,
+    detail,
+    recommendedResolution,
+    assistantHint,
+    group,
+  };
+}
+
+function toNumber(value: unknown, fallback = 0): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeReport(raw: unknown): ReportModel {
+  const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const metaObj = source.meta && typeof source.meta === "object" ? (source.meta as Record<string, unknown>) : {};
+  const summaryObj = source.summary && typeof source.summary === "object" ? (source.summary as Record<string, unknown>) : {};
+  const guideObj =
+    source.assistantGuide && typeof source.assistantGuide === "object"
+      ? (source.assistantGuide as Record<string, unknown>)
+      : source.promptPack && typeof source.promptPack === "object"
+      ? (source.promptPack as Record<string, unknown>)
+      : {};
+
+  const issuesRaw = Array.isArray(source.issues) ? source.issues : [];
+  const issues = issuesRaw.map((issue, index) => normalizeIssue(issue, index));
+  const bySeverityWeight = { high: 0, medium: 1, low: 2 } as const;
+  issues.sort((a, b) => {
+    const severityCmp = bySeverityWeight[a.severity] - bySeverityWeight[b.severity];
+    if (severityCmp !== 0) return severityCmp;
+    return a.code.localeCompare(b.code);
+  });
+
+  return {
+    meta: {
+      project: String(metaObj.project ?? "sitepulse-report"),
+      baseUrl: String(metaObj.baseUrl ?? source.baseUrl ?? DEFAULT_URL),
+      generatedAt: String(metaObj.finishedAt ?? metaObj.generatedAt ?? nowIso()),
+    },
+    summary: {
+      routesChecked: toNumber(summaryObj.routesChecked, 0),
+      buttonsChecked: toNumber(summaryObj.buttonsChecked, 0),
+      totalIssues: toNumber(summaryObj.totalIssues, issues.length),
+      visualSectionOrderInvalid: toNumber(summaryObj.visualSectionOrderInvalid, 0),
+      buttonsNoEffect: toNumber(summaryObj.buttonsNoEffect, 0),
+      consoleErrors: toNumber(summaryObj.consoleErrors, 0),
+    },
+    assistantGuide: {
+      replayCommand: String(
+        guideObj.replayCommand ??
+          metaObj.replayCommand ??
+          `node src/index.mjs --config "audit.kuruma.${String(source.mode) === "mobile" ? "mobile" : "json"}" --fresh --live-log --human-log`
+      ),
+      immediateSteps: Array.isArray(guideObj.immediateSteps)
+        ? guideObj.immediateSteps.map((v) => String(v))
+        : ["Read top P0/P1 issues first.", "Fix root cause.", "Run auditor again."],
+      quickStartPrompt: String(
+        guideObj.quickStartPrompt ??
+          guideObj.masterPrompt ??
+          "Act as a senior engineer. Fix highest severity issues first and validate with a new audit run."
+      ),
+    },
+    issues,
+  };
+}
+
+function scoreFromIssues(issues: IssueModel[]): number {
+  const high = issues.filter((i) => i.severity === "high").length;
+  const medium = issues.filter((i) => i.severity === "medium").length;
+  const low = issues.filter((i) => i.severity === "low").length;
+  const score = Math.min(100, high * 34 + medium * 14 + low * 6);
+  return score;
+}
+
+function makeCommand(mode: Mode, targetUrl: string, noServer: boolean, headed: boolean) {
+  const config = mode === "mobile" ? "audit.kuruma.mobile.json" : "audit.kuruma.json";
+  const parts = [
+    "npm --prefix tools/sitepulse-qa run audit:cmd --",
+    `--config "${config}"`,
+    "--fresh",
+    "--live-log",
+    "--human-log",
+    `--base-url "${targetUrl}"`,
+  ];
+  if (noServer) parts.push("--no-server");
+  if (headed) parts.push("--headed");
+  return parts.join(" ");
+}
+
+function wizardCommand(mode: Mode, targetUrl: string, noServer: boolean, headed: boolean) {
+  const parts = [
+    "npm --prefix tools/sitepulse-qa run audit:hub --",
+    `--mode ${mode}`,
+    `--url "${targetUrl}"`,
+  ];
+  if (noServer) parts.push("--no-server");
+  if (headed) parts.push("--headed");
+  return parts.join(" ");
+}
+
+function downloadJson(fileName: string, payload: unknown) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = fileName;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+function priorityPillClass(priority = "P2") {
+  if (priority === "P0") return "pill pill-p0";
+  if (priority === "P1") return "pill pill-p1";
+  return "pill pill-p2";
+}
+
+function severityPillClass(severity: Severity) {
+  if (severity === "high") return "pill pill-high";
+  if (severity === "medium") return "pill pill-medium";
+  return "pill pill-low";
+}
+
+function mapHealthChip(health: "idle" | "ok" | "bad") {
+  if (health === "ok") return { label: "API healthy", className: "dot ok" };
+  if (health === "bad") return { label: "API offline/error", className: "dot bad" };
+  return { label: "API not checked", className: "dot" };
 }
 
 export default function Page() {
@@ -71,32 +260,70 @@ export default function Page() {
 
   const [mode, setMode] = useState<Mode>("desktop");
   const [targetUrl, setTargetUrl] = useState(DEFAULT_URL);
+  const [noServer, setNoServer] = useState(true);
+  const [headed, setHeaded] = useState(false);
+
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [logs, setLogs] = useState<string[]>([]);
-  const [report, setReport] = useState<DemoReport | null>(null);
+  const [logs, setLogs] = useState<string[]>(["[hub] ready"]);
+  const [report, setReport] = useState<ReportModel | null>(null);
+  const [reportRaw, setReportRaw] = useState<unknown>(null);
   const [health, setHealth] = useState<"idle" | "ok" | "bad">("idle");
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
+  const [search, setSearch] = useState("");
+  const [jsonPaste, setJsonPaste] = useState("");
 
-  const copyCommand = useMemo(() => {
-    const config = mode === "mobile" ? "audit.kuruma.mobile.json" : "audit.kuruma.json";
-    return `npm --prefix tools/sitepulse-qa run audit:cmd -- --config "${config}" --base-url "${targetUrl}" --no-server`;
-  }, [mode, targetUrl]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const directCmd = useMemo(() => makeCommand(mode, targetUrl, noServer, headed), [mode, targetUrl, noServer, headed]);
+  const guidedCmd = useMemo(() => wizardCommand(mode, targetUrl, noServer, headed), [mode, targetUrl, noServer, headed]);
+
+  const filteredIssues = useMemo(() => {
+    if (!report) return [];
+    return report.issues.filter((issue) => {
+      if (severityFilter !== "all" && issue.severity !== severityFilter) return false;
+      if (!search.trim()) return true;
+      const hay = `${issue.code} ${issue.route} ${issue.action} ${issue.detail} ${issue.group}`.toLowerCase();
+      return hay.includes(search.trim().toLowerCase());
+    });
+  }, [report, severityFilter, search]);
+
+  const severityCounts = useMemo(() => {
+    const source = report?.issues ?? [];
+    return {
+      high: source.filter((i) => i.severity === "high").length,
+      medium: source.filter((i) => i.severity === "medium").length,
+      low: source.filter((i) => i.severity === "low").length,
+    };
+  }, [report]);
+
+  const riskScore = useMemo(() => scoreFromIssues(report?.issues ?? []), [report]);
+  const healthChip = mapHealthChip(health);
+
+  function pushLog(line: string) {
+    setLogs((prev) => [`${new Date().toLocaleTimeString()} ${line}`, ...prev].slice(0, 140));
+  }
 
   async function checkHealth() {
     try {
       const res = await fetch("/api/health", { cache: "no-store" });
-      setHealth(res.ok ? "ok" : "bad");
+      if (!res.ok) {
+        setHealth("bad");
+        pushLog("[health] api check failed");
+        return;
+      }
+      setHealth("ok");
+      pushLog("[health] api ok");
     } catch {
       setHealth("bad");
+      pushLog("[health] api unreachable");
     }
   }
 
-  function onLogin() {
-    const valid =
-      (username === "admin" && password === "admin123") ||
-      (username === "mobile" && password === "mobile123");
+  function validateLogin() {
+    const valid = DEMO_USERS.some((u) => u.username === username && u.password === password);
     if (!valid) {
-      setLoginError("Login invalido. Use admin/admin123 ou mobile/mobile123.");
+      setLoginError("Invalid login. Use admin/admin123 or mobile/mobile123.");
       return;
     }
     setLoginError("");
@@ -104,28 +331,35 @@ export default function Page() {
     void checkHealth();
   }
 
-  async function copyCmd() {
+  async function copyText(text: string, label: string) {
     try {
-      await navigator.clipboard.writeText(copyCommand);
-      setLogs((prev) => [`[hub] command copied`, ...prev].slice(0, 120));
+      await navigator.clipboard.writeText(text);
+      pushLog(`[copy] ${label}`);
     } catch {
-      setLogs((prev) => [`[hub] could not copy command`, ...prev].slice(0, 120));
+      pushLog(`[copy] failed: ${label}`);
     }
   }
 
   async function loadDemoReport() {
     const res = await fetch(`/api/demo-report?mode=${mode}`, { cache: "no-store" });
-    const data = (await res.json()) as DemoReport;
-    setReport(data);
-    return data;
+    const data = await res.json();
+    const normalized = normalizeReport(data);
+    setReportRaw(data);
+    setReport(normalized);
+    setSeverityFilter("all");
+    setSearch("");
+    pushLog(`[report] demo loaded (${normalized.issues.length} issues)`);
+    return normalized;
   }
 
   async function runPlan() {
     if (!targetUrl.trim()) return;
     setRunning(true);
     setProgress(0);
-    setLogs([]);
     setReport(null);
+    setReportRaw(null);
+    setLogs([]);
+    pushLog("[run] starting plan");
     try {
       const res = await fetch("/api/run-plan", {
         method: "POST",
@@ -135,219 +369,410 @@ export default function Page() {
           mode,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "run_plan_failed");
+      const payload = (await res.json()) as RunPlanResponse;
+      if (!res.ok || !payload.ok) throw new Error(payload.error ?? "run_plan_failed");
 
-      const steps: string[] = data.steps ?? [];
+      const steps = payload.steps ?? [];
       const total = Math.max(steps.length, 1);
       for (let i = 0; i < steps.length; i += 1) {
-        const line = steps[i];
-        setLogs((prev) => [`[plan] ${line}`, ...prev].slice(0, 120));
-        setProgress(Math.round(((i + 1) / total) * 80));
+        pushLog(`[step] ${steps[i]}`);
+        setProgress(Math.round(((i + 1) / total) * 82));
         await wait(450);
       }
 
-      const demo = await loadDemoReport();
-      setLogs((prev) => [`[plan] report loaded with ${demo.summary.totalIssues} issue(s)`, ...prev].slice(0, 120));
+      await loadDemoReport();
       setProgress(100);
+      pushLog("[run] completed");
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown_error";
-      setLogs((prev) => [`[plan] failed: ${message}`, ...prev].slice(0, 120));
+      pushLog(`[run] failed: ${message}`);
       setProgress(0);
     } finally {
       setRunning(false);
     }
   }
 
+  function applyReport(raw: unknown, source: string) {
+    try {
+      const normalized = normalizeReport(raw);
+      setReportRaw(raw);
+      setReport(normalized);
+      setSeverityFilter("all");
+      setSearch("");
+      pushLog(`[report] imported from ${source}`);
+    } catch {
+      pushLog("[report] invalid json");
+    }
+  }
+
+  async function onReportFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    try {
+      const parsed = JSON.parse(text);
+      applyReport(parsed, file.name);
+    } catch {
+      pushLog("[report] could not parse selected file");
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  function importFromPaste() {
+    if (!jsonPaste.trim()) return;
+    try {
+      const parsed = JSON.parse(jsonPaste);
+      applyReport(parsed, "paste");
+    } catch {
+      pushLog("[report] paste is not valid json");
+    }
+  }
+
+  const reportAvailable = !!report;
+
   if (!logged) {
     return (
-      <main className="page">
-        <section className="hero">
-          <span className="kicker">SitePulse Hub</span>
-          <h1 className="title">Deploy this folder to Vercel and tune the visual on top.</h1>
-          <p className="subtitle">This app is a ready base for design iteration, command copy and report reading.</p>
-        </section>
-
-        <section className="card" style={{ maxWidth: 520 }}>
-          <h2>Login</h2>
-          <p className="muted">Demo users: admin/admin123 or mobile/mobile123</p>
-          <div className="controls" style={{ marginTop: 12 }}>
-            <label>
-              Username
-              <input value={username} onChange={(e) => setUsername(e.target.value)} />
-            </label>
-            <label>
-              Password
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            </label>
-            <div className="row">
-              <button type="button" onClick={onLogin}>
-                Enter hub
-              </button>
+      <main className="page-shell">
+        <div className="noise" />
+        <div className="orb orb-a" />
+        <div className="orb orb-b" />
+        <section className="login-shell">
+          <article className="login-card reveal">
+            <header className="login-hero">
+              <p className="small muted" style={{ margin: 0 }}>
+                SitePulse Hub
+              </p>
+              <h1>App + CMD auditor command center.</h1>
+              <p>Built for rapid detection of missing, unexpected and broken actions.</p>
+            </header>
+            <div className="login-body">
+              <div className="field">
+                <label>Username</label>
+                <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="admin" />
+              </div>
+              <div className="field">
+                <label>Password</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="admin123" />
+              </div>
+              <div className="btn-row">
+                <button className="btn-primary" type="button" onClick={validateLogin}>
+                  Enter command center
+                </button>
+              </div>
+              <p className="small muted">Demo users: admin/admin123 and mobile/mobile123</p>
+              {loginError ? <p className="error">{loginError}</p> : null}
             </div>
-            {loginError ? <p style={{ color: "#ffb5c0" }}>{loginError}</p> : null}
-          </div>
+          </article>
         </section>
       </main>
     );
   }
 
   return (
-    <main className="page">
-      <section className="hero">
-        <span className="kicker">SitePulse Hub</span>
-        <h1 className="title">Audit command center for UI, flow and assistant playbooks.</h1>
-        <p className="subtitle">
-          Ready for Vercel deploy now. Next step is pure visual iteration on top of this base.
-        </p>
-        <div className="row">
-          <span className="status">
-            <span className={`dot ${health === "ok" ? "ok" : health === "bad" ? "bad" : ""}`} />
-            API health: {health}
-          </span>
-          <button type="button" className="secondary" onClick={checkHealth}>
-            Check API
-          </button>
-        </div>
-      </section>
+    <main className="page-shell">
+      <div className="noise" />
+      <div className="orb orb-a" />
+      <div className="orb orb-b" />
 
-      <section className="grid">
-        <article className="card span-8">
-          <h2>Execution</h2>
-          <div className="controls">
-            <label>
-              Target URL
-              <input value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)} placeholder="https://your-site.com" />
-            </label>
-            <div className="row">
-              <label style={{ minWidth: 200 }}>
-                Mode
-                <select value={mode} onChange={(e) => setMode(e.target.value as Mode)}>
-                  <option value="desktop">desktop</option>
-                  <option value="mobile">mobile</option>
-                </select>
+      <section className="wrap">
+        <header className="topbar reveal">
+          <div className="brand">
+            <div className="brand-mark">SP</div>
+            <div>
+              <h1 className="brand-title">SitePulse Hub</h1>
+              <p className="brand-sub">High signal dashboard for audits, unexpected actions and root-cause playbooks.</p>
+            </div>
+          </div>
+          <div className="chip-row">
+            <span className="chip">
+              <span className={healthChip.className} />
+              {healthChip.label}
+            </span>
+            <span className="chip">
+              <span className="dot ok" />
+              mode: {mode}
+            </span>
+            <span className="chip">
+              <span className={running ? "dot" : "dot ok"} />
+              {running ? "run active" : "idle"}
+            </span>
+          </div>
+        </header>
+
+        <section className="dashboard">
+          <article className="card reveal d2">
+            <header className="card-head">
+              <h2 className="card-title">Control Center</h2>
+            </header>
+            <div className="card-body">
+              <div className="field">
+                <label>Target URL</label>
+                <input value={targetUrl} onChange={(e) => setTargetUrl(e.target.value)} placeholder="https://your-site.com" />
+              </div>
+
+              <div className="field">
+                <label>Viewport mode</label>
+                <div className="segmented">
+                  <button type="button" className={mode === "desktop" ? "active" : ""} onClick={() => setMode("desktop")}>
+                    desktop
+                  </button>
+                  <button type="button" className={mode === "mobile" ? "active" : ""} onClick={() => setMode("mobile")}>
+                    mobile
+                  </button>
+                </div>
+              </div>
+
+              <label className="checkbox">
+                <input type="checkbox" checked={noServer} onChange={(e) => setNoServer(e.target.checked)} />
+                use --no-server (external URL mode)
               </label>
-            </div>
-            <div className="row">
-              <button type="button" disabled={running} onClick={runPlan}>
-                {running ? "Running..." : "Run plan"}
-              </button>
-              <button type="button" className="secondary" onClick={copyCmd}>
-                Copy command
-              </button>
-              <button
-                type="button"
-                className="secondary"
-                onClick={() => report && downloadJson(`sitepulse-${mode}-report.json`, report)}
-                disabled={!report}
-              >
-                Download report JSON
-              </button>
-            </div>
-            <p className="code">{copyCommand}</p>
-          </div>
-        </article>
+              <label className="checkbox">
+                <input type="checkbox" checked={headed} onChange={(e) => setHeaded(e.target.checked)} />
+                headed browser mode
+              </label>
 
-        <article className="card span-4">
-          <h2>Progress</h2>
-          <p className="muted">{running ? "Execution in progress..." : "Idle"}</p>
-          <div className="progress-shell">
-            <div className="progress-fill" style={{ width: `${progress}%` }} />
-          </div>
-          <p style={{ marginTop: 8 }}>{progress}%</p>
-        </article>
-
-        <article className="card span-12">
-          <h3>Live log</h3>
-          <pre className="log">{logs.length ? logs.join("\n") : "[hub] waiting for run..."}</pre>
-        </article>
-
-        <article className="card span-12">
-          <h3>Summary</h3>
-          {!report ? (
-            <p className="muted">No report loaded yet.</p>
-          ) : (
-            <div className="summary-grid">
-              <div className="summary-box">
-                <div className="summary-value">{report.summary.routesChecked}</div>
-                <div className="summary-label">Routes checked</div>
-              </div>
-              <div className="summary-box">
-                <div className="summary-value">{report.summary.buttonsChecked}</div>
-                <div className="summary-label">Buttons checked</div>
-              </div>
-              <div className="summary-box">
-                <div className="summary-value">{report.summary.totalIssues}</div>
-                <div className="summary-label">Total issues</div>
-              </div>
-              <div className="summary-box">
-                <div className="summary-value">{report.summary.visualSectionOrderInvalid}</div>
-                <div className="summary-label">Visual order invalid</div>
-              </div>
-            </div>
-          )}
-        </article>
-
-        <article className="card span-8">
-          <h3>Issues</h3>
-          {!report ? (
-            <p className="muted">Run plan to get issue details.</p>
-          ) : (
-            <ul className="list">
-              {report.issues.map((issue) => (
-                <li key={issue.id} className="item">
-                  <div className="row">
-                    <strong>{issue.code}</strong>
-                    <span className="pill">{issue.severity}</span>
-                    <span className={priorityClass(issue.assistantHint?.priority)}>{issue.assistantHint?.priority ?? "P2"}</span>
-                  </div>
-                  <p className="muted" style={{ marginTop: 6 }}>
-                    {issue.route}
-                    {issue.action ? ` -> ${issue.action}` : ""}
-                  </p>
-                  <p style={{ marginTop: 6 }}>{issue.detail}</p>
-                  <p className="muted" style={{ marginTop: 6 }}>
-                    Resolution: {issue.recommendedResolution}
-                  </p>
-                  {issue.assistantHint?.firstChecks?.length ? (
-                    <p className="code" style={{ marginTop: 6 }}>
-                      checks: {issue.assistantHint.firstChecks.join(" | ")}
-                    </p>
-                  ) : null}
-                  {issue.assistantHint?.commandHints?.length ? (
-                    <p className="code" style={{ marginTop: 6 }}>
-                      commands: {issue.assistantHint.commandHints.join(" || ")}
-                    </p>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
-          )}
-        </article>
-
-        <article className="card span-4">
-          <h3>Assistant prompt</h3>
-          {!report ? (
-            <p className="muted">Prompt will show after report load.</p>
-          ) : (
-            <>
-              <div className="item">
-                <p className="code">{report.assistantGuide.quickStartPrompt}</p>
-              </div>
-              <div className="row" style={{ marginTop: 10 }}>
-                <button
-                  type="button"
-                  className="warn"
-                  onClick={() => navigator.clipboard.writeText(report.assistantGuide.quickStartPrompt)}
-                >
-                  Copy prompt
+              <div className="btn-row">
+                <button className="btn-primary" type="button" disabled={running} onClick={runPlan}>
+                  {running ? "Running plan..." : "Run plan (demo flow)"}
+                </button>
+                <button className="btn-secondary" type="button" onClick={checkHealth}>
+                  Check API
                 </button>
               </div>
-            </>
-          )}
-        </article>
+
+              <div className="btn-row">
+                <button type="button" onClick={() => void loadDemoReport()}>
+                  Load demo report
+                </button>
+                <button type="button" onClick={() => fileInputRef.current?.click()}>
+                  Import JSON file
+                </button>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="application/json,.json"
+                style={{ display: "none" }}
+                onChange={onReportFileChange}
+              />
+
+              <div className="field">
+                <label>Paste JSON report</label>
+                <textarea
+                  rows={5}
+                  value={jsonPaste}
+                  onChange={(e) => setJsonPaste(e.target.value)}
+                  placeholder='Paste full report JSON here and click "Apply pasted JSON".'
+                />
+              </div>
+              <div className="btn-row">
+                <button className="btn-secondary" type="button" onClick={importFromPaste}>
+                  Apply pasted JSON
+                </button>
+              </div>
+            </div>
+          </article>
+
+          <article className="card reveal d3">
+            <header className="card-head">
+              <h2 className="card-title">Live Run + Metrics</h2>
+            </header>
+            <div className="card-body">
+              <div className="metrics">
+                <div className="metric">
+                  <div className="value">{report?.summary.routesChecked ?? 0}</div>
+                  <div className="label">Routes</div>
+                </div>
+                <div className="metric">
+                  <div className="value">{report?.summary.buttonsChecked ?? 0}</div>
+                  <div className="label">Buttons</div>
+                </div>
+                <div className="metric">
+                  <div className="value">{report?.summary.totalIssues ?? 0}</div>
+                  <div className="label">Issues</div>
+                </div>
+                <div className="metric">
+                  <div className="value">{riskScore}</div>
+                  <div className="label">Risk score</div>
+                </div>
+              </div>
+
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Progress
+                </p>
+                <div className="progress">
+                  <div style={{ width: `${progress}%` }} />
+                </div>
+                <p className="small muted" style={{ margin: "7px 0 0" }}>
+                  {progress}% complete
+                </p>
+              </div>
+
+              <div className="legend">
+                <span className="pill pill-high">high {severityCounts.high}</span>
+                <span className="pill pill-medium">medium {severityCounts.medium}</span>
+                <span className="pill pill-low">low {severityCounts.low}</span>
+                <span className="pill">visual order invalid {report?.summary.visualSectionOrderInvalid ?? 0}</span>
+                <span className="pill">no effect buttons {report?.summary.buttonsNoEffect ?? 0}</span>
+              </div>
+
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Run log
+                </p>
+                <div className="log mono">
+                  {logs.map((line, idx) => (
+                    <p className="log-line" key={`log-${idx}`}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </div>
+
+              <div className="issues-head">
+                <div className="field" style={{ minWidth: 220 }}>
+                  <label>Filter severity</label>
+                  <select value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value as SeverityFilter)}>
+                    <option value="all">all</option>
+                    <option value="high">high</option>
+                    <option value="medium">medium</option>
+                    <option value="low">low</option>
+                  </select>
+                </div>
+                <div className="field" style={{ minWidth: 280 }}>
+                  <label>Search issue text</label>
+                  <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="code, route, action or detail..." />
+                </div>
+              </div>
+
+              <div className="issues-grid">
+                {!reportAvailable ? (
+                  <div className="issue">
+                    <p className="small muted">No report loaded yet. Run plan or import a JSON report.</p>
+                  </div>
+                ) : filteredIssues.length === 0 ? (
+                  <div className="issue">
+                    <p className="small muted">No issue matches current filters.</p>
+                  </div>
+                ) : (
+                  filteredIssues.map((issue) => (
+                    <article className="issue" key={issue.id}>
+                      <div className="issue-top">
+                        <span className="issue-code">{issue.code}</span>
+                        <span className={severityPillClass(issue.severity)}>{issue.severity}</span>
+                        <span className={priorityPillClass(issue.assistantHint.priority)}>{issue.assistantHint.priority ?? "P2"}</span>
+                        <span className="pill">{issue.group}</span>
+                      </div>
+                      <p className="issue-route">
+                        {issue.route}
+                        {issue.action ? ` -> ${issue.action}` : ""}
+                      </p>
+                      <p className="issue-detail">{issue.detail}</p>
+                      <p className="issue-meta">Recommended resolution: {issue.recommendedResolution}</p>
+                      {issue.assistantHint.firstChecks?.length ? (
+                        <div className="assistant-block">
+                          <p className="small muted" style={{ marginTop: 0 }}>
+                            First checks
+                          </p>
+                          <ul className="assistant-list">
+                            {issue.assistantHint.firstChecks.map((line, idx) => (
+                              <li key={`check-${issue.id}-${idx}`}>{line}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : null}
+                      {issue.assistantHint.commandHints?.length ? (
+                        <div className="assistant-block">
+                          <p className="small muted" style={{ marginTop: 0 }}>
+                            Command hints
+                          </p>
+                          <div className="code-box mono">{issue.assistantHint.commandHints.join("\n")}</div>
+                        </div>
+                      ) : null}
+                    </article>
+                  ))
+                )}
+              </div>
+            </div>
+          </article>
+
+          <article className="card reveal d2">
+            <header className="card-head">
+              <h2 className="card-title">CMD + Assistant</h2>
+            </header>
+            <div className="card-body">
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Guided wizard command
+                </p>
+                <div className="code-box mono">{guidedCmd}</div>
+                <div className="btn-row" style={{ marginTop: 8 }}>
+                  <button className="btn-secondary" type="button" onClick={() => void copyText(guidedCmd, "guided cmd copied")}>
+                    Copy guided CMD
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Direct command
+                </p>
+                <div className="code-box mono">{directCmd}</div>
+                <div className="btn-row" style={{ marginTop: 8 }}>
+                  <button type="button" onClick={() => void copyText(directCmd, "direct cmd copied")}>
+                    Copy direct CMD
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Assistant immediate steps
+                </p>
+                <div className="assistant-block">
+                  <ul className="assistant-list">
+                    {(report?.assistantGuide.immediateSteps ?? ["Load report and start with top P0/P1 issues."]).map((line, idx) => (
+                      <li key={`step-${idx}`}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Quick-start prompt
+                </p>
+                <div className="code-box mono">{report?.assistantGuide.quickStartPrompt ?? "No prompt yet."}</div>
+                <div className="btn-row" style={{ marginTop: 8 }}>
+                  <button className="btn-warn" type="button" onClick={() => void copyText(report?.assistantGuide.quickStartPrompt ?? "", "prompt copied")}>
+                    Copy prompt
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <p className="small muted" style={{ margin: "0 0 6px" }}>
+                  Replay command
+                </p>
+                <div className="code-box mono">{report?.assistantGuide.replayCommand ?? "No replay command available."}</div>
+              </div>
+
+              <div className="btn-row">
+                <button
+                  type="button"
+                  disabled={!reportRaw}
+                  onClick={() => reportRaw && downloadJson(`sitepulse-hub-report-${mode}.json`, reportRaw)}
+                >
+                  Download current report JSON
+                </button>
+              </div>
+            </div>
+          </article>
+        </section>
       </section>
     </main>
   );
 }
-

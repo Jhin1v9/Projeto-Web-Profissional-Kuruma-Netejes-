@@ -35,6 +35,7 @@ Eventos live:
    - `npm run audit:mobile` (mobile, headless)
    - `npm run audit:headed` (desktop com navegador aberto)
    - `npm run audit:auto` (retoma checkpoints ate concluir)
+   - `npm run audit:hub` (wizard guiado em CMD com resumo final inteligente)
    - `npm run audit:cmd` (terminal com progresso/eventos em tempo real)
    - `npm run audit:cmd:mobile` (igual acima em mobile)
 
@@ -42,6 +43,7 @@ Ou use:
 - `run-audit.cmd`
 - `run-audit-auto.cmd`
 - `run-audit-live.cmd`
+- `run-audit-hub.cmd`
 - `run-audit-url.cmd <BASE_URL>`
 
 ## Configs
@@ -79,3 +81,8 @@ No JSON final:
 - `promptPack.masterPrompt`: prompt inteligente consolidado para corrigir tudo.
 - `promptPack.issuePrompts`: prompt individual por issue.
 - `assistantGuide`: plano de ataque rapido (rotas prioritarias, passos imediatos, top issues e prompt rapido).
+
+No `audit:hub`:
+- perguntas guiadas (modo/url/server/headed/fresh)
+- execucao do auditor normal com live logs
+- resumo final com top issues, severidade, passos imediatos e replay command
