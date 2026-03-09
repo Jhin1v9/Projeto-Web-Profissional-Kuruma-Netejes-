@@ -30,6 +30,12 @@ function isDirectVideo(url: string): boolean {
   return /\.(mp4|webm|ogg)(\?|#|$)/i.test(url.trim());
 }
 
+function asLocalImagePath(url?: string): string | null {
+  const value = url?.trim();
+  if (!value) return null;
+  return value.startsWith("/images/") ? value : null;
+}
+
 export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?: string }) {
   const cfg = useSiteConfig();
   const { language, t } = useLanguage();
@@ -72,11 +78,12 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     if (!term) return serviceFaq;
     return serviceFaq.filter((item) => `${item.q} ${item.a}`.toLowerCase().includes(term));
   }, [faqQuery, serviceFaq]);
+  const fallbackImage =
+    (activeService ? SERVICE_MEDIA_FALLBACK[activeService.id] : "") || "/images/hero.webp";
   const mediaImage =
-    activeService?.infoImageUrl?.trim() ||
-    activeService?.imageUrl?.trim() ||
-    (activeService ? SERVICE_MEDIA_FALLBACK[activeService.id] : "") ||
-    "/images/hero.webp";
+    asLocalImagePath(activeService?.infoImageUrl) ||
+    asLocalImagePath(activeService?.imageUrl) ||
+    fallbackImage;
   const mediaVideo = activeService?.videoUrl?.trim() || "";
   const youtubeEmbed = getYouTubeEmbed(mediaVideo);
   const directVideo = isDirectVideo(mediaVideo);
@@ -213,7 +220,16 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
               ) : directVideo ? (
                 <video src={mediaVideo} controls playsInline className="h-full w-full object-cover" />
               ) : (
-                <img src={mediaImage} alt={serviceName} className="h-full w-full object-cover" />
+                <img
+                  src={mediaImage}
+                  alt={serviceName}
+                  className="h-full w-full object-cover"
+                  onError={(event) => {
+                    const target = event.currentTarget;
+                    if (target.src.endsWith(fallbackImage)) return;
+                    target.src = fallbackImage;
+                  }}
+                />
               )}
             </div>
             <div className="p-5 sm:p-6">
