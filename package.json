@@ -13,6 +13,8 @@
     "hub:start": "npm --prefix apps/sitepulse-hub run start",
     "audit:run": "npm --prefix tools/sitepulse-qa run audit:fresh",
     "audit:run:mobile": "npm --prefix tools/sitepulse-qa run audit:mobile",
+    "audit:self": "npm --prefix tools/sitepulse-qa run audit:self",
+    "audit:self:mobile": "npm --prefix tools/sitepulse-qa run audit:self:mobile",
     "audit:hub": "npm --prefix tools/sitepulse-qa run audit:hub",
     "audit:hub:mobile": "npm --prefix tools/sitepulse-qa run audit:hub:mobile",
     "audit:cmd": "npm --prefix tools/sitepulse-qa run audit:cmd",

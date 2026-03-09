@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Mode = "desktop" | "mobile";
 type Severity = "high" | "medium" | "low";
@@ -253,6 +254,8 @@ function mapHealthChip(health: "idle" | "ok" | "bad") {
 }
 
 export default function Page() {
+  const searchParams = useSearchParams();
+  const autoLogin = searchParams.get("autologin") === "1";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [logged, setLogged] = useState(false);
@@ -272,8 +275,10 @@ export default function Page() {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>("all");
   const [search, setSearch] = useState("");
   const [jsonPaste, setJsonPaste] = useState("");
+  const [actionPulse, setActionPulse] = useState(0);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const autoLoginAppliedRef = useRef(false);
 
   const directCmd = useMemo(() => makeCommand(mode, targetUrl, noServer, headed), [mode, targetUrl, noServer, headed]);
   const guidedCmd = useMemo(() => wizardCommand(mode, targetUrl, noServer, headed), [mode, targetUrl, noServer, headed]);
@@ -430,8 +435,20 @@ export default function Page() {
   }
 
   const reportAvailable = !!report;
+  const showDashboard = logged || autoLogin;
+  const pasteReady = jsonPaste.trim().length > 1;
 
-  if (!logged) {
+  useEffect(() => {
+    if (!autoLogin) return;
+    if (autoLoginAppliedRef.current) return;
+    autoLoginAppliedRef.current = true;
+    setLogged(true);
+    void checkHealth();
+    pushLog("[auth] autologin enabled by query param");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoLogin]);
+
+  if (!showDashboard) {
     return (
       <main className="page-shell">
         <div className="noise" />
@@ -482,6 +499,7 @@ export default function Page() {
             <div>
               <h1 className="brand-title">SitePulse Hub</h1>
               <p className="brand-sub">High signal dashboard for audits, unexpected actions and root-cause playbooks.</p>
+              <p className="small muted" style={{ margin: "2px 0 0" }}>ui pulse: {actionPulse}</p>
             </div>
           </div>
           <div className="chip-row">
@@ -514,10 +532,20 @@ export default function Page() {
               <div className="field">
                 <label>Viewport mode</label>
                 <div className="segmented">
-                  <button type="button" className={mode === "desktop" ? "active" : ""} onClick={() => setMode("desktop")}>
+                  <button
+                    type="button"
+                    className={mode === "desktop" ? "active" : ""}
+                    aria-pressed={mode === "desktop"}
+                    onClick={() => setMode("desktop")}
+                  >
                     desktop
                   </button>
-                  <button type="button" className={mode === "mobile" ? "active" : ""} onClick={() => setMode("mobile")}>
+                  <button
+                    type="button"
+                    className={mode === "mobile" ? "active" : ""}
+                    aria-pressed={mode === "mobile"}
+                    onClick={() => setMode("mobile")}
+                  >
                     mobile
                   </button>
                 </div>
@@ -568,7 +596,12 @@ export default function Page() {
                 />
               </div>
               <div className="btn-row">
-                <button className="btn-secondary" type="button" onClick={importFromPaste}>
+                <button
+                  className="btn-secondary"
+                  type="button"
+                  onClick={importFromPaste}
+                  disabled={!pasteReady}
+                >
                   Apply pasted JSON
                 </button>
               </div>
@@ -764,7 +797,12 @@ export default function Page() {
                 <button
                   type="button"
                   disabled={!reportRaw}
-                  onClick={() => reportRaw && downloadJson(`sitepulse-hub-report-${mode}.json`, reportRaw)}
+                  onClick={() => {
+                    if (!reportRaw) return;
+                    setActionPulse((prev) => prev + 1);
+                    pushLog("[export] report json downloaded");
+                    downloadJson(`sitepulse-hub-report-${mode}.json`, reportRaw);
+                  }}
                 >
                   Download current report JSON
                 </button>
