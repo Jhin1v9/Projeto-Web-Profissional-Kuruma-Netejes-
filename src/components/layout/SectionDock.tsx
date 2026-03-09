@@ -2,25 +2,27 @@
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import { CircleHelp, Contact, HandCoins, Home, ListChecks, MapPin, Sparkles } from "lucide-react";
+import { useLanguage } from "@/components/providers/LanguageProvider";
 import { scrollToSection } from "@/lib/utils";
 
 type DockItem = {
   id: string;
-  label: string;
+  labels: Record<"ca" | "es" | "en", string>;
   icon: ComponentType<{ className?: string }>;
 };
 
 const ITEMS: DockItem[] = [
-  { id: "hero", label: "Inicio", icon: Home },
-  { id: "services", label: "Servicos", icon: ListChecks },
-  { id: "service-details", label: "Infos + FAQ", icon: CircleHelp },
-  { id: "estimate", label: "Orcamento", icon: HandCoins },
-  { id: "process", label: "Processo", icon: Sparkles },
-  { id: "location", label: "Localizacao", icon: MapPin },
-  { id: "cta", label: "Contato", icon: Contact },
+  { id: "hero", labels: { ca: "Inici", es: "Inicio", en: "Home" }, icon: Home },
+  { id: "services", labels: { ca: "Serveis", es: "Servicios", en: "Services" }, icon: ListChecks },
+  { id: "service-details", labels: { ca: "Info de serveis", es: "Info de servicios", en: "Service details" }, icon: CircleHelp },
+  { id: "estimate", labels: { ca: "Pressupost", es: "Presupuesto", en: "Estimate" }, icon: HandCoins },
+  { id: "process", labels: { ca: "Proces", es: "Proceso", en: "Process" }, icon: Sparkles },
+  { id: "location", labels: { ca: "Ubicacio", es: "Ubicacion", en: "Location" }, icon: MapPin },
+  { id: "cta", labels: { ca: "Contacte", es: "Contacto", en: "Contact" }, icon: Contact },
 ];
 
 export function SectionDock() {
+  const { language } = useLanguage();
   const [activeSection, setActiveSection] = useState<string>("hero");
 
   const visibleItems = useMemo(
@@ -66,6 +68,7 @@ export function SectionDock() {
     <div className="fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 flex-col gap-2 xl:flex">
       {visibleItems.map((item) => {
         const Icon = item.icon;
+        const label = item.labels[language];
         const active = activeSection === item.id;
         return (
           <button
@@ -78,11 +81,11 @@ export function SectionDock() {
                 ? "border-brand-cyan/55 bg-brand-cyan/18 text-brand-cyan shadow-glow"
                 : "border-white/15 bg-black/35 text-brand-silver/85 hover:border-brand-cyan/35 hover:text-brand-cyan",
             ].join(" ")}
-            title={item.label}
+            title={label}
           >
             <Icon className="h-3.5 w-3.5" />
-            <span className="hidden max-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 group-hover:max-w-[120px] group-hover:pr-1">
-              {item.label}
+            <span className="hidden max-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 group-hover:max-w-[160px] group-hover:pr-1">
+              {label}
             </span>
           </button>
         );
