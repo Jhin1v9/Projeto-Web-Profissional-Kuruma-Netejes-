@@ -160,3 +160,25 @@ Painel com:
 Credenciais demo do Studio:
 - `admin / admin123`
 - `mobile / mobile123`
+
+## 10) App separado para Vercel (base grafica do auditor)
+
+Pasta: `apps/sitepulse-hub`
+
+Uso local:
+```bash
+npm run hub:dev
+```
+
+Deploy no Vercel:
+1. Importar este repositorio
+2. Definir `Root Directory` = `apps/sitepulse-hub`
+3. Deployar
+
+Esse app ja vem com:
+- login demo
+- painel para URL/mode
+- botao de executar plano (simulado)
+- botao para copiar comando real do auditor CMD
+- leitura de relatorio demo + download JSON
+- rota de health para validar deploy
