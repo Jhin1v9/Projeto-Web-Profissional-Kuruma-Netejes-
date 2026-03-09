@@ -52,27 +52,15 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     infoServices.find((service) => service.id === (activeServiceId ?? infoServices[0]?.id)) ?? infoServices[0] ?? null;
 
   const translated = activeService ? cfg.i18n?.[language]?.services?.[activeService.id] ?? t.services.items[activeService.id] : null;
-  const serviceName = activeService ? (language === "ca" ? activeService.name : translated?.name ?? activeService.name) : "";
+  const serviceName = activeService ? translated?.name ?? activeService.name : "";
   const serviceDescription = activeService
-    ? language === "ca"
-      ? activeService.infoSummary?.trim() || activeService.description
-      : translated?.infoSummary?.trim() ||
-        activeService.infoSummary?.trim() ||
-        translated?.description ||
-        activeService.description
+    ? translated?.infoSummary?.trim() ||
+      activeService.infoSummary?.trim() ||
+      translated?.description ||
+      activeService.description
     : "";
-  const serviceHighlights =
-    language === "ca"
-      ? activeService?.highlights ?? []
-      : translated?.highlights?.length
-      ? translated.highlights
-      : activeService?.highlights ?? [];
-  const serviceFaq =
-    language === "ca"
-      ? activeService?.faq ?? []
-      : translated?.faq?.length
-      ? translated.faq
-      : activeService?.faq ?? [];
+  const serviceHighlights = translated?.highlights?.length ? translated.highlights : activeService?.highlights ?? [];
+  const serviceFaq = translated?.faq?.length ? translated.faq : activeService?.faq ?? [];
   const filteredFaq = useMemo(() => {
     const term = faqQuery.trim().toLowerCase();
     if (!term) return serviceFaq;
@@ -92,12 +80,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     const targetService = infoServices.find((service) => service.id === serviceId);
     if (!targetService) return;
     const targetTranslated = cfg.i18n?.[language]?.services?.[targetService.id] ?? t.services.items[targetService.id];
-    const targetFaq =
-      language === "ca"
-        ? targetService.faq ?? []
-        : targetTranslated?.faq?.length
-        ? targetTranslated.faq
-        : targetService.faq ?? [];
+    const targetFaq = targetTranslated?.faq?.length ? targetTranslated.faq : targetService.faq ?? [];
     const bestIndex =
       targetFaq.findIndex((item) => preferredMatch.test(`${item.q} ${item.a}`)) >= 0
         ? targetFaq.findIndex((item) => preferredMatch.test(`${item.q} ${item.a}`))
@@ -120,9 +103,12 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
     ca: {
       title: "Informacio completa de",
       highlight: "cada servei",
-      subtitle: "Explicacio directa, imagens reals e FAQ por servico.",
+      subtitle: "Explicacio directa, imatges reals i FAQ per servei.",
       faq: "Preguntes frequents",
-      empty: "Sem servicos marcados para infos.",
+      empty: "No hi ha serveis marcats per aquesta seccio.",
+      searchPlaceholder: "Cerca a la FAQ...",
+      noResults: "No s'ha trobat cap pregunta per aquest filtre.",
+      noFaq: "Encara no hi ha FAQ configurada per aquest servei.",
     },
     es: {
       title: "Informacion completa de",
@@ -130,6 +116,9 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
       subtitle: "Explicacion directa, imagenes reales y FAQ por servicio.",
       faq: "Preguntas frecuentes",
       empty: "No hay servicios marcados para infos.",
+      searchPlaceholder: "Buscar en la FAQ...",
+      noResults: "No se encontraron preguntas para este filtro.",
+      noFaq: "Todavia no hay FAQ configurada para este servicio.",
     },
     en: {
       title: "Complete info for",
@@ -137,6 +126,9 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
       subtitle: "Clear explanation, real visuals and a service-specific FAQ.",
       faq: "Frequently asked questions",
       empty: "No services enabled for info.",
+      searchPlaceholder: "Search FAQ...",
+      noResults: "No questions found for this filter.",
+      noFaq: "FAQ is not configured for this service yet.",
     },
   } as const;
   const copy = labels[language];
@@ -267,7 +259,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                   setFaqQuery(event.target.value);
                   setOpenFaqIndex(0);
                 }}
-                placeholder="Buscar na FAQ..."
+                placeholder={copy.searchPlaceholder}
                 className="w-full bg-transparent text-sm text-white outline-none placeholder:text-brand-silver/65"
               />
             </label>
@@ -330,7 +322,7 @@ export function ServiceSummaries({ sectionId = "service-details" }: { sectionId?
                 })
               ) : (
                 <div className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-brand-silver/80">
-                  {serviceFaq.length ? "Nenhuma pergunta encontrada para esse filtro." : "FAQ ainda nao configurado para este servico."}
+                  {serviceFaq.length ? copy.noResults : copy.noFaq}
                 </div>
               )}
             </div>
