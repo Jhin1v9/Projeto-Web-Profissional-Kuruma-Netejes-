@@ -107,6 +107,175 @@ const ISSUE_GUIDE = {
   },
 };
 
+const ISSUE_PLAYBOOK = {
+  [CODE.ROUTE_LOAD_FAIL]: {
+    priority: "P0",
+    firstChecks: [
+      "Reproduzir a rota no browser com logs do servidor ativos.",
+      "Validar middleware/auth/redirect da rota.",
+      "Conferir timeout e dependencias externas da pagina.",
+    ],
+    commandHints: [
+      "rg -n \"middleware|redirect\\(|notFound\\(|throw new Error\" src",
+      "rg -n \"export default function|generateMetadata|getServerSideProps|fetch\\(\" src/app src",
+    ],
+    likelyAreas: [
+      "src/app/**/page.tsx",
+      "src/middleware.ts",
+      "src/app/api/**/route.ts",
+    ],
+  },
+  [CODE.BTN_CLICK_ERROR]: {
+    priority: "P1",
+    firstChecks: [
+      "Inspecionar handler onClick e estado disabled/loading.",
+      "Verificar se elemento clicavel esta coberto por overlay.",
+      "Reproduzir erro no console e stack trace.",
+    ],
+    commandHints: [
+      "rg -n \"onClick|disabled|aria-disabled|pointer-events\" src/components src/app",
+      "rg -n \"try\\s*\\{|catch\\s*\\(\" src/components src/app",
+    ],
+    likelyAreas: [
+      "src/components/**",
+      "src/app/**",
+    ],
+  },
+  [CODE.BTN_NO_EFFECT]: {
+    priority: "P1",
+    firstChecks: [
+      "Checar se o clique altera URL, estado, modal, scroll ou request.",
+      "Garantir feedback visual e tratamento de sucesso/erro.",
+      "Confirmar que callbacks nao estao vazios ou condicionados indevidamente.",
+    ],
+    commandHints: [
+      "rg -n \"onClick|scrollToSection|router\\.push|setState|set[A-Z]\" src/components src/lib",
+      "rg -n \"TODO|placeholder|noop|return;\" src/components src/app",
+    ],
+    likelyAreas: [
+      "src/components/layout/**",
+      "src/components/sections/**",
+    ],
+  },
+  [CODE.HTTP_4XX]: {
+    priority: "P1",
+    firstChecks: [
+      "Validar payload enviado e schema esperado no endpoint.",
+      "Revisar autenticacao/autorizacao e headers.",
+      "Checar rota e metodo HTTP corretos.",
+    ],
+    commandHints: [
+      "rg -n \"fetch\\(|axios|/api/|POST|PATCH|PUT|DELETE\" src",
+      "rg -n \"zod|schema|safeParse|parse\\(\" src",
+    ],
+    likelyAreas: [
+      "src/app/api/**/route.ts",
+      "src/lib/**",
+      "src/components/**",
+    ],
+  },
+  [CODE.HTTP_5XX]: {
+    priority: "P0",
+    firstChecks: [
+      "Ler logs do backend na hora da falha.",
+      "Capturar stack trace e parametros de entrada.",
+      "Aplicar tratamento de excecao + resposta consistente.",
+    ],
+    commandHints: [
+      "rg -n \"throw new Error|console\\.error|try\\s*\\{|catch\\s*\\(\" src/app/api src/lib",
+      "rg -n \"createClient|supabase|db|storage\" src",
+    ],
+    likelyAreas: [
+      "src/app/api/**/route.ts",
+      "src/lib/**",
+    ],
+  },
+  [CODE.NET_REQUEST_FAILED]: {
+    priority: "P1",
+    firstChecks: [
+      "Verificar URL/basePath/CORS e disponibilidade do endpoint.",
+      "Validar timeouts e cancelamentos inesperados.",
+      "Garantir fallback na UI para falha de rede.",
+    ],
+    commandHints: [
+      "rg -n \"fetch\\(|AbortController|signal|timeout|baseUrl\" src",
+      "rg -n \"CORS|origin|headers\" src/app/api src/lib",
+    ],
+    likelyAreas: [
+      "src/lib/**",
+      "src/components/**",
+      "src/app/api/**/route.ts",
+    ],
+  },
+  [CODE.JS_RUNTIME_ERROR]: {
+    priority: "P0",
+    firstChecks: [
+      "Mapear stack do erro no console para arquivo/linha.",
+      "Corrigir null/undefined e estados nao inicializados.",
+      "Adicionar guard clauses e fallback de render.",
+    ],
+    commandHints: [
+      "rg -n \"\\?\\.|\\!\\.|as any|null|undefined\" src/components src/app src/lib",
+      "rg -n \"window\\.|document\\.|localStorage\" src/components src/app",
+    ],
+    likelyAreas: [
+      "src/components/**",
+      "src/app/**",
+      "src/lib/**",
+    ],
+  },
+  [CODE.CONSOLE_ERROR]: {
+    priority: "P2",
+    firstChecks: [
+      "Classificar erro: warning ruido vs falha funcional real.",
+      "Eliminar erros silenciosos repetitivos.",
+      "Confirmar que nao existe regressao apos ajuste.",
+    ],
+    commandHints: [
+      "rg -n \"console\\.error|console\\.warn\" src",
+      "rg -n \"catch\\s*\\(.*\\)\\s*\\{\\s*\\}\" src",
+    ],
+    likelyAreas: [
+      "src/components/**",
+      "src/lib/**",
+    ],
+  },
+  [CODE.VISUAL_SECTION_ORDER_INVALID]: {
+    priority: "P0",
+    firstChecks: [
+      "Comparar ordem real no DOM com regra visual da config.",
+      "Revisar plano de render e flags mobile/desktop.",
+      "Garantir secao informativa antes do footer em todas as viewports.",
+    ],
+    commandHints: [
+      "rg -n \"sectionOrderRules|buildSectionRenderPlan|service-details|footer\" src tools/sitepulse-qa",
+      "rg -n \"mobile|desktop|enabled\" src/lib src/components",
+    ],
+    likelyAreas: [
+      "src/lib/section-flow.ts",
+      "src/components/sections/HomeSections.tsx",
+      "src/components/layout/**",
+    ],
+  },
+  [CODE.VISUAL_SECTION_MISSING]: {
+    priority: "P1",
+    firstChecks: [
+      "Validar seletor/ID esperado na regra visual.",
+      "Conferir condicoes de renderizacao da secao.",
+      "Checar se a secao esta visivel (display/visibility/altura).",
+    ],
+    commandHints: [
+      "rg -n \"id=\\\"|sectionId|service-details|footer|hero|services\" src/components src/app",
+      "rg -n \"enabled|mobile|desktop|infoEnabled\" src/lib src/components",
+    ],
+    likelyAreas: [
+      "src/components/sections/**",
+      "src/lib/section-flow.ts",
+      "data/site-config.local.json",
+    ],
+  },
+};
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -352,6 +521,14 @@ function mkIssue(input) {
     technicalExplanation: guide.technical,
     laymanExplanation: guide.layman,
     recommendedResolution: guide.recommendation,
+    assistantHint: buildIssueActionHint({
+      code: input.code,
+      severity: input.severity,
+      route: input.route,
+      action: input.action ?? "",
+      detail: input.detail,
+      recommendedResolution: guide.recommendation,
+    }),
   };
   issue.recommendedPrompt = buildIssueFixPrompt(issue);
   return issue;
@@ -370,6 +547,7 @@ function pushIssue(report, input) {
     laymanExplanation: issue.laymanExplanation,
     recommendedResolution: issue.recommendedResolution,
     recommendedPrompt: issue.recommendedPrompt,
+    assistantHint: issue.assistantHint,
   });
 }
 
@@ -390,6 +568,165 @@ function severityFromCode(code) {
     return "medium";
   }
   return "low";
+}
+
+function severityWeight(severity) {
+  if (severity === "high") return 0;
+  if (severity === "medium") return 1;
+  return 2;
+}
+
+function playbookForCode(code) {
+  return ISSUE_PLAYBOOK[code] ?? {
+    priority: "P2",
+    firstChecks: [
+      "Reproduzir o problema com logs ativos.",
+      "Identificar causa raiz no arquivo/fluxo principal.",
+      "Aplicar fix minimo e validar com nova auditoria.",
+    ],
+    commandHints: [
+      "rg -n \"TODO|FIXME|throw new Error|console.error\" src",
+    ],
+    likelyAreas: ["src/**"],
+  };
+}
+
+function buildIssueActionHint(issue) {
+  const playbook = playbookForCode(issue.code);
+  return {
+    priority: playbook.priority,
+    firstChecks: playbook.firstChecks,
+    commandHints: playbook.commandHints,
+    likelyAreas: playbook.likelyAreas,
+  };
+}
+
+function buildAssistantGuide(report) {
+  const sorted = [...report.issues].sort((a, b) => {
+    const bySeverity = severityWeight(a.severity) - severityWeight(b.severity);
+    if (bySeverity !== 0) return bySeverity;
+    return a.code.localeCompare(b.code);
+  });
+
+  const byRoute = new Map();
+  for (const issue of sorted) {
+    const row = byRoute.get(issue.route) ?? { route: issue.route, totalIssues: 0, high: 0, medium: 0, low: 0 };
+    row.totalIssues += 1;
+    if (issue.severity === "high") row.high += 1;
+    else if (issue.severity === "medium") row.medium += 1;
+    else row.low += 1;
+    byRoute.set(issue.route, row);
+  }
+
+  const routesByPriority = Array.from(byRoute.values()).sort((a, b) => {
+    if (a.high !== b.high) return b.high - a.high;
+    if (a.medium !== b.medium) return b.medium - a.medium;
+    return b.totalIssues - a.totalIssues;
+  });
+
+  const immediateSteps =
+    sorted.length === 0
+      ? [
+          "Sem issues: manter baseline e monitorar regressao.",
+          `Rodar novamente com: ${report.meta.replayCommand}`,
+          "Se houver mudanca grande de layout, atualizar sectionOrderRules.",
+        ]
+      : [
+          "Corrigir primeiro erros high (runtime/5xx/ordem visual).",
+          "Depois tratar medium (clicks falhos/rede/secoes ausentes).",
+          "Finalizar com low e ruido de console.",
+          "Reexecutar auditoria completa e confirmar totalIssues=0.",
+        ];
+
+  const quickStartPrompt =
+    sorted.length === 0
+      ? [
+          "Atue como engenheiro de software senior.",
+          "Nao ha issues abertas nesta auditoria.",
+          "Objetivo: prevenir regressao.",
+          `Comando de revalidacao: ${report.meta.replayCommand}`,
+          "Verifique mudancas recentes e rode a auditoria novamente apos qualquer ajuste estrutural.",
+        ].join("\n")
+      : [
+          "Atue como engenheiro de software senior com foco em execucao rapida e causa raiz.",
+          `Total de issues: ${sorted.length}.`,
+          "Ordem de ataque: high -> medium -> low.",
+          "Nao aceitar fix cosmetico: cada problema precisa de evidencia de resolucao.",
+          "",
+          "Top issues para iniciar:",
+          ...sorted.slice(0, 8).map((issue, idx) => {
+            const action = issue.action ? ` -> ${issue.action}` : "";
+            return `${idx + 1}. [${issue.code}] (${issue.severity}) ${issue.route}${action} | ${issue.detail}`;
+          }),
+          "",
+          `Comando de revalidacao: ${report.meta.replayCommand}`,
+        ].join("\n");
+
+  return {
+    status: sorted.length === 0 ? "clean" : "issues_found",
+    issueCount: sorted.length,
+    routePriority: routesByPriority.slice(0, 8),
+    immediateSteps,
+    replayCommand: report.meta.replayCommand,
+    quickStartPrompt,
+    topIssues: sorted.slice(0, 12).map((issue) => ({
+      id: issue.id,
+      code: issue.code,
+      severity: issue.severity,
+      route: issue.route,
+      action: issue.action,
+      detail: issue.detail,
+      recommendedResolution: issue.recommendedResolution,
+      assistantHint: issue.assistantHint ?? buildIssueActionHint(issue),
+    })),
+  };
+}
+
+function toAssistantBrief(report) {
+  const guide = report.assistantGuide ?? buildAssistantGuide(report);
+  const lines = [];
+  lines.push("SITEPULSE ASSISTANT BRIEF");
+  lines.push("========================");
+  lines.push(`Projeto: ${report.meta.project}`);
+  lines.push(`Base URL: ${report.meta.baseUrl}`);
+  lines.push(`Status: ${guide.status}`);
+  lines.push(`Total issues: ${guide.issueCount}`);
+  lines.push("");
+  lines.push("PASSOS IMEDIATOS");
+  for (const step of guide.immediateSteps) {
+    lines.push(`- ${step}`);
+  }
+  lines.push("");
+  lines.push("ROTAS PRIORITARIAS");
+  if (!guide.routePriority.length) {
+    lines.push("- Nenhuma rota com issues.");
+  } else {
+    for (const row of guide.routePriority) {
+      lines.push(`- ${row.route}: total=${row.totalIssues} high=${row.high} medium=${row.medium} low=${row.low}`);
+    }
+  }
+  lines.push("");
+  lines.push("TOP ISSUES");
+  if (!guide.topIssues.length) {
+    lines.push("- Nenhuma issue.");
+  } else {
+    for (const issue of guide.topIssues) {
+      lines.push(`- [${issue.code}] (${issue.severity}) ${issue.route}${issue.action ? ` -> ${issue.action}` : ""}`);
+      lines.push(`  detalhe: ${issue.detail}`);
+      lines.push(`  resolucao: ${issue.recommendedResolution}`);
+      lines.push(`  prioridade: ${issue.assistantHint.priority}`);
+      lines.push(`  checks: ${issue.assistantHint.firstChecks.join(" | ")}`);
+      lines.push(`  comandos: ${issue.assistantHint.commandHints.join(" || ")}`);
+    }
+  }
+  lines.push("");
+  lines.push("PROMPT RAPIDO");
+  lines.push("-------------");
+  lines.push(guide.quickStartPrompt);
+  lines.push("");
+  lines.push("REVALIDACAO");
+  lines.push(`- ${guide.replayCommand}`);
+  return lines.join("\n");
 }
 
 function buildPromptPack(issues) {
@@ -523,6 +860,23 @@ function toMarkdown(report) {
   lines.push(`- Total issues: ${report.summary.totalIssues}`);
 
   lines.push("");
+  lines.push("## Guia Rapido Para Assistente");
+  lines.push("");
+  lines.push(`- Status: ${report.assistantGuide?.status ?? "n/a"}`);
+  lines.push(`- Replay command: ${report.assistantGuide?.replayCommand ?? report.meta.replayCommand ?? "n/a"}`);
+  if (report.assistantGuide?.immediateSteps?.length) {
+    for (const step of report.assistantGuide.immediateSteps) {
+      lines.push(`- Passo: ${step}`);
+    }
+  }
+  if (report.assistantGuide?.routePriority?.length) {
+    lines.push("- Rotas prioritarias:");
+    for (const row of report.assistantGuide.routePriority) {
+      lines.push(`  - ${row.route}: total=${row.totalIssues} high=${row.high} medium=${row.medium} low=${row.low}`);
+    }
+  }
+
+  lines.push("");
   lines.push("## Explicacao Para Leigos");
   lines.push("");
   const laymanSummary = laymanSummaryByCode(report.issues);
@@ -555,6 +909,13 @@ function toMarkdown(report) {
       lines.push(`  - Tecnico: ${issue.technicalExplanation}`);
       lines.push(`  - Leigo: ${issue.laymanExplanation}`);
       lines.push(`  - Resolucao recomendada: ${issue.recommendedResolution}`);
+      lines.push(`  - Prioridade de ataque: ${issue.assistantHint?.priority ?? "P2"}`);
+      if (issue.assistantHint?.firstChecks?.length) {
+        lines.push(`  - Checks iniciais: ${issue.assistantHint.firstChecks.join(" | ")}`);
+      }
+      if (issue.assistantHint?.commandHints?.length) {
+        lines.push(`  - Comandos sugeridos: ${issue.assistantHint.commandHints.join(" || ")}`);
+      }
       lines.push(`  - Prompt de correcao: ${issuePrompt}`);
     }
   }
@@ -583,6 +944,13 @@ function toMarkdown(report) {
   lines.push(report.promptPack.masterPrompt);
   lines.push("```");
 
+  lines.push("");
+  lines.push("## Prompt Rapido Do Assistente");
+  lines.push("");
+  lines.push("```text");
+  lines.push(report.assistantGuide?.quickStartPrompt ?? "(indisponivel)");
+  lines.push("```");
+
   return lines.join("\n");
 }
 
@@ -598,6 +966,9 @@ function toIssueLog(report) {
         `detalhe: ${entry.detail}`,
         `leigo: ${entry.laymanExplanation}`,
         `resolucao_recomendada: ${entry.recommendedResolution}`,
+        `prioridade_assistente: ${entry.assistantHint?.priority ?? "P2"}`,
+        `checks_assistente: ${(entry.assistantHint?.firstChecks ?? []).join(" | ")}`,
+        `comandos_assistente: ${(entry.assistantHint?.commandHints ?? []).join(" || ")}`,
         "prompt_correcao:",
         entry.recommendedPrompt ?? "(prompt indisponivel)",
       ].join("\n"),
@@ -897,7 +1268,29 @@ function summarize(report) {
   };
 }
 
+function buildReplayCommand(args, configPath) {
+  const parts = [
+    "node src/index.mjs",
+    `--config "${configPath}"`,
+    "--fresh",
+    "--live-log",
+    "--human-log",
+  ];
+
+  if (args.baseUrlOverride) {
+    parts.push(`--base-url "${args.baseUrlOverride}"`, "--no-server");
+  } else if (args.noServer) {
+    parts.push("--no-server");
+  }
+
+  if (args.headed) parts.push("--headed");
+  return parts.join(" ");
+}
+
 function createEmptyReport(cfg, args, maxRunMs) {
+  const configPath = path.resolve(process.cwd(), args.configPath);
+  const replayCommand = buildReplayCommand(args, configPath);
+
   return {
     meta: {
       project: cfg.name,
@@ -912,6 +1305,8 @@ function createEmptyReport(cfg, args, maxRunMs) {
       paused: false,
       maxRunMs,
       checkpointFile: cfg.checkpointFile,
+      configPath,
+      replayCommand,
     },
     progress: {
       nextRouteIndex: 0,
@@ -926,6 +1321,15 @@ function createEmptyReport(cfg, args, maxRunMs) {
       masterPrompt: "",
       prompts: [],
       issuePrompts: [],
+    },
+    assistantGuide: {
+      status: "pending",
+      issueCount: 0,
+      routePriority: [],
+      immediateSteps: [],
+      replayCommand,
+      quickStartPrompt: "",
+      topIssues: [],
     },
     summary: {},
   };
@@ -954,6 +1358,17 @@ function normalizeCheckpointReport(report, cfg, args, maxRunMs) {
     report.promptPack = { masterPrompt: "", prompts: [], issuePrompts: [] };
   }
   if (!Array.isArray(report.promptPack.issuePrompts)) report.promptPack.issuePrompts = [];
+  if (!report.assistantGuide || typeof report.assistantGuide !== "object") {
+    report.assistantGuide = {
+      status: "pending",
+      issueCount: 0,
+      routePriority: [],
+      immediateSteps: [],
+      replayCommand: "",
+      quickStartPrompt: "",
+      topIssues: [],
+    };
+  }
 
   report.meta.project = cfg.name;
   report.meta.baseUrl = cfg.baseUrl;
@@ -965,7 +1380,11 @@ function normalizeCheckpointReport(report, cfg, args, maxRunMs) {
   report.meta.paused = false;
   report.meta.maxRunMs = maxRunMs;
   report.meta.checkpointFile = cfg.checkpointFile;
+  report.meta.configPath = path.resolve(process.cwd(), args.configPath);
+  report.meta.replayCommand = buildReplayCommand(args, report.meta.configPath);
   report.meta.finishedAt = "";
+
+  report.assistantGuide.replayCommand = report.meta.replayCommand;
 
   report.progress.totalRoutes = cfg.routes.length;
   report.progress.nextRouteIndex = Math.max(0, Math.min(Number(report.progress.nextRouteIndex ?? 0), cfg.routes.length));
@@ -1024,6 +1443,10 @@ function shouldPauseByTime(runStartedAt, maxRunMs) {
 
 function finalizeReport(report, paused) {
   report.issues = dedupeIssues(report.issues);
+  report.issues = report.issues.map((issue) => ({
+    ...issue,
+    assistantHint: issue.assistantHint ?? buildIssueActionHint(issue),
+  }));
   report.issueLog = report.issues.map((issue) => ({
     timestamp: issue.timestamp,
     code: issue.code,
@@ -1034,8 +1457,10 @@ function finalizeReport(report, paused) {
     laymanExplanation: issue.laymanExplanation,
     recommendedResolution: issue.recommendedResolution,
     recommendedPrompt: issue.recommendedPrompt ?? buildIssueFixPrompt(issue),
+    assistantHint: issue.assistantHint ?? buildIssueActionHint(issue),
   }));
   report.promptPack = buildPromptPack(report.issues);
+  report.assistantGuide = buildAssistantGuide(report);
   report.summary = summarize(report);
   report.meta.finishedAt = nowIso();
   report.meta.paused = paused;
@@ -1048,10 +1473,12 @@ async function writeReportArtifacts(report, reportDir, paused) {
   const jsonPath = path.join(reportDir, `${stamp}-sitepulse-report-${suffix}.json`);
   const mdPath = path.join(reportDir, `${stamp}-sitepulse-report-${suffix}.md`);
   const issueLogPath = path.join(reportDir, `${stamp}-sitepulse-issues-${suffix}.log`);
+  const assistantBriefPath = path.join(reportDir, `${stamp}-sitepulse-assistant-${suffix}.txt`);
   await fs.writeFile(jsonPath, JSON.stringify(report, null, 2), "utf8");
   await fs.writeFile(mdPath, toMarkdown(report), "utf8");
   await fs.writeFile(issueLogPath, toIssueLog(report), "utf8");
-  return { jsonPath, mdPath, issueLogPath };
+  await fs.writeFile(assistantBriefPath, toAssistantBrief(report), "utf8");
+  return { jsonPath, mdPath, issueLogPath, assistantBriefPath };
 }
 
 async function run() {
@@ -1423,7 +1850,15 @@ async function run() {
     jsonReport: artifacts.jsonPath,
     markdownReport: artifacts.mdPath,
     issueLog: artifacts.issueLogPath,
+    assistantBrief: artifacts.assistantBriefPath,
   };
+
+  const firstStep = report.assistantGuide?.immediateSteps?.[0] ?? "Sem passo pendente.";
+  emitLiveEvent(args, "assistant_hint_ready", {
+    action: "assistant_playbook",
+    detail: firstStep,
+    report: artifacts.assistantBriefPath,
+  });
 
   emitLiveEvent(args, "runner_finished", {
     action: "finish",

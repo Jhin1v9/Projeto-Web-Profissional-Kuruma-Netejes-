@@ -18,6 +18,7 @@ Cada issue sai com:
 - explicacao leiga
 - resolucao recomendada
 - prompt de correcao por issue (`recommendedPrompt`)
+- dicas operacionais para assistente (`assistantHint` com prioridade/checks/comandos)
 
 Eventos live:
 - use `--live-log` para emitir eventos de rota/clique no stdout (`SPLIVE {...}`).
@@ -70,9 +71,11 @@ Arquivos na pasta `reports/`:
 - `*-sitepulse-report-final.json`
 - `*-sitepulse-report-final.md`
 - `*-sitepulse-issues-final.log`
+- `*-sitepulse-assistant-final.txt` (brief de acao rapida para correcao)
 
 Quando pausa por tempo, gera `partial` e checkpoint para retomada.
 
 No JSON final:
 - `promptPack.masterPrompt`: prompt inteligente consolidado para corrigir tudo.
 - `promptPack.issuePrompts`: prompt individual por issue.
+- `assistantGuide`: plano de ataque rapido (rotas prioritarias, passos imediatos, top issues e prompt rapido).
