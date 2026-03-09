@@ -19,6 +19,13 @@ Cada issue sai com:
 - resolucao recomendada
 - prompt de correcao por issue (`recommendedPrompt`)
 
+Eventos live:
+- use `--live-log` para emitir eventos de rota/clique no stdout (`SPLIVE {...}`).
+- o `SitePulse Studio` usa isso para mostrar a execucao em tempo real.
+- use `--human-log` junto para imprimir eventos legiveis no CMD.
+- use `--base-url <URL>` para auditar uma URL sem editar config.
+- use `--no-server` para nao subir servidor local (ideal para URL externa).
+
 ## Uso rapido
 1. Entre em `tools/sitepulse-qa`
 2. Rode `npm install`
@@ -27,10 +34,14 @@ Cada issue sai com:
    - `npm run audit:mobile` (mobile, headless)
    - `npm run audit:headed` (desktop com navegador aberto)
    - `npm run audit:auto` (retoma checkpoints ate concluir)
+   - `npm run audit:cmd` (terminal com progresso/eventos em tempo real)
+   - `npm run audit:cmd:mobile` (igual acima em mobile)
 
 Ou use:
 - `run-audit.cmd`
 - `run-audit-auto.cmd`
+- `run-audit-live.cmd`
+- `run-audit-url.cmd <BASE_URL>`
 
 ## Configs
 - `audit.kuruma.json` (desktop)

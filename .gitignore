@@ -7,3 +7,4 @@ build/
 *.tsbuildinfo
 tools/sitepulse-qa/reports/
 .next-dev.pid
+tools/sitepulse-studio/.studio.pid

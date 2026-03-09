@@ -1,0 +1,14 @@
+[
+  {
+    "username": "admin",
+    "password": "admin123",
+    "defaultConfig": "audit.kuruma.json",
+    "defaultBaseUrl": "http://127.0.0.1:3110"
+  },
+  {
+    "username": "mobile",
+    "password": "mobile123",
+    "defaultConfig": "audit.kuruma.mobile.json",
+    "defaultBaseUrl": "http://127.0.0.1:3111"
+  }
+]

@@ -107,7 +107,23 @@ cd tools/sitepulse-qa
 npm install
 npm run audit
 npm run audit:mobile
+npm run audit:cmd
 ```
+
+Atalhos pela raiz:
+```bash
+npm run audit:run
+npm run audit:run:mobile
+npm run audit:cmd
+npm run audit:cmd:mobile
+```
+
+Auditar URL custom via CMD:
+```bash
+cd tools/sitepulse-qa
+run-audit-url.cmd https://meusite.com
+```
+Esse comando ja usa `--no-server` para nao subir app local.
 
 Saidas:
 - relatorio JSON
@@ -115,3 +131,32 @@ Saidas:
 - log com codigo da issue + explicacao leiga + resolucao recomendada
 - prompt master e prompts por issue para correcao automatizada
 - deteccao visual de ordem de secoes (ex.: FAQ abaixo do footer)
+
+## 9) Painel visual do auditor
+
+Ferramenta: `tools/sitepulse-studio`
+
+Uso:
+```bash
+cd tools/sitepulse-studio
+npm install
+npm run dev
+```
+
+Atalho pela raiz:
+```bash
+npm run audit:studio
+```
+
+Painel com:
+- executar/parar auditoria
+- progresso e logs em tempo real
+- evento atual de clique/rota
+- leitura de relatorios + download
+- login por usuario com site/config padrao
+- campo para URL override (auditar qualquer site)
+- opcao `no-server` para auditoria externa
+
+Credenciais demo do Studio:
+- `admin / admin123`
+- `mobile / mobile123`

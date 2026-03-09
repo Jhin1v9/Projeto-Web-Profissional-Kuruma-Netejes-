@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SitePulse Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-a"></div>
+    <div class="bg-shape bg-shape-b"></div>
+
+    <main class="layout">
+      <section id="login-panel" class="card login-card">
+        <p class="eyebrow">Acesso</p>
+        <h1>SitePulse Studio</h1>
+        <p class="subtitle">
+          Cada login pode ter um site/config padrão. Você também pode informar uma URL temporária para rodar auditoria em qualquer site.
+        </p>
+        <div class="form-grid form-grid-login">
+          <label>
+            Usuário
+            <input id="login-user" type="text" placeholder="admin" />
+          </label>
+          <label>
+            Senha
+            <input id="login-pass" type="password" placeholder="admin123" />
+          </label>
+        </div>
+        <div class="btn-row">
+          <button id="login-btn" class="btn btn-primary">Entrar</button>
+        </div>
+        <div id="login-msg" class="mono muted">Dica demo: admin/admin123 ou mobile/mobile123</div>
+      </section>
+
+      <div id="app-shell" class="app-hidden">
+        <header class="hero">
+          <div>
+            <p class="eyebrow">Operador do Auditor</p>
+            <h1>SitePulse Studio</h1>
+            <p class="subtitle">
+              Executa auditoria com progresso ao vivo, relatório detalhado, download, lista de erros/sucessos/sugestões e modo de execução no CMD.
+            </p>
+            <div class="small-meta">
+              <div><strong>Usuário:</strong> <span id="user-name">-</span></div>
+              <div><strong>Site padrão:</strong> <span id="user-site">-</span></div>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <span id="status-pill" class="pill pill-idle">idle</span>
+            <button id="logout-btn" class="btn btn-secondary">Sair</button>
+          </div>
+        </header>
+
+        <section class="grid-2">
+          <article class="card">
+            <h2>Execução</h2>
+            <div class="form-grid">
+              <label>
+                Config
+                <select id="config-file"></select>
+              </label>
+              <label>
+                Max Run (ms)
+                <input id="max-run-ms" type="number" value="0" min="0" step="1000" />
+              </label>
+            </div>
+            <div class="form-grid single-col">
+              <label>
+                URL Para Auditar (override opcional)
+                <input id="base-url" type="text" placeholder="https://meusite.com" />
+              </label>
+            </div>
+
+            <div class="check-row">
+              <label><input id="fresh" type="checkbox" checked /> fresh</label>
+              <label><input id="headed" type="checkbox" /> headed (abre navegador)</label>
+              <label><input id="no-resume" type="checkbox" /> no-resume</label>
+              <label><input id="no-server" type="checkbox" /> no-server (URL externa)</label>
+              <label><input id="human-log" type="checkbox" /> human-log no terminal</label>
+            </div>
+
+            <div class="btn-row">
+              <button id="run-btn" class="btn btn-primary">Executar Auditoria</button>
+              <button id="stop-btn" class="btn btn-danger">Parar</button>
+              <button id="copy-btn" class="btn btn-secondary">Copiar Comando</button>
+            </div>
+
+            <div class="small-meta">
+              <div><strong>PID:</strong> <span id="pid">-</span></div>
+              <div><strong>Início:</strong> <span id="started-at">-</span></div>
+              <div><strong>Fim:</strong> <span id="ended-at">-</span></div>
+              <div><strong>Comando:</strong> <code id="command-preview">-</code></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Progresso</h2>
+            <div class="progress-wrap">
+              <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div class="progress-meta">
+              <span id="progress-label">0%</span>
+              <span id="progress-route">rota 0/0</span>
+              <span id="progress-click">botão idx 0</span>
+            </div>
+
+            <div class="live-box">
+              <h3>Ação Em Tempo Real</h3>
+              <div id="live-action" class="mono">Sem evento</div>
+            </div>
+
+            <div class="summary-grid">
+              <div class="metric"><span>Total Issues</span><strong id="m-total">0</strong></div>
+              <div class="metric"><span>Erros 5xx</span><strong id="m-5xx">0</strong></div>
+              <div class="metric"><span>Runtime</span><strong id="m-runtime">0</strong></div>
+              <div class="metric"><span>Ordem Visual</span><strong id="m-order">0</strong></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="grid-2">
+          <article class="card">
+            <h2>Logs</h2>
+            <pre id="logs" class="log-view">Sem logs.</pre>
+          </article>
+
+          <article class="card">
+            <div class="card-top">
+              <h2>Relatórios</h2>
+              <button id="refresh-reports" class="btn btn-secondary">Atualizar Lista</button>
+            </div>
+            <div id="reports-list" class="reports-list">Carregando...</div>
+          </article>
+        </section>
+
+        <section class="card">
+          <h2>Visualizador</h2>
+          <div id="viewer" class="viewer">Selecione um relatório para visualizar.</div>
+        </section>
+      </div>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

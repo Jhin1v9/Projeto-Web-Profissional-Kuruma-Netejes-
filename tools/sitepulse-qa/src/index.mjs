@@ -123,13 +123,33 @@ function normalizeText(value) {
   return (value ?? "").replace(/\s+/g, " ").trim();
 }
 
+function emitLiveEvent(args, type, payload = {}) {
+  if (!args?.liveLog) return;
+  const event = { ts: nowIso(), type, ...payload };
+  // Prefixo estavel para parsing no Studio.
+  // eslint-disable-next-line no-console
+  console.log(`SPLIVE ${JSON.stringify(event)}`);
+
+  if (args?.humanLog) {
+    const route = payload.route ? ` rota=${payload.route}` : "";
+    const action = payload.action ? ` acao=${payload.action}` : "";
+    const detail = payload.detail ? ` detalhe=${payload.detail}` : "";
+    // eslint-disable-next-line no-console
+    console.log(`[LIVE] ${type}${route}${action}${detail}`);
+  }
+}
+
 function parseArgs(argv) {
   const args = {
     configPath: "audit.config.json",
     headed: false,
     fresh: false,
     noResume: false,
+    noServer: false,
     maxRunMs: null,
+    liveLog: false,
+    humanLog: false,
+    baseUrlOverride: "",
   };
 
   for (let i = 0; i < argv.length; i += 1) {
@@ -146,8 +166,25 @@ function parseArgs(argv) {
       args.noResume = true;
       continue;
     }
+    if (token === "--no-server") {
+      args.noServer = true;
+      continue;
+    }
+    if (token === "--live-log") {
+      args.liveLog = true;
+      continue;
+    }
+    if (token === "--human-log") {
+      args.humanLog = true;
+      continue;
+    }
     if (token === "--config" && argv[i + 1]) {
       args.configPath = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    if (token === "--base-url" && argv[i + 1]) {
+      args.baseUrlOverride = String(argv[i + 1]);
       i += 1;
       continue;
     }
@@ -1022,7 +1059,11 @@ async function run() {
   const configPath = path.resolve(process.cwd(), args.configPath);
   const configDir = path.dirname(configPath);
   const rawConfig = await readJson(configPath);
-  const cfg = normalizeConfig(rawConfig, configDir);
+  const cfgBase = normalizeConfig(rawConfig, configDir);
+  const cfg = {
+    ...cfgBase,
+    baseUrl: args.baseUrlOverride ? String(args.baseUrlOverride) : cfgBase.baseUrl,
+  };
 
   const maxRunMs = args.maxRunMs ?? (cfg.maxRunMs > 0 ? cfg.maxRunMs : 0);
 
@@ -1047,18 +1088,21 @@ async function run() {
 
   const runStartedAt = Date.now();
 
-  const server = spawn("cmd.exe", ["/d", "/s", "/c", cfg.serverCommand], {
-    cwd: cfg.serverCwd,
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-  });
+  let server = null;
+  if (!args.noServer) {
+    server = spawn("cmd.exe", ["/d", "/s", "/c", cfg.serverCommand], {
+      cwd: cfg.serverCwd,
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    });
 
-  server.stdout.on("data", () => {
-    // kept intentionally empty (drain stream)
-  });
-  server.stderr.on("data", () => {
-    // kept intentionally empty (drain stream)
-  });
+    server.stdout.on("data", () => {
+      // kept intentionally empty (drain stream)
+    });
+    server.stderr.on("data", () => {
+      // kept intentionally empty (drain stream)
+    });
+  }
 
   const counters = {
     requestsFinished: 0,
@@ -1068,7 +1112,13 @@ async function run() {
   let browser = null;
 
   try {
-    await waitForServer(`${cfg.baseUrl}/`);
+    if (!args.noServer) {
+      await waitForServer(`${cfg.baseUrl}/`);
+    }
+    emitLiveEvent(args, "runner_ready", {
+      action: "boot",
+      detail: `baseUrl=${cfg.baseUrl} routes=${cfg.routes.length}`,
+    });
 
     browser = await chromium.launch({ headless: !args.headed });
     const context = await browser.newContext({ viewport: { width: cfg.viewportWidth, height: cfg.viewportHeight } });
@@ -1149,6 +1199,11 @@ async function run() {
       const route = cfg.routes[routeIndex];
       currentRoute = route;
       currentAction = "route_load";
+      emitLiveEvent(args, "route_start", {
+        route,
+        action: "route_load",
+        detail: `route ${routeIndex + 1}/${cfg.routes.length}`,
+      });
 
       const routeResult = ensureRouteResult(report, route);
       routeResult.loadOk = true;
@@ -1161,6 +1216,11 @@ async function run() {
         await page.waitForTimeout(300);
       } catch (error) {
         routeResult.loadOk = false;
+        emitLiveEvent(args, "route_error", {
+          route,
+          action: "route_load",
+          detail: normalizeText(String(error)),
+        });
         pushIssue(report, {
           code: CODE.ROUTE_LOAD_FAIL,
           severity: severityFromCode(CODE.ROUTE_LOAD_FAIL),
@@ -1173,12 +1233,20 @@ async function run() {
         await saveCheckpoint(cfg.checkpointFile, report);
         continue;
       }
+      emitLiveEvent(args, "route_loaded", { route, action: "route_load" });
 
       if (cfg.sectionOrderRules.length) {
         currentAction = "visual_layout_check";
+        emitLiveEvent(args, "layout_check_start", { route, action: "visual_layout_check" });
         const findings = await runSectionOrderChecks(page, route, cfg);
         for (const finding of findings) {
           if (finding.status === "missing") {
+            emitLiveEvent(args, "layout_check_issue", {
+              route,
+              action: `layout_rule:${finding.id}`,
+              rule: finding.id,
+              status: "missing",
+            });
             pushIssue(report, {
               code: CODE.VISUAL_SECTION_MISSING,
               severity: severityFromCode(CODE.VISUAL_SECTION_MISSING),
@@ -1188,6 +1256,12 @@ async function run() {
               url: page.url(),
             });
           } else if (finding.status === "order_invalid") {
+            emitLiveEvent(args, "layout_check_issue", {
+              route,
+              action: `layout_rule:${finding.id}`,
+              rule: finding.id,
+              status: "order_invalid",
+            });
             pushIssue(report, {
               code: CODE.VISUAL_SECTION_ORDER_INVALID,
               severity: severityFromCode(CODE.VISUAL_SECTION_ORDER_INVALID),
@@ -1217,6 +1291,13 @@ async function run() {
 
         const label = labels[labelIndex];
         currentAction = label;
+        emitLiveEvent(args, "button_click_start", {
+          route,
+          action: label,
+          label,
+          labelIndex: labelIndex + 1,
+          totalLabels: labels.length,
+        });
 
         try {
           if (!page.url().includes(route)) {
@@ -1229,6 +1310,12 @@ async function run() {
 
           const result = await clickButtonByLabel(page, label, cfg, counters);
           if (!result.ok) {
+            emitLiveEvent(args, "button_click_skip", {
+              route,
+              action: label,
+              label,
+              reason: result.reason,
+            });
             if (
               result.reason !== "button_disabled" &&
               result.reason !== "button_not_visible" &&
@@ -1245,6 +1332,12 @@ async function run() {
             }
           } else {
             routeResult.buttonsClicked += 1;
+            emitLiveEvent(args, "button_click_result", {
+              route,
+              action: label,
+              label,
+              effectDetected: result.effectDetected,
+            });
 
             if (cfg.requireButtonEffect && !result.effectDetected && !canIgnoreNoEffect(label, cfg)) {
               pushIssue(report, {
@@ -1258,6 +1351,12 @@ async function run() {
             }
           }
         } catch (error) {
+          emitLiveEvent(args, "button_click_error", {
+            route,
+            action: label,
+            label,
+            detail: normalizeText(String(error)),
+          });
           pushIssue(report, {
             code: CODE.BTN_CLICK_ERROR,
             severity: severityFromCode(CODE.BTN_CLICK_ERROR),
@@ -1294,7 +1393,9 @@ async function run() {
     if (browser) {
       await browser.close().catch(() => undefined);
     }
-    await killProcessTreeWindows(server.pid);
+    if (server?.pid) {
+      await killProcessTreeWindows(server.pid);
+    }
   }
 
   const finished = !paused && report.progress.nextRouteIndex >= cfg.routes.length;
@@ -1323,6 +1424,13 @@ async function run() {
     markdownReport: artifacts.mdPath,
     issueLog: artifacts.issueLogPath,
   };
+
+  emitLiveEvent(args, "runner_finished", {
+    action: "finish",
+    paused,
+    ok: output.ok,
+    totalIssues: report.summary.totalIssues,
+  });
 
   console.log(JSON.stringify(output, null, 2));
 

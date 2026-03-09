@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "audit:studio": "npm --prefix tools/sitepulse-studio run dev",
+    "audit:run": "npm --prefix tools/sitepulse-qa run audit:fresh",
+    "audit:run:mobile": "npm --prefix tools/sitepulse-qa run audit:mobile",
+    "audit:cmd": "npm --prefix tools/sitepulse-qa run audit:cmd",
+    "audit:cmd:mobile": "npm --prefix tools/sitepulse-qa run audit:cmd:mobile"
   },
   "dependencies": {
     "next": "14.2.5",
