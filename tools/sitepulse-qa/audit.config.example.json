@@ -9,16 +9,31 @@
   "viewportWidth": 1536,
   "viewportHeight": 864,
   "scrollEffectMinPx": 8,
+  "sectionOrderWaitMs": 1500,
   "maxRunMs": 180000,
   "checkpointEveryClicks": 10,
   "reportDir": "reports",
   "checkpointFile": "reports/sitepulse-checkpoint.json",
   "requireButtonEffect": true,
   "allowedNoEffectButtonContains": [
-    "whatsapp"
+    "whatsapp",
+    "home",
+    "go to slide"
   ],
   "ignoredRequestFailedErrors": [
     "ERR_ABORTED"
+  ],
+  "sectionOrderRules": [
+    {
+      "id": "faq-before-footer",
+      "description": "FAQ deve vir antes do footer.",
+      "routes": [
+        "/"
+      ],
+      "beforeSelector": "#service-details",
+      "afterSelector": "#footer",
+      "required": true
+    }
   ],
   "routes": [
     "/"

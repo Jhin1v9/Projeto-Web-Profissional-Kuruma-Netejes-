@@ -113,3 +113,5 @@ Saidas:
 - relatorio JSON
 - relatorio Markdown
 - log com codigo da issue + explicacao leiga + resolucao recomendada
+- prompt master e prompts por issue para correcao automatizada
+- deteccao visual de ordem de secoes (ex.: FAQ abaixo do footer)

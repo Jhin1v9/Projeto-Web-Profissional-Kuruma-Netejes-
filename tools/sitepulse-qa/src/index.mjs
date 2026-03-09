@@ -20,6 +20,8 @@ const CODE = {
   NET_REQUEST_FAILED: "NET_REQUEST_FAILED",
   JS_RUNTIME_ERROR: "JS_RUNTIME_ERROR",
   CONSOLE_ERROR: "CONSOLE_ERROR",
+  VISUAL_SECTION_ORDER_INVALID: "VISUAL_SECTION_ORDER_INVALID",
+  VISUAL_SECTION_MISSING: "VISUAL_SECTION_MISSING",
 };
 
 const ISSUE_GUIDE = {
@@ -85,7 +87,23 @@ const ISSUE_GUIDE = {
     layman:
       "Algo deu errado por baixo dos panos, mesmo que a tela ainda apareca.",
     recommendation:
-      "Inspecionar stack/message no console, remover erros silenciosos e corrigir integrações quebradas.",
+      "Inspecionar stack/message no console, remover erros silenciosos e corrigir integraÃ§Ãµes quebradas.",
+  },
+  [CODE.VISUAL_SECTION_ORDER_INVALID]: {
+    technical:
+      "A ordem visual entre secoes no DOM/scroll esta invertida para uma regra funcional esperada (ex.: FAQ renderizada abaixo do footer).",
+    layman:
+      "As partes da pagina aparecem na ordem errada. Isso confunde o usuario e quebra o fluxo da leitura.",
+    recommendation:
+      "Revisar o plano de renderizacao das secoes e garantir que a secao anterior obrigatoria venha antes da posterior em todas as viewports.",
+  },
+  [CODE.VISUAL_SECTION_MISSING]: {
+    technical:
+      "Uma secao obrigatoria da regra visual nao foi encontrada ou nao ficou visivel na rota auditada.",
+    layman:
+      "Uma parte importante da pagina nao apareceu quando deveria.",
+    recommendation:
+      "Validar condicoes de exibicao, IDs/seletores, dados de configuracao e flags mobile/desktop para garantir renderizacao consistente.",
   },
 };
 
@@ -170,6 +188,39 @@ function toAbsoluteMaybe(value, baseDir) {
   return path.isAbsolute(value) ? value : path.resolve(baseDir, value);
 }
 
+function normalizeSectionOrderRules(rules) {
+  if (!Array.isArray(rules)) return [];
+
+  return rules.map((rule, index) => {
+    if (!rule || typeof rule !== "object") {
+      throw new Error(`Config invalida: sectionOrderRules[${index}] precisa ser objeto.`);
+    }
+
+    const beforeSelector = String(rule.beforeSelector ?? "").trim();
+    const afterSelector = String(rule.afterSelector ?? "").trim();
+    if (!beforeSelector || !afterSelector) {
+      throw new Error(
+        `Config invalida: sectionOrderRules[${index}] exige beforeSelector e afterSelector.`,
+      );
+    }
+
+    const routes = Array.isArray(rule.routes)
+      ? rule.routes.map((item) => String(item).trim()).filter(Boolean)
+      : rule.route
+      ? [String(rule.route).trim()]
+      : [];
+
+    return {
+      id: String(rule.id ?? `section-order-${index + 1}`),
+      description: String(rule.description ?? ""),
+      beforeSelector,
+      afterSelector,
+      routes,
+      required: rule.required !== false,
+    };
+  });
+}
+
 function normalizeConfig(config, configDir) {
   if (!config || typeof config !== "object") {
     throw new Error("Config invalida: JSON vazio ou incorreto.");
@@ -178,6 +229,7 @@ function normalizeConfig(config, configDir) {
   ensureArray(config.routes, "routes");
   ensureArray(config.allowedNoEffectButtonContains ?? [], "allowedNoEffectButtonContains");
   ensureArray(config.ignoredRequestFailedErrors ?? [], "ignoredRequestFailedErrors");
+  ensureArray(config.sectionOrderRules ?? [], "sectionOrderRules");
 
   const serverCwd = path.isAbsolute(config.serverCwd)
     ? config.serverCwd
@@ -208,10 +260,41 @@ function normalizeConfig(config, configDir) {
     scrollEffectMinPx: Number.isFinite(Number(config.scrollEffectMinPx))
       ? Math.max(0, Number(config.scrollEffectMinPx))
       : 8,
+    sectionOrderWaitMs: Number.isFinite(Number(config.sectionOrderWaitMs))
+      ? Math.max(0, Number(config.sectionOrderWaitMs))
+      : 1400,
+    sectionOrderRules: normalizeSectionOrderRules(config.sectionOrderRules ?? []),
     ignoredRequestFailedErrors: (config.ignoredRequestFailedErrors ?? ["ERR_ABORTED"]).map((item) =>
       String(item).toLowerCase(),
     ),
   };
+}
+
+function buildIssueFixPrompt(issue) {
+  return [
+    "Atue como engenheiro de software senior focado em causa raiz.",
+    "Corrija a issue abaixo de forma definitiva, sem gambiarras e sem regressao.",
+    "",
+    `Issue: [${issue.code}] (${issue.severity})`,
+    `Rota: ${issue.route}`,
+    `Acao: ${issue.action || "(sem acao especifica)"}`,
+    `URL: ${issue.url || "(nao informada)"}`,
+    `Detalhe observado: ${issue.detail}`,
+    `Explicacao tecnica: ${issue.technicalExplanation}`,
+    `Resolucao recomendada: ${issue.recommendedResolution}`,
+    "",
+    "Requisitos obrigatorios:",
+    "1. Reproduzir o problema localmente antes da mudanca.",
+    "2. Identificar causa raiz real no codigo (nao apenas sintoma).",
+    "3. Implementar correcao robusta e minima.",
+    "4. Preservar UX, acessibilidade e comportamento mobile/desktop.",
+    "5. Revalidar com auditoria automatizada apos o fix.",
+    "",
+    "Entregue:",
+    "- mudancas de codigo",
+    "- resumo da causa raiz",
+    "- como validar que foi resolvido",
+  ].join("\n");
 }
 
 function mkIssue(input) {
@@ -220,7 +303,7 @@ function mkIssue(input) {
     layman: "Foi detectada uma inconsistenca que precisa de revisao.",
     recommendation: "Revisar logs e fluxo afetado para aplicar correcao orientada a causa raiz.",
   };
-  return {
+  const issue = {
     id: shortHash(`${input.code}|${input.route}|${input.action ?? ""}|${input.detail}`),
     code: input.code,
     severity: input.severity,
@@ -233,6 +316,8 @@ function mkIssue(input) {
     laymanExplanation: guide.layman,
     recommendedResolution: guide.recommendation,
   };
+  issue.recommendedPrompt = buildIssueFixPrompt(issue);
+  return issue;
 }
 
 function pushIssue(report, input) {
@@ -247,12 +332,26 @@ function pushIssue(report, input) {
     detail: issue.detail,
     laymanExplanation: issue.laymanExplanation,
     recommendedResolution: issue.recommendedResolution,
+    recommendedPrompt: issue.recommendedPrompt,
   });
 }
 
 function severityFromCode(code) {
-  if (code === CODE.ROUTE_LOAD_FAIL || code === CODE.HTTP_5XX || code === CODE.JS_RUNTIME_ERROR) return "high";
-  if (code === CODE.BTN_CLICK_ERROR || code === CODE.NET_REQUEST_FAILED) return "medium";
+  if (
+    code === CODE.ROUTE_LOAD_FAIL ||
+    code === CODE.HTTP_5XX ||
+    code === CODE.JS_RUNTIME_ERROR ||
+    code === CODE.VISUAL_SECTION_ORDER_INVALID
+  ) {
+    return "high";
+  }
+  if (
+    code === CODE.BTN_CLICK_ERROR ||
+    code === CODE.NET_REQUEST_FAILED ||
+    code === CODE.VISUAL_SECTION_MISSING
+  ) {
+    return "medium";
+  }
   return "low";
 }
 
@@ -312,14 +411,40 @@ function buildPromptPack(issues) {
     );
   }
 
+  if (byCode.has(CODE.VISUAL_SECTION_ORDER_INVALID) || byCode.has(CODE.VISUAL_SECTION_MISSING)) {
+    const rows = [...(byCode.get(CODE.VISUAL_SECTION_ORDER_INVALID) ?? []), ...(byCode.get(CODE.VISUAL_SECTION_MISSING) ?? [])]
+      .slice(0, 20)
+      .map((i) => `- ${i.route} -> ${i.detail}`)
+      .join("\n");
+    prompts.push(
+      [
+        "Corrija inconsistencias visuais/funcionais na ordem das secoes.",
+        "Regra critica: conteudo informativo/FAQ nao pode aparecer abaixo do footer.",
+        "Ocorrencias:",
+        rows,
+      ].join("\n"),
+    );
+  }
+
   const masterPrompt = [
-    "Faca uma passada completa no app e elimine todos os erros abaixo.",
-    "Exigencias: sem botao sem efeito, sem callback solto, sem erro fetch sem feedback, sem 4xx/5xx inesperado no fluxo principal.",
-    "Apos corrigir, rode novamente o auditor e garanta zero falhas.",
+    "Atue como engenheiro de software senior e corrija todas as issues listadas abaixo com foco em causa raiz.",
+    "Nao aplique correcoes cosmeticas. Garanta comportamento funcional correto em desktop e mobile.",
+    "Exigencias minimas: sem botao sem efeito, sem callback solto, sem erro fetch sem feedback, sem 4xx/5xx inesperado no fluxo principal e sem ordem de secoes quebrada.",
+    "Workflow obrigatorio: reproduzir, identificar causa raiz, corrigir com menor impacto, validar novamente via auditor.",
+    "Entregue ao final: codigo corrigido, resumo da causa raiz por categoria e evidencias de revalidacao.",
     ...prompts,
   ].join("\n\n");
 
-  return { masterPrompt, prompts };
+  const issuePrompts = issues.map((issue) => ({
+    id: issue.id,
+    code: issue.code,
+    severity: issue.severity,
+    route: issue.route,
+    action: issue.action,
+    prompt: issue.recommendedPrompt ?? buildIssueFixPrompt(issue),
+  }));
+
+  return { masterPrompt, prompts, issuePrompts };
 }
 
 function laymanSummaryByCode(issues) {
@@ -356,6 +481,8 @@ function toMarkdown(report) {
   lines.push(`- Erros de rede: ${report.summary.netRequestFailed}`);
   lines.push(`- Erros JS runtime: ${report.summary.jsRuntimeErrors}`);
   lines.push(`- Console errors: ${report.summary.consoleErrors}`);
+  lines.push(`- Ordem visual invalida: ${report.summary.visualSectionOrderInvalid}`);
+  lines.push(`- Secao obrigatoria ausente/invisivel: ${report.summary.visualSectionMissing}`);
   lines.push(`- Total issues: ${report.summary.totalIssues}`);
 
   lines.push("");
@@ -386,10 +513,29 @@ function toMarkdown(report) {
     lines.push("Sem issues detectadas.");
   } else {
     for (const issue of report.issues) {
+      const issuePrompt = issue.recommendedPrompt ?? buildIssueFixPrompt(issue);
       lines.push(`- [${issue.code}] (${issue.severity}) ${issue.route}${issue.action ? ` -> ${issue.action}` : ""}: ${issue.detail}`);
       lines.push(`  - Tecnico: ${issue.technicalExplanation}`);
       lines.push(`  - Leigo: ${issue.laymanExplanation}`);
       lines.push(`  - Resolucao recomendada: ${issue.recommendedResolution}`);
+      lines.push(`  - Prompt de correcao: ${issuePrompt}`);
+    }
+  }
+
+  lines.push("");
+  lines.push("## Prompts De Correcao Por Issue");
+  lines.push("");
+  if (report.issues.length === 0) {
+    lines.push("Sem prompts especificos porque nao houve issue.");
+  } else {
+    for (const issue of report.issues) {
+      const issuePrompt = issue.recommendedPrompt ?? buildIssueFixPrompt(issue);
+      lines.push(`### ${issue.id} | ${issue.code}`);
+      lines.push("");
+      lines.push("```text");
+      lines.push(issuePrompt);
+      lines.push("```");
+      lines.push("");
     }
   }
 
@@ -415,9 +561,122 @@ function toIssueLog(report) {
         `detalhe: ${entry.detail}`,
         `leigo: ${entry.laymanExplanation}`,
         `resolucao_recomendada: ${entry.recommendedResolution}`,
+        "prompt_correcao:",
+        entry.recommendedPrompt ?? "(prompt indisponivel)",
       ].join("\n"),
     )
     .join("\n\n");
+}
+
+function routeMatchesRule(route, rule) {
+  if (!rule.routes.length) return true;
+  return rule.routes.some((pattern) => {
+    if (pattern === "*") return true;
+    if (pattern.endsWith("*")) return route.startsWith(pattern.slice(0, -1));
+    return route === pattern;
+  });
+}
+
+function formatSectionMissingDetail(finding) {
+  const before = finding.before;
+  const after = finding.after;
+  return [
+    `Regra ${finding.id} (${finding.description || "sem descricao"}) incompleta.`,
+    `beforeSelector=${finding.beforeSelector} exists=${before.exists} visible=${before.visible}`,
+    `afterSelector=${finding.afterSelector} exists=${after.exists} visible=${after.visible}`,
+  ].join(" | ");
+}
+
+function formatSectionOrderDetail(finding) {
+  return [
+    `Regra ${finding.id} (${finding.description || "sem descricao"}) violada.`,
+    `${finding.beforeSelector} top=${finding.before.top} precisa vir antes de ${finding.afterSelector} top=${finding.after.top}.`,
+  ].join(" | ");
+}
+
+async function runSectionOrderChecks(page, route, cfg) {
+  const rules = cfg.sectionOrderRules.filter((rule) => routeMatchesRule(route, rule));
+  if (!rules.length) return [];
+
+  if (cfg.sectionOrderWaitMs > 0) {
+    await page.waitForTimeout(cfg.sectionOrderWaitMs);
+  }
+
+  const findings = await page.evaluate((activeRules) => {
+    const inspectSelector = (selector) => {
+      try {
+        const element = document.querySelector(selector);
+        if (!element) {
+          return { exists: false, visible: false, top: null, bottom: null };
+        }
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        const visible =
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          rect.width > 0 &&
+          rect.height > 0;
+        return {
+          exists: true,
+          visible,
+          top: Number((rect.top + window.scrollY).toFixed(2)),
+          bottom: Number((rect.bottom + window.scrollY).toFixed(2)),
+        };
+      } catch {
+        return { exists: false, visible: false, top: null, bottom: null };
+      }
+    };
+
+    return activeRules.map((rule) => {
+      const before = inspectSelector(rule.beforeSelector);
+      const after = inspectSelector(rule.afterSelector);
+      const missing = rule.required && (!before.exists || !after.exists || !before.visible || !after.visible);
+      if (missing) {
+        return {
+          status: "missing",
+          id: rule.id,
+          description: rule.description,
+          beforeSelector: rule.beforeSelector,
+          afterSelector: rule.afterSelector,
+          before,
+          after,
+        };
+      }
+
+      const invalidOrder =
+        before.exists &&
+        after.exists &&
+        before.visible &&
+        after.visible &&
+        before.top !== null &&
+        after.top !== null &&
+        before.top >= after.top;
+
+      if (invalidOrder) {
+        return {
+          status: "order_invalid",
+          id: rule.id,
+          description: rule.description,
+          beforeSelector: rule.beforeSelector,
+          afterSelector: rule.afterSelector,
+          before,
+          after,
+        };
+      }
+
+      return {
+        status: "ok",
+        id: rule.id,
+        description: rule.description,
+        beforeSelector: rule.beforeSelector,
+        afterSelector: rule.afterSelector,
+        before,
+        after,
+      };
+    });
+  }, rules);
+
+  return findings.filter((item) => item.status !== "ok");
 }
 
 function extractButtonLabels(page) {
@@ -486,6 +745,27 @@ async function clickButtonByLabel(page, label, cfg, counters) {
   const enabled = await target.isEnabled().catch(() => false);
   if (!enabled) {
     return { ok: false, reason: "button_disabled" };
+  }
+
+  const activeState = await target
+    .evaluate((el) => ({
+      ariaCurrent: el.getAttribute("aria-current") ?? "",
+      ariaSelected: el.getAttribute("aria-selected") ?? "",
+      ariaPressed: el.getAttribute("aria-pressed") ?? "",
+      dataState: el.getAttribute("data-state") ?? "",
+    }))
+    .catch(() => null);
+
+  const alreadyActive = !!activeState && (
+    activeState.ariaCurrent.toLowerCase() === "true" ||
+    activeState.ariaCurrent.toLowerCase() === "page" ||
+    activeState.ariaCurrent.toLowerCase() === "step" ||
+    activeState.ariaSelected.toLowerCase() === "true" ||
+    activeState.ariaPressed.toLowerCase() === "true" ||
+    activeState.dataState.toLowerCase() === "active"
+  );
+  if (alreadyActive) {
+    return { ok: false, reason: "button_already_active" };
   }
 
   const before = await fingerprint(page);
@@ -574,6 +854,8 @@ function summarize(report) {
     netRequestFailed: count(CODE.NET_REQUEST_FAILED),
     jsRuntimeErrors: count(CODE.JS_RUNTIME_ERROR),
     consoleErrors: count(CODE.CONSOLE_ERROR),
+    visualSectionOrderInvalid: count(CODE.VISUAL_SECTION_ORDER_INVALID),
+    visualSectionMissing: count(CODE.VISUAL_SECTION_MISSING),
     totalIssues: report.issues.length,
   };
 }
@@ -606,6 +888,7 @@ function createEmptyReport(cfg, args, maxRunMs) {
     promptPack: {
       masterPrompt: "",
       prompts: [],
+      issuePrompts: [],
     },
     summary: {},
   };
@@ -631,8 +914,9 @@ function normalizeCheckpointReport(report, cfg, args, maxRunMs) {
   if (!Array.isArray(report.issues)) report.issues = [];
   if (!Array.isArray(report.issueLog)) report.issueLog = [];
   if (!report.promptPack || typeof report.promptPack !== "object") {
-    report.promptPack = { masterPrompt: "", prompts: [] };
+    report.promptPack = { masterPrompt: "", prompts: [], issuePrompts: [] };
   }
+  if (!Array.isArray(report.promptPack.issuePrompts)) report.promptPack.issuePrompts = [];
 
   report.meta.project = cfg.name;
   report.meta.baseUrl = cfg.baseUrl;
@@ -712,6 +996,7 @@ function finalizeReport(report, paused) {
     detail: issue.detail,
     laymanExplanation: issue.laymanExplanation,
     recommendedResolution: issue.recommendedResolution,
+    recommendedPrompt: issue.recommendedPrompt ?? buildIssueFixPrompt(issue),
   }));
   report.promptPack = buildPromptPack(report.issues);
   report.summary = summarize(report);
@@ -889,6 +1174,32 @@ async function run() {
         continue;
       }
 
+      if (cfg.sectionOrderRules.length) {
+        currentAction = "visual_layout_check";
+        const findings = await runSectionOrderChecks(page, route, cfg);
+        for (const finding of findings) {
+          if (finding.status === "missing") {
+            pushIssue(report, {
+              code: CODE.VISUAL_SECTION_MISSING,
+              severity: severityFromCode(CODE.VISUAL_SECTION_MISSING),
+              route,
+              action: `layout_rule:${finding.id}`,
+              detail: formatSectionMissingDetail(finding),
+              url: page.url(),
+            });
+          } else if (finding.status === "order_invalid") {
+            pushIssue(report, {
+              code: CODE.VISUAL_SECTION_ORDER_INVALID,
+              severity: severityFromCode(CODE.VISUAL_SECTION_ORDER_INVALID),
+              route,
+              action: `layout_rule:${finding.id}`,
+              detail: formatSectionOrderDetail(finding),
+              url: page.url(),
+            });
+          }
+        }
+      }
+
       const labels = await extractButtonLabels(page);
       routeResult.buttonsDiscovered = Math.max(routeResult.buttonsDiscovered, labels.length);
 
@@ -918,7 +1229,11 @@ async function run() {
 
           const result = await clickButtonByLabel(page, label, cfg, counters);
           if (!result.ok) {
-            if (result.reason !== "button_disabled" && result.reason !== "button_not_visible") {
+            if (
+              result.reason !== "button_disabled" &&
+              result.reason !== "button_not_visible" &&
+              result.reason !== "button_already_active"
+            ) {
               pushIssue(report, {
                 code: CODE.BTN_CLICK_ERROR,
                 severity: severityFromCode(CODE.BTN_CLICK_ERROR),
@@ -1022,3 +1337,4 @@ run().catch((error) => {
   console.error(error);
   process.exit(EXIT_FAIL);
 });
+

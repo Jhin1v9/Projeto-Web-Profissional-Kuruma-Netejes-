@@ -9,12 +9,15 @@ Auditor via CMD/Playwright para validar o site real com relatorio tecnico e expl
 - request failed
 - runtime JS error
 - console error
+- regras visuais de ordem de secoes (ex.: FAQ antes do footer)
+- secao obrigatoria ausente/invisivel
 
 Cada issue sai com:
 - `code`
 - explicacao tecnica
 - explicacao leiga
 - resolucao recomendada
+- prompt de correcao por issue (`recommendedPrompt`)
 
 ## Uso rapido
 1. Entre em `tools/sitepulse-qa`
@@ -33,6 +36,24 @@ Ou use:
 - `audit.kuruma.json` (desktop)
 - `audit.kuruma.mobile.json` (mobile)
 
+Campos importantes:
+- `sectionOrderRules`: regras de ordem visual por seletor
+- `sectionOrderWaitMs`: espera antes de validar ordem visual
+- `ignoredRequestFailedErrors`: ruido de rede para ignorar
+
+Exemplo de `sectionOrderRules`:
+```json
+[
+  {
+    "id": "faq-before-footer",
+    "routes": ["/"],
+    "beforeSelector": "#service-details",
+    "afterSelector": "#footer",
+    "required": true
+  }
+]
+```
+
 ## Saida
 Arquivos na pasta `reports/`:
 - `*-sitepulse-report-final.json`
@@ -40,3 +61,7 @@ Arquivos na pasta `reports/`:
 - `*-sitepulse-issues-final.log`
 
 Quando pausa por tempo, gera `partial` e checkpoint para retomada.
+
+No JSON final:
+- `promptPack.masterPrompt`: prompt inteligente consolidado para corrigir tudo.
+- `promptPack.issuePrompts`: prompt individual por issue.
